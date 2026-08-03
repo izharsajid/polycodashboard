@@ -1,0 +1,1126 @@
+{
+  "source": "EcoFibre monthly Financial Overview statements issued to Polyco Healthline Ltd",
+  "currency": "USD",
+  "statements": [
+    {
+      "id": "2025-06",
+      "period_start": "2025-06-01",
+      "period_end": "2025-06-30",
+      "prepared_date": "2025-05-27",
+      "kind": "request",
+      "stated_total": 227026.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": "Need to order for July based on POs"
+        },
+        {
+          "amount": 79000.0,
+          "description": "Staff Salaries April 2025 (overdue 27 days) + upcoming May 2025",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental May 2025",
+          "remarks": null
+        },
+        {
+          "amount": 30000.0,
+          "description": "Supplier Payments April + May 2025",
+          "remarks": null
+        },
+        {
+          "amount": 18000.0,
+          "description": "GOSI + LMRA Labor Social Taxes April + May 2025",
+          "remarks": null
+        },
+        {
+          "amount": 15561.0,
+          "description": "Electricity and Water Bill April 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash (maintenance, fuel, local purchases)",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation April 2025",
+          "remarks": null
+        },
+        {
+          "amount": 2125.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Costs stated as associated with running 4-5 machines 24/7; average USD 200,000 per month required to maintain operations and cash flow.",
+        "At 8 machines, monthly running cost expected at USD 285,000 to 300,000 including raw materials.",
+        "Previously communicated to David Greenwood and Fuad Khan in 'EcoFibre Financial Summary + Model' dated 5 March 2025.",
+        "Figures may increase if internal upgrades (new machinery or pipeline) are pursued."
+      ]
+    },
+    {
+      "id": "2025-07",
+      "period_start": "2025-07-01",
+      "period_end": "2025-07-31",
+      "prepared_date": "2025-06-30",
+      "kind": "request",
+      "stated_total": 197879.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": null
+        },
+        {
+          "amount": 39500.0,
+          "description": "Staff Salaries June 2025",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental June 2025",
+          "remarks": null
+        },
+        {
+          "amount": 27500.0,
+          "description": "Supplier Payments May + June 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9000.0,
+          "description": "GOSI + LMRA Labor Social Taxes June 2025",
+          "remarks": null
+        },
+        {
+          "amount": 27083.0,
+          "description": "Electricity and Water Bill May + June 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation May 2025",
+          "remarks": null
+        },
+        {
+          "amount": 2125.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 5261.0,
+          "description": "Rectangle Tool Clearance",
+          "remarks": null
+        },
+        {
+          "amount": 403.0,
+          "description": "FedEx Samples to Nick Lowe at Platinum",
+          "remarks": null
+        },
+        {
+          "amount": 4667.0,
+          "description": "Sandwich Tool Clearance",
+          "remarks": null
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2025-08",
+      "period_start": "2025-08-01",
+      "period_end": "2025-08-31",
+      "prepared_date": "2025-08-18",
+      "kind": "request_with_actuals",
+      "stated_total": 195921.0,
+      "lines": [
+        {
+          "amount": 39830.0,
+          "description": "Staff Salaries July 2025",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental July 2025",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 9000.0,
+          "description": "GOSI + LMRA Labor Social Taxes July 2025",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 19915.0,
+          "description": "Electricity and Water Bill July 2025",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 3186.0,
+          "description": "Factory Insurance Renewal 2025-2026, instalment 1 of 4",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": "utilised"
+        },
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": "required"
+        },
+        {
+          "amount": 43407.0,
+          "description": "Supplier Payments June + July 2025",
+          "remarks": "required"
+        },
+        {
+          "amount": 4643.0,
+          "description": "Staff Annual Medical Insurance, instalment 1 of 4",
+          "remarks": "required"
+        }
+      ],
+      "notes": [
+        "Split presentation: Funds Utilised 97,881.00 and Remaining Funds Required 98,040.00. Total for August 2025 195,921.00.",
+        "Only month other than October 2025 for which actual utilisation is shown."
+      ]
+    },
+    {
+      "id": "2025-09",
+      "period_start": "2025-09-01",
+      "period_end": "2025-09-30",
+      "prepared_date": "2025-08-31",
+      "kind": "request",
+      "stated_total": 236785.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": null
+        },
+        {
+          "amount": 46991.0,
+          "description": "Staff Salaries August 2025 including overtime 3,183",
+          "remarks": "Fixed payroll increased from 39,830 to 43,808 as Bahrain law requires annual leave pay and indemnities to be adjusted in monthly salaries"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental August 2025",
+          "remarks": null
+        },
+        {
+          "amount": 32807.0,
+          "description": "Supplier Payments July + August 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes June 2025",
+          "remarks": "month label as stated on source document"
+        },
+        {
+          "amount": 20663.0,
+          "description": "Electricity August 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation June 2025",
+          "remarks": "month label as stated on source document"
+        },
+        {
+          "amount": 2125.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 3186.0,
+          "description": "Factory Insurance Renewal 2025-2026, instalment 2 of 4",
+          "remarks": null
+        },
+        {
+          "amount": 4643.0,
+          "description": "Staff Annual Medical Insurance 2025-2026, instalment 2 of 4",
+          "remarks": null
+        },
+        {
+          "amount": 9020.0,
+          "description": "BRC + ISO 14001 / 9001 Certification Fees 2025-2026",
+          "remarks": null
+        },
+        {
+          "amount": 13501.0,
+          "description": "BRC Maintenance",
+          "remarks": "Floor epoxy paint, new drainage covers, new SS sheets for tables, employee annual health checkup, annual calibration of devices"
+        },
+        {
+          "amount": 12040.0,
+          "description": "Al Sharif Cargo Clearance",
+          "remarks": "2 shipments of 18 PLA rolls each (1,174 + 1,285); Skinfresh Top Film Germany (3,931); PointFive ET3 Mould (5,650)"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2025-10",
+      "period_start": "2025-10-01",
+      "period_end": "2025-10-31",
+      "prepared_date": "2025-11-04",
+      "kind": "actuals",
+      "stated_total": 218743.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers (Bagasse)",
+          "remarks": null
+        },
+        {
+          "amount": 27500.0,
+          "description": "1 Fiber Container (Bamboo) October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 46991.0,
+          "description": "Staff Salaries October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 21090.0,
+          "description": "Electricity October 2025 plus partial remaining from September 2025",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 18728.0,
+          "description": "AKD + Wire Mesh from India October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation October 2025",
+          "remarks": null
+        },
+        {
+          "amount": 2125.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 10500.0,
+          "description": "Supplier Payments, partial for September / October 2025",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Actuals statement, not a funding request. Income shown: PHL payment of 220,000.00 received 6 October 2025.",
+        "Total expenses 218,743.00 against 220,000.00 received, leaving a remaining balance of 1,257.00."
+      ]
+    },
+    {
+      "id": "2025-11",
+      "period_start": "2025-11-01",
+      "period_end": "2025-11-30",
+      "prepared_date": "2025-11-04",
+      "kind": "request",
+      "stated_total": 217598.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": null
+        },
+        {
+          "amount": 46000.0,
+          "description": "Staff Salaries November 2025",
+          "remarks": "Bahrain law requires annual leave pay and indemnities to be adjusted in monthly salaries; fixed payroll has increased"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental November 2025",
+          "remarks": null
+        },
+        {
+          "amount": 38875.0,
+          "description": "Supplier Payments October + November 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes November 2025",
+          "remarks": null
+        },
+        {
+          "amount": 21585.0,
+          "description": "Electricity November 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation November 2025",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 3186.0,
+          "description": "Factory Insurance Renewal 2025-2026, instalment 4 of 4",
+          "remarks": null
+        },
+        {
+          "amount": 4643.0,
+          "description": "Staff Annual Medical Insurance 2025-2026, instalment 4 of 4",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "BRC + ISO Certification Charges",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "EXCEPTION: two versions of this statement exist, both prepared 4 November 2025, both totalling 217,598.00, with identical amounts but different month labels. One version labels salaries, rental, supplier payments, GOSI and electricity as November; the other labels the same amounts as October, with accommodation labelled September. Resolve which is authoritative before issuing."
+      ]
+    },
+    {
+      "id": "2025-12",
+      "period_start": "2025-12-01",
+      "period_end": "2025-12-31",
+      "prepared_date": "2025-12-02",
+      "kind": "request",
+      "stated_total": 239910.0,
+      "lines": [
+        {
+          "amount": 74985.0,
+          "description": "3 Fiber Containers",
+          "remarks": "Ordering 3 containers in December followed by 4 containers in January 2026"
+        },
+        {
+          "amount": 54039.0,
+          "description": "Staff Salaries December 2025, includes overtime and new QC Manager",
+          "remarks": "Payroll on track per costing analysis for running 8 machines"
+        },
+        {
+          "amount": 10000.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental December 2025",
+          "remarks": null
+        },
+        {
+          "amount": 38500.0,
+          "description": "Supplier Payments November + December 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes December 2025",
+          "remarks": null
+        },
+        {
+          "amount": 18567.0,
+          "description": "Electricity December 2025",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation December 2025",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2026-01",
+      "period_start": "2026-01-01",
+      "period_end": "2026-01-31",
+      "prepared_date": "2026-01-06",
+      "kind": "request",
+      "stated_total": 264799.0,
+      "lines": [
+        {
+          "amount": 99980.0,
+          "description": "4 Fiber Containers (3 unbleached bagasse + 1 bamboo)",
+          "remarks": null
+        },
+        {
+          "amount": 54000.0,
+          "description": "Staff Salaries January 2026, includes overtime and hiring new QC Manager",
+          "remarks": "Current payroll is to run at full capacity (8 machines)"
+        },
+        {
+          "amount": 10000.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental January 2026",
+          "remarks": null
+        },
+        {
+          "amount": 38500.0,
+          "description": "Supplier Payments December + January 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes January 2026",
+          "remarks": null
+        },
+        {
+          "amount": 18500.0,
+          "description": "Electricity January 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation January 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2026-02",
+      "period_start": "2026-02-05",
+      "period_end": "2026-03-05",
+      "prepared_date": "2026-02-05",
+      "kind": "request",
+      "stated_total": 207240.0,
+      "lines": [
+        {
+          "amount": 49990.0,
+          "description": "2 Fiber Containers",
+          "remarks": "Reduced to 2 containers from 3, change made 10 February"
+        },
+        {
+          "amount": 54000.0,
+          "description": "Staff Salaries February 2026, includes overtime",
+          "remarks": "Current payroll is to run at full capacity (8 machines)"
+        },
+        {
+          "amount": 0.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": "Removed until cashflow situation improves"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental February 2026",
+          "remarks": null
+        },
+        {
+          "amount": 40400.0,
+          "description": "Supplier Payments January + February 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes February 2026",
+          "remarks": null
+        },
+        {
+          "amount": 19031.0,
+          "description": "Electricity February 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation February 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Period runs 5 February to 5 March 2026 and overlaps the March statement by five days."
+      ]
+    },
+    {
+      "id": "2026-03",
+      "period_start": "2026-03-01",
+      "period_end": "2026-03-31",
+      "prepared_date": "2026-03-16",
+      "kind": "request",
+      "stated_total": 243105.55,
+      "lines": [
+        {
+          "amount": 78000.0,
+          "description": "3 Fiber Containers (3 unbleached bagasse)",
+          "remarks": "2 plus 1 extra at Jebel Ali"
+        },
+        {
+          "amount": 54725.0,
+          "description": "Staff Salaries March 2026, includes overtime",
+          "remarks": "Current payroll is to run at full capacity (8 machines)"
+        },
+        {
+          "amount": 0.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": "Removed until cashflow situation improves"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental March 2026",
+          "remarks": null
+        },
+        {
+          "amount": 46596.55,
+          "description": "Supplier Payments February + March 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes March 2026",
+          "remarks": null
+        },
+        {
+          "amount": 19965.0,
+          "description": "Electricity March 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation March 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2026-04",
+      "period_start": "2026-04-10",
+      "period_end": "2026-04-30",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 186600.0,
+      "lines": [
+        {
+          "amount": 16400.0,
+          "description": "2 Fiber Containers (2 unbleached bagasse)",
+          "remarks": "Remaining 49,050 of funds from March 2026 applied, plus extra 4,225 shipping cost per container"
+        },
+        {
+          "amount": 47428.0,
+          "description": "Staff Salaries April 2026",
+          "remarks": "Reduced due to non-working days in March 2026"
+        },
+        {
+          "amount": 0.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": "Removed until cashflow situation improves"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental April 2026",
+          "remarks": null
+        },
+        {
+          "amount": 63613.0,
+          "description": "Supplier Payments March + April 2026",
+          "remarks": "16,421 extra; includes 6,281 clearance for the 7x7 mould and an extra 10,140 for 2.5 months of AKD"
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes April 2026",
+          "remarks": null
+        },
+        {
+          "amount": 15340.0,
+          "description": "Electricity April 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation April 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Period starts 10 April, leaving 1 to 9 April 2026 uncovered by any statement."
+      ]
+    },
+    {
+      "id": "2026-05",
+      "period_start": "2026-05-01",
+      "period_end": "2026-05-31",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 211585.05,
+      "lines": [
+        {
+          "amount": 60450.0,
+          "description": "2 Fiber Containers (2 unbleached bagasse)",
+          "remarks": "Added extra 4,225 shipping cost per container"
+        },
+        {
+          "amount": 44218.0,
+          "description": "Staff Salaries May 2026",
+          "remarks": "Salaries of Bahraini staff not included, paid by the Government of Bahrain as war reparation"
+        },
+        {
+          "amount": 0.0,
+          "description": "Payroll for Izhar and Hamza (5,000 each)",
+          "remarks": "Removed until cashflow situation improves"
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental May 2026",
+          "remarks": null
+        },
+        {
+          "amount": 40736.05,
+          "description": "Supplier Payments April + May 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes May 2026",
+          "remarks": null
+        },
+        {
+          "amount": 19227.0,
+          "description": "Electricity May 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation May 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 3135.0,
+          "description": "Product Recall Insurance Renewal 2025-2026, instalment 1 of 4",
+          "remarks": "Total payment 12,540"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2026-06",
+      "period_start": "2026-06-10",
+      "period_end": "2026-07-10",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 218019.8,
+      "lines": [
+        {
+          "amount": 60450.0,
+          "description": "2 Fiber Containers (2 unbleached bagasse)",
+          "remarks": "Added extra 4,225 shipping cost per container"
+        },
+        {
+          "amount": 54000.0,
+          "description": "Staff Salaries June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 34454.0,
+          "description": "Supplier Payments May + June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 22161.8,
+          "description": "Electricity June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation June 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 3135.0,
+          "description": "Product Recall Insurance Renewal 2026-2027, instalment 2 of 4",
+          "remarks": "Total payment 12,540"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2026-07",
+      "period_start": "2026-07-15",
+      "period_end": "2026-08-15",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 194699.1,
+      "lines": [
+        {
+          "amount": 61189.0,
+          "description": "2 Fiber Containers (1 bagasse + 1 bamboo)",
+          "remarks": null
+        },
+        {
+          "amount": 54000.0,
+          "description": "Staff Salaries July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 30311.1,
+          "description": "Supplier Payments June + July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI + LMRA Labor Social Taxes July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 21355.0,
+          "description": "Electricity July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation July 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        },
+        {
+          "amount": 3135.0,
+          "description": "Product Recall Insurance Renewal 2026-2027, instalment 3 of 4",
+          "remarks": "Total payment 12,540"
+        },
+        {
+          "amount": -19110.0,
+          "description": "Customs Duty Refund January 2026 to May 2026",
+          "remarks": "Credit, deducted from funds required"
+        }
+      ],
+      "notes": [
+        "Period runs 15 July to 15 August 2026, leaving 10 to 15 July 2026 uncovered by any statement."
+      ]
+    }
+  ],
+  "reconciliation_to_ledger": [
+    {
+      "period": "2025-06",
+      "requested": 227026.0,
+      "receipts": [
+        {
+          "date": "2025-06-11",
+          "amount": 218982.5,
+          "note": "ledger date stored as 2025-06-11; day/month order unconfirmed"
+        }
+      ],
+      "received_total": 218982.5,
+      "variance": -8043.5,
+      "match_confidence": "probable"
+    },
+    {
+      "period": "2025-07",
+      "requested": 197879.0,
+      "receipts": [],
+      "received_total": 0,
+      "variance": -197879.0,
+      "match_confidence": "unmatched"
+    },
+    {
+      "period": "2025-08",
+      "requested": 195921.0,
+      "receipts": [],
+      "received_total": 0,
+      "variance": -195921.0,
+      "match_confidence": "unmatched"
+    },
+    {
+      "period": "2025-09",
+      "requested": 236785.0,
+      "receipts": [
+        {
+          "date": "2025-09-24",
+          "amount": 20164.3,
+          "note": "top-up"
+        },
+        {
+          "date": "2025-11-09",
+          "amount": 173733.12,
+          "note": "ledger date stored as 2025-11-09; day/month order unconfirmed"
+        }
+      ],
+      "received_total": 193897.42,
+      "variance": -42887.58,
+      "match_confidence": "probable"
+    },
+    {
+      "period": "2025-10",
+      "requested": 218743.0,
+      "receipts": [
+        {
+          "date": "2025-10-06",
+          "amount": 220000.0,
+          "note": "PHL payment confirmed on the October actuals statement; appears in ledger as 2025-07-10, a day/month transposition"
+        }
+      ],
+      "received_total": 220000.0,
+      "variance": 1257.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2025-11",
+      "requested": 217598.0,
+      "receipts": [
+        {
+          "date": "2025-11-30",
+          "amount": 41235.5,
+          "note": "top-up"
+        }
+      ],
+      "received_total": 41235.5,
+      "variance": -176362.5,
+      "match_confidence": "partial"
+    },
+    {
+      "period": "2025-12",
+      "requested": 239910.0,
+      "receipts": [
+        {
+          "date": "2025-12-04",
+          "amount": 239247.76,
+          "note": "ledger date stored as 2025-04-12"
+        },
+        {
+          "date": "2025-12-22",
+          "amount": 61155.53,
+          "note": "top-up"
+        }
+      ],
+      "received_total": 300403.29,
+      "variance": 60493.29,
+      "match_confidence": "probable"
+    },
+    {
+      "period": "2026-01",
+      "requested": 264799.0,
+      "receipts": [
+        {
+          "date": "2026-01-13",
+          "amount": 239000.0,
+          "note": null
+        }
+      ],
+      "received_total": 239000.0,
+      "variance": -25799.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-02",
+      "requested": 207240.0,
+      "receipts": [
+        {
+          "date": "2026-02-11",
+          "amount": 207000.0,
+          "note": "ledger date stored as 2026-11-02"
+        }
+      ],
+      "received_total": 207000.0,
+      "variance": -240.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-03",
+      "requested": 243105.55,
+      "receipts": [
+        {
+          "date": "2026-03-17",
+          "amount": 243105.55,
+          "note": "exact match to the cent"
+        }
+      ],
+      "received_total": 243105.55,
+      "variance": 0.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-04",
+      "requested": 186600.0,
+      "receipts": [
+        {
+          "date": "2026-04-18",
+          "amount": 186580.0,
+          "note": null
+        }
+      ],
+      "received_total": 186580.0,
+      "variance": -20.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-05",
+      "requested": 211585.05,
+      "receipts": [
+        {
+          "date": "2026-05-12",
+          "amount": 211565.05,
+          "note": "ledger date stored as 2026-12-05"
+        }
+      ],
+      "received_total": 211565.05,
+      "variance": -20.0,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-06",
+      "requested": 218019.8,
+      "receipts": [
+        {
+          "date": "2026-06-11",
+          "amount": 217000.0,
+          "note": "ledger date stored as 2026-11-06"
+        }
+      ],
+      "received_total": 217000.0,
+      "variance": -1019.8,
+      "match_confidence": "confirmed"
+    },
+    {
+      "period": "2026-07",
+      "requested": 194699.1,
+      "receipts": [
+        {
+          "date": "2026-07-19",
+          "amount": 193700.0,
+          "note": null
+        }
+      ],
+      "received_total": 193700.0,
+      "variance": -999.1,
+      "match_confidence": "confirmed"
+    }
+  ],
+  "reconciliation_notes": [
+    "Every ledger date shown here as 'stored as' is a day/month transposition in the source workbook. The corrected date is the one used above and must be confirmed before the statement is reissued.",
+    "From March 2026 onward each request is met by a single payment within days, at or within roughly 1,000 US$ of the requested figure. This is the clearest evidence that the monthly Financial Overview is the funding mechanism, not an informal estimate.",
+    "July and August 2025 requests carry no identified receipt. Either the payment is recorded in the ledger under a date that has not been matched, or those months were funded from an earlier balance. Resolve before publishing.",
+    "January 2026 was funded 25,799.00 short of the request. Confirm whether the shortfall was absorbed or carried."
+  ]
+}

@@ -1,25 +1,49 @@
-import { SectionHead, Note } from './components/ui'
+import ledgerRaw from '../data/polyco-ledger.json'
+import { Ledger } from './lib/schema'
+import Tab1Position from './tabs/Tab1Position'
 import { isPartner } from './redaction'
 
-/**
- * Placeholder shell. Tabs 1 to 3 are the next gate; see BUILD-SPEC.md section 8.
- * Kept deliberately bare so nothing here is mistaken for finished work.
- */
+const ledger = Ledger.parse(ledgerRaw)
+
 export default function App() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
-      <p className="eyebrow mb-2">EcoFibre and Polyco</p>
-      <SectionHead
-        n="00"
-        title="Position, capacity and configuration"
-        lede="The data layer and calculation engine are in place and tested. The tabs are not built yet."
-      />
-      <div className="space-y-3">
-        <Note>
-          Running in <strong>{isPartner ? 'partner' : 'internal'}</strong> mode.
-        </Note>
-        <Note>Next: Tab 1, where we stand with Polyco. See BUILD-SPEC.md section 8.</Note>
-      </div>
-    </main>
+    <div className="min-h-screen">
+      <header className="border-b border-rule bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex flex-wrap items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-3">
+            <span className="text-sm font-bold tracking-tight">ECOFIBRE</span>
+            <span className="text-ink-faint">/</span>
+            <span className="text-sm text-ink-muted">Polyco Healthline</span>
+          </div>
+          <span className="eyebrow">
+            Position, capacity and configuration{isPartner ? '' : ' · internal'}
+          </span>
+        </div>
+      </header>
+
+      <nav className="border-b border-rule bg-paper-panel no-print">
+        <div className="mx-auto max-w-6xl px-6 flex gap-6 overflow-x-auto">
+          {[
+            'Where we stand', 'Funding statements', 'Still to be made', 'Capacity',
+            'Configurations', 'Path to 8', 'Scenarios', 'Assumptions',
+          ].map((t, i) => (
+            <span
+              key={t}
+              className={`py-3 text-sm whitespace-nowrap border-b-2 ${
+                i === 0
+                  ? 'border-leaf font-semibold'
+                  : 'border-transparent text-ink-faint'
+              }`}
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      </nav>
+
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <Tab1Position ledger={ledger} />
+      </main>
+    </div>
   )
 }

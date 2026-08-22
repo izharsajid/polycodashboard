@@ -12,7 +12,8 @@
     "seed:admin": "tsx scripts/seed-admin.ts",
     "seed:invited": "tsx scripts/seed-invited.ts",
     "preflight": "tsx scripts/preflight.ts",
-    "issue:link": "tsx scripts/issue-link.ts"
+    "issue:link": "tsx scripts/issue-link.ts",
+    "statement:tie": "tsx scripts/statement-tie.ts"
   },
   "dependencies": {
     "@netlify/blobs": "^11.0.1",

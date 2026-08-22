@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@netlify/blobs": "^11.0.1",
+    "exceljs": "^4.4.0",
     "hash-wasm": "^4.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -24,10 +24,13 @@ import Login from './pages/Login'
 import Reset from './pages/Reset'
 import Tab1Position from './tabs/Tab1Position'
 import Tab2Funding from './tabs/Tab2Funding'
+import Tab3Statement from './tabs/Tab3Statement'
 
 const TABS = [
   { section: 'polyco-position', label: 'Where we stand', built: true },
   { section: 'funding-statements', label: 'Funding statements', built: true },
+  // Next to Tab 1: Tab 1 states the position and this is the evidence for it.
+  { section: 'statement', label: 'Statement', built: true },
   { section: 'order-book', label: 'Still to be made', built: false },
   { section: 'capacity', label: 'Capacity', built: false },
   { section: 'configurations', label: 'Configurations', built: false },
@@ -156,6 +159,9 @@ function Dashboard({ user }: { user: PublicUser }) {
           <>
             {active === 'polyco-position' && <Tab1Position ledger={figures.data.ledger} />}
             {active === 'funding-statements' && <Tab2Funding statements={figures.data.statements} />}
+            {active === 'statement' && (
+              <Tab3Statement ledger={figures.data.ledger} who={user.email} />
+            )}
           </>
         )}
       </main>

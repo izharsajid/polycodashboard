@@ -55,7 +55,17 @@
   }
 
   /* A figure split across a page break is a figure nobody trusts. */
-  table, tr, .recharts-wrapper { break-inside: avoid; }
+  tr, .recharts-wrapper { break-inside: avoid; }
+
+  /* The statement runs to hundreds of rows, so it must break across pages. The
+     header repeats on each one, which is what thead does in print when the table
+     is allowed to break. */
+  table { break-inside: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+
+  /* Sticky is meaningless on paper and leaves a gap where it would have sat. */
+  thead.sticky, .sticky { position: static !important; }
 
   @page { margin: 14mm; }
 }

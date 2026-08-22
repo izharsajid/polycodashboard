@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import ledgerRaw from '../../../../data/polyco-ledger.json'
 import { Ledger } from '../../schema'
 import { round2 } from '../index'
-import { statementEntries, statementTie, statementView } from '../statement'
+import {
+  entryTypeLabel, statementEntries, statementTie, statementView, wholeDollars,
+} from '../statement'
 
 const ledger = Ledger.parse(ledgerRaw)
 
@@ -119,6 +121,26 @@ describe('the reconciliation', () => {
     expect(tie.tiesToTab1).toBe(true)
   })
 
+  it('labels every entry by the movement it carries, not by its ledger row', () => {
+    // Nineteen rows are typed `delivery` or `recharge` yet carry a receipt too.
+    // Labelling by the row put "Delivery" against a line that raised the balance,
+    // which reads as a sign error to anyone reconciling.
+    for (const entry of statementView(ledger).entries) {
+      const label = entryTypeLabel(entry)
+      if (entry.movement > 0) expect(`${entry.id}:${label}`).toBe(`${entry.id}:Receipt`)
+      if (entry.movement < 0) expect(['Delivery', 'Recharge']).toContain(label)
+      if (entry.movement === 0) expect(label).toBe('Purchase order')
+    }
+  })
+
+  it('keeps recharges distinct from deliveries, since they sit inside delivered value', () => {
+    const entries = statementView(ledger).entries
+    const recharges = entries.filter((e) => entryTypeLabel(e) === 'Recharge')
+
+    expect(recharges.length).toBeGreaterThan(0)
+    expect(recharges.every((e) => e.kind === 'delivery' && e.movement < 0)).toBe(true)
+  })
+
   it('holds the convention: receipts raise the balance, deliveries lower it', () => {
     const view = statementView(ledger)
     const receipt = view.entries.find((e) => e.kind === 'receipt')!
@@ -198,5 +220,35 @@ describe('a date range', () => {
     // that a range sets aside. Rounded, because the engine rounds at every step
     // and an unrounded expectation here drifts by a fraction of a cent.
     expect(view.opening).toBe(round2(2113292.74 - statementView(ledger).undatedTotal))
+  })
+})
+
+describe('the headline figures', () => {
+  it('adds up as whole dollars, which independent rounding does not', () => {
+    const range = { from: '2026-01-01', to: '2026-03-31' }
+    const view = statementView(ledger, range)
+    const headline = wholeDollars(view)
+
+    // Rounded on their own these read 1,259,495 + 649,568 = 1,909,063 against a
+    // closing of 1,909,062, which is an error on the page to the one audience
+    // certain to check it.
+    expect(Math.round(view.opening) + Math.round(view.movement)).not.toBe(Math.round(view.closing))
+    expect(headline.opening + headline.movement).toBe(headline.closing)
+  })
+
+  it('keeps both balances true and gives up the movement instead', () => {
+    const view = statementView(ledger, { from: '2026-01-01', to: '2026-03-31' })
+    const headline = wholeDollars(view)
+
+    expect(headline.opening).toBe(Math.round(view.opening))
+    expect(headline.closing).toBe(Math.round(view.closing))
+    expect(Math.abs(headline.movement - view.movement)).toBeLessThanOrEqual(1)
+  })
+
+  it('adds up unfiltered too', () => {
+    const headline = wholeDollars(statementView(ledger))
+    expect(headline.opening).toBe(0)
+    expect(headline.opening + headline.movement).toBe(headline.closing)
+    expect(headline.closing).toBe(2113293)
   })
 })

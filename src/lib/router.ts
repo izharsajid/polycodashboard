@@ -9,6 +9,7 @@ export const LOGIN = '/login'
 export const FORGOT = '/forgot'
 export const INVITE = '/invite'
 export const RESET = '/reset'
+export const ACCOUNT = '/account'
 export const DASHBOARD = '/'
 
 /**

@@ -8,9 +8,9 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
       set of figures, every signed-in user seeing all of them, with individual pay the
       only exclusion and it applies to everyone. `src/redaction`, the `VITE_MODE` split
       and the partner build are retired. See `BUILD-SPEC.md` section 3.
-- [ ] Display names for the three Polyco addresses and for Hamza. The user record carries
-      a name and it is shown in the header and the admin list. Needed at gate 4, not
-      before.
+- [x] Resolved 22 August 2026, by Izhar. Display names are Hamza Sajid, Andy Blewett,
+      Jack Prichard and Samuel Story-Taylor, given rather than derived from the addresses.
+      Set in `scripts/seed-invited.ts`.
 - [x] Resolved 22 August 2026. The figures were compiled into the public JavaScript
       bundle, where the session guard could not reach them, because `src/App.tsx` imported
       the two `/data` files at build time. They now come from `GET /api/data`, which the

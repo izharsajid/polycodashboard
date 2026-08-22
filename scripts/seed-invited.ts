@@ -17,10 +17,12 @@ import type { RoleT } from '../netlify/lib/schema'
 import { createUser, getUserByEmail } from '../netlify/lib/users'
 
 /**
- * Names are read off the addresses, apart from Hamza's, which AUTH-SPEC gives.
- * They show in the header and the admin list. Correct any that are wrong before
- * anybody is invited: it is one edit in the admin panel, and nothing has been
- * sent, so a wrong spelling costs nothing today.
+ * Names given by Izhar on 22 August 2026. They are not derived from the email
+ * addresses and must not be: an address is a mailbox, not a person, and guessing
+ * at capitalisation and hyphens off the local part gets somebody's name wrong in
+ * the header of a dashboard their own company is reading.
+ *
+ * A name that needs correcting is one edit in the admin panel.
  */
 const ACCOUNTS: { email: string; name: string; role: RoleT }[] = [
   { email: 'hamza@ecofibre.bh', name: 'Hamza Sajid', role: 'admin' },

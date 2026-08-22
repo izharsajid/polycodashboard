@@ -132,7 +132,7 @@ describe('POST /api/users/invite', () => {
     await sendInvite({ email: SAMUEL, name: 'Samuel Story-Taylor' }, headers)
 
     const [first, second] = sent
-    expect((await validate(post('/api/invitations/validate', { token: first.token }))).status).toBe(400)
+    expect((await validate(post('/api/invitations/validate', { token: first.token }))).status).toBe(410)
     expect((await validate(post('/api/invitations/validate', { token: second.token }))).status).toBe(200)
   })
 
@@ -165,7 +165,9 @@ describe('POST /api/invitations/validate', () => {
 
     for (const token of ['never-issued', stale.token, reset.token]) {
       const res = await validate(post('/api/invitations/validate', { token }))
-      expect(res.status).toBe(400)
+      // 410 Gone, not 400: the link is finished, rather than the caller having
+      // sent something malformed. The page shows a different screen for each.
+      expect(res.status).toBe(410)
       expect((await res.json()).error).toMatch(/no longer valid/)
     }
   })
@@ -208,7 +210,7 @@ describe('POST /api/invitations/accept', () => {
     expect((await use(token)).status).toBe(200)
 
     const replay = await use(token, 'yet another phrase')
-    expect(replay.status).toBe(400)
+    expect(replay.status).toBe(410)
     expect((await signIn(SAMUEL, 'yet another phrase')).status).toBe(401)
   })
 
@@ -230,7 +232,7 @@ describe('POST /api/invitations/accept', () => {
       eightDaysAgo,
     )
 
-    expect((await use(token)).status).toBe(400)
+    expect((await use(token)).status).toBe(410)
     expect((await getUserByEmail(SAMUEL))?.status).toBe('invited')
   })
 
@@ -241,7 +243,7 @@ describe('POST /api/invitations/accept', () => {
     const second = await issueToken({ email: SAMUEL, role: 'member', purpose: 'invitation' })
     const res = await use(second.token, 'a third arrangement entirely')
 
-    expect(res.status).toBe(400)
+    expect(res.status).toBe(410)
     expect((await listAudit({ action: 'invitation_accepted' }))[0].detail).toMatch(
       /status is active/,
     )

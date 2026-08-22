@@ -4,10 +4,22 @@ import { SessionProvider, useSession } from './auth/session'
 import Header from './components/Header'
 import { useDashboardData } from './data/useDashboardData'
 import { navigate, useLocation } from './lib/navigation'
-import { DASHBOARD, FORGOT, INVITE, LOGIN, loginPathFor, nextFrom } from './lib/router'
+import {
+  ACCOUNT,
+  DASHBOARD,
+  FORGOT,
+  INVITE,
+  LOGIN,
+  RESET,
+  loginPathFor,
+  nextFrom,
+  tokenFromHash,
+} from './lib/router'
+import Account from './pages/Account'
 import Forgot from './pages/Forgot'
 import Invite from './pages/Invite'
 import Login from './pages/Login'
+import Reset from './pages/Reset'
 import Tab1Position from './tabs/Tab1Position'
 import Tab2Funding from './tabs/Tab2Funding'
 
@@ -32,17 +44,23 @@ export default function App() {
 
 function Routed() {
   const session = useSession()
-  const { path, search } = useLocation()
+  const { path, search, hash } = useLocation()
 
   // Nothing at all until the server has said who this is. Rendering the
   // dashboard first and taking it away looks like a flicker and reads like a
   // leak.
   if (session.status === 'loading') return <Waiting />
 
-  // The invitation page runs signed in or out. Somebody already holding a session
-  // may still be opening a link for a different address, and the token decides
-  // whose account it activates, not the cookie.
-  if (path === INVITE) return <Invite />
+  // These two run signed in or out. Somebody already holding a session may still
+  // be opening a link for a different address, and the token decides whose
+  // account it touches, not the cookie.
+  //
+  // Keyed on the token so that opening a second link in the same tab starts the
+  // page again rather than showing what the first one ended up on. A fragment
+  // change does not reload the document.
+  const token = tokenFromHash(hash)
+  if (path === INVITE) return <Invite key={hash} token={token} />
+  if (path === RESET) return <Reset key={hash} token={token} />
 
   if (session.status === 'out') {
     if (path === LOGIN) return <Login next={nextFrom(search)} />
@@ -52,6 +70,8 @@ function Routed() {
 
   // Signed in and standing on a page that only makes sense signed out.
   if (path === LOGIN || path === FORGOT) return <Send to={DASHBOARD} />
+
+  if (path === ACCOUNT) return <Account user={session.user} />
 
   return <Dashboard user={session.user} />
 }

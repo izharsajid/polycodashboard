@@ -35,7 +35,7 @@ export default async (req: Request, context: Context) => {
       ip,
       detail: `reset token ${held.reason}`,
     })
-    return fail(400, GENERIC.link)
+    return fail(410, GENERIC.link)
   }
 
   const user = await getUserByEmail(held.invitation.email)
@@ -47,7 +47,7 @@ export default async (req: Request, context: Context) => {
       ip,
       detail: user ? `account status is ${user.status}` : 'account no longer exists',
     })
-    return fail(400, GENERIC.link)
+    return fail(410, GENERIC.link)
   }
 
   const verdict = checkPassword(body.password, { email: user.email, name: user.name })
@@ -63,7 +63,7 @@ export default async (req: Request, context: Context) => {
       ip,
       detail: `reset token ${consumed.reason} before it could be used`,
     })
-    return fail(400, GENERIC.link)
+    return fail(410, GENERIC.link)
   }
 
   const now = new Date()

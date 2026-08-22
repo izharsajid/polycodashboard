@@ -24,7 +24,7 @@ export default async (req: Request) => {
   if (!body) return fail(400, GENERIC.badRequest)
 
   const held = await readToken(body.token, 'invitation')
-  if (!held.ok) return fail(400, GENERIC.link)
+  if (!held.ok) return fail(410, GENERIC.link)
 
   return json({ email: held.invitation.email })
 }

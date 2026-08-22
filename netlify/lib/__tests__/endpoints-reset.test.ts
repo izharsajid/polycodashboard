@@ -73,7 +73,7 @@ describe('POST /api/auth/forgot', () => {
 
     const [first, second] = sent
     const stale = await reset(post('/api/auth/reset', { token: first.token, password: NEW_PASSWORD }), ctx())
-    expect(stale.status).toBe(400)
+    expect(stale.status).toBe(410)
 
     const fresh = await reset(post('/api/auth/reset', { token: second.token, password: NEW_PASSWORD }), ctx())
     expect(fresh.status).toBe(200)
@@ -130,8 +130,11 @@ describe('POST /api/auth/reset', () => {
     await ask(IZHAR)
 
     expect((await use(sent[0].token)).status).toBe(200)
+    // 410 Gone, not 400: the link itself is finished, which is a different thing
+    // from the caller sending something wrong, and the page shows a different
+    // screen for each.
     const replay = await use(sent[0].token, 'yet another phrase')
-    expect(replay.status).toBe(400)
+    expect(replay.status).toBe(410)
     expect((await replay.json()).error).toMatch(/no longer valid/)
   })
 
@@ -155,7 +158,7 @@ describe('POST /api/auth/reset', () => {
       twoHoursAgo,
     )
 
-    expect((await use(token)).status).toBe(400)
+    expect((await use(token)).status).toBe(410)
     expect((await signIn(IZHAR, PASSWORD)).status).toBe(200)
   })
 
@@ -163,15 +166,15 @@ describe('POST /api/auth/reset', () => {
     await seedUser({ email: IZHAR, password: PASSWORD })
     const invitation = await issueToken({ email: IZHAR, role: 'member', purpose: 'invitation' })
 
-    expect((await use('nobody-issued-this')).status).toBe(400)
-    expect((await use(invitation.token)).status).toBe(400)
+    expect((await use('nobody-issued-this')).status).toBe(410)
+    expect((await use(invitation.token)).status).toBe(410)
   })
 
   it('refuses when the account went away in the meantime', async () => {
     const { token } = await issueToken({ email: 'ghost@ecofibre.bh', role: 'member', purpose: 'reset' })
     const res = await use(token)
 
-    expect(res.status).toBe(400)
+    expect(res.status).toBe(410)
     expect((await listAudit({ action: 'password_reset_completed' }))[0].detail).toMatch(
       /no longer exists/,
     )

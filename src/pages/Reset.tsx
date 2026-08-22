@@ -1,45 +1,29 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import type { PublicUser } from '../../netlify/lib/http'
 import { useSession } from '../auth/session'
 import { api } from '../lib/api'
 import { navigate } from '../lib/navigation'
-import { DASHBOARD, LOGIN } from '../lib/router'
+import { DASHBOARD, FORGOT } from '../lib/router'
 
 /**
- * Accepting an invitation. The token comes from the fragment, which the browser
- * keeps to itself, so it never reaches a server log on the way here.
+ * Setting a new password from a reset link. The token comes from the fragment, as
+ * the invitation does, so it never reaches a server log.
  *
- * The page asks the server who the link is for before showing anything, so a dead
- * link says so immediately rather than after somebody has chosen a password.
+ * Unlike the invitation page this does not check the token before showing the
+ * form, and so does not display the address the link belongs to. AUTH-SPEC
+ * section 8 calls the two pages the same shape, and this is the one place they
+ * differ. Showing the address would need an endpoint that section 5 does not
+ * have, and it would tell whoever found the link whose account it opens. The
+ * person resetting typed their own address into the previous page a moment ago,
+ * so it tells them nothing they do not know.
  */
-type Stage =
-  | { at: 'checking' }
-  | { at: 'dead' }
-  | { at: 'ready'; email: string }
-
-export default function Invite({ token }: { token: string | null }) {
+export default function Reset({ token }: { token: string | null }) {
   const { adopt } = useSession()
-  const [stage, setStage] = useState<Stage>({ at: 'checking' })
   const [password, setPassword] = useState('')
   const [again, setAgain] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [dead, setDead] = useState(false)
   const [busy, setBusy] = useState(false)
-
-  useEffect(() => {
-    let live = true
-    void (async () => {
-      if (!token) {
-        setStage({ at: 'dead' })
-        return
-      }
-      const result = await api.post<{ email: string }>('/api/invitations/validate', { token })
-      if (!live) return
-      setStage(result.ok ? { at: 'ready', email: result.data.email } : { at: 'dead' })
-    })()
-    return () => {
-      live = false
-    }
-  }, [token])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -51,21 +35,18 @@ export default function Invite({ token }: { token: string | null }) {
     }
 
     setBusy(true)
-    const result = await api.post<{ user: PublicUser }>('/api/invitations/accept', {
-      token,
-      password,
-    })
+    const result = await api.post<{ user: PublicUser }>('/api/auth/reset', { token, password })
 
     if (!result.ok) {
-      // 410 means the link is gone, so send them back to the dead-link state
-      // rather than showing it as something they could retype their way out of.
-      if (result.status === 410) setStage({ at: 'dead' })
-      else setError(result.error)
       setBusy(false)
+      // 410 is the link itself being gone, which is worth saying plainly rather
+      // than leaving somebody retyping. Anything else, a refused password most
+      // likely, is worth another go on the same link.
+      if (result.status === 410) setDead(true)
+      else setError(result.error)
       return
     }
 
-    // The server has set the cookie and signed them in already.
     adopt(result.data.user)
     navigate(DASHBOARD, { replace: true })
   }
@@ -79,41 +60,32 @@ export default function Invite({ token }: { token: string | null }) {
           <span className="text-sm text-ink-muted">Polyco Healthline</span>
         </div>
 
-        {stage.at === 'checking' && (
-          <p className="text-sm text-ink-muted" aria-busy="true">
-            Checking that link.
-          </p>
-        )}
-
-        {stage.at === 'dead' && (
+        {dead || !token ? (
           <>
             <h1 className="text-xl font-semibold tracking-tight mb-1">That link has expired</h1>
             <p className="text-sm text-ink-muted leading-relaxed mb-8">
-              Invitations last seven days and work once. Ask whoever invited you for
-              another, and this one stops working either way.
+              Reset links last an hour and work once. Ask for another and this one stops
+              working either way.
             </p>
             <button
               type="button"
-              onClick={() => navigate(LOGIN)}
+              onClick={() => navigate(FORGOT)}
               className="text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
             >
-              Go to sign in
+              Send me a new link
             </button>
           </>
-        )}
-
-        {stage.at === 'ready' && (
+        ) : (
           <>
-            <h1 className="text-xl font-semibold tracking-tight mb-1">Choose a password</h1>
+            <h1 className="text-xl font-semibold tracking-tight mb-1">Choose a new password</h1>
             <p className="text-sm text-ink-muted leading-relaxed mb-8">
-              For <span className="text-ink">{stage.email}</span>. At least 12 characters. A
-              few words you will remember beat a short one with symbols in it, and nobody
-              here can see what you choose.
+              At least 12 characters. Setting it signs out every session on this account,
+              including any you did not start.
             </p>
 
             <form onSubmit={submit} className="flex flex-col gap-4">
               <label className="flex flex-col gap-1.5">
-                <span className="eyebrow">Password</span>
+                <span className="eyebrow">New password</span>
                 <input
                   type="password"
                   value={password}

@@ -1,6 +1,7 @@
 import type { Config, Context } from '@netlify/functions'
 import ledger from '../../data/polyco-ledger.json' with { type: 'json' }
 import statements from '../../data/monthly-funding-statements.json' with { type: 'json' }
+import poTracker from '../../data/po-tracker.json' with { type: 'json' }
 import { authenticate, clientIp, json, refuseUnauthenticated, wrongMethod } from '../lib/http'
 
 /**
@@ -31,7 +32,7 @@ export default async (req: Request, context: Context) => {
   const authed = await authenticate(req)
   if (!authed) return refuseUnauthenticated(req, clientIp(context))
 
-  return json({ ledger, statements })
+  return json({ ledger, statements, poTracker })
 }
 
 export const config: Config = { path: '/api/data' }

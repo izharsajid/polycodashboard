@@ -1,12 +1,14 @@
 /** Fails the build on bad data. Runs in CI and before every local build. */
 import { readFileSync } from 'node:fs'
-import { Ledger, Statements } from '../src/lib/schema'
+import { Ledger, PoTracker, Statements } from '../src/lib/schema'
+import { reconcileTracker } from '../src/lib/engine/po-tracker'
 
 const read = (p: string) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'))
 const problems: string[] = []
 
 const ledger = Ledger.parse(read('../data/polyco-ledger.json'))
 const statements = Statements.parse(read('../data/monthly-funding-statements.json'))
+const poTracker = PoTracker.parse(read('../data/po-tracker.json'))
 
 const s = ledger.summary
 const computed =
@@ -28,6 +30,13 @@ for (const st of statements.statements) {
     problems.push(`Statement ${st.id} foots to ${total} against a stated ${st.stated_total}`)
   }
 }
+
+const recon = reconcileTracker(poTracker, ledger)
+console.log(
+  `PO tracker: ${poTracker.row_count} orders pulled ${poTracker.pulled_at.slice(0, 10)}, ` +
+    `${recon.exact.length} matched, ${recon.suffixOnly.length} on base number, ` +
+    `${recon.trackerOnly.length} tracker only, ${recon.ledgerOnly.length} ledger only`,
+)
 
 const flagged = ledger.rows.filter((r) => r.flags.length).length
 console.log(`Ledger: ${ledger.rows.length} rows, ${flagged} carrying flags`)

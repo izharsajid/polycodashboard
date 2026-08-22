@@ -13,7 +13,8 @@
     "seed:invited": "tsx scripts/seed-invited.ts",
     "preflight": "tsx scripts/preflight.ts",
     "issue:link": "tsx scripts/issue-link.ts",
-    "statement:tie": "tsx scripts/statement-tie.ts"
+    "statement:tie": "tsx scripts/statement-tie.ts",
+    "import:po-tracker": "tsx scripts/import-po-tracker.ts"
   },
   "dependencies": {
     "@netlify/blobs": "^11.0.1",

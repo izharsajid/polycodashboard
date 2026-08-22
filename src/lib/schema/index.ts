@@ -76,8 +76,46 @@ export const Statements = z.object({
   reconciliation_notes: z.array(z.string()),
 })
 
+/**
+ * The order tracker, pulled from efdashboard's `po_data`.
+ *
+ * Every field the source holds as free text is kept as free text, and any date we
+ * could parse out of it is kept alongside under a `_date` name. Nothing is
+ * corrected in place: `cargo_ready` carries values like "ON HOLD (Miami)" and
+ * "CARGO READY" as well as dates, and flattening those into a date column would
+ * throw away what the row actually says.
+ */
+export const PoOrder = z.object({
+  id: z.number(),
+  row_no: z.string(),
+  po_number: z.string(),
+  product: z.string(),
+  film: z.string(),
+  rolls: z.string(),
+  qty: z.string(),
+  /** "Dispatched", "Booked", "Processing", "Cancelled", and two spellings of air freight. */
+  order_status: z.string(),
+  cargo_ready: z.string(),
+  cargo_ready_date: z.string().nullable(),
+  dispatched: z.string(),
+  dispatched_date: z.string().nullable(),
+  remarks: z.string(),
+  is_new: z.boolean(),
+  sort_order: z.number(),
+})
+
+export const PoTracker = z.object({
+  source: z.string(),
+  /** When the pull happened, not when the page was opened. */
+  pulled_at: z.string(),
+  row_count: z.number(),
+  orders: z.array(PoOrder),
+})
+
 export type LedgerT = z.infer<typeof Ledger>
 export type LedgerRowT = z.infer<typeof LedgerRow>
 export type StatementsT = z.infer<typeof Statements>
 export type StatementT = z.infer<typeof Statement>
 export type ReconRowT = z.infer<typeof ReconRow>
+export type PoOrderT = z.infer<typeof PoOrder>
+export type PoTrackerT = z.infer<typeof PoTracker>

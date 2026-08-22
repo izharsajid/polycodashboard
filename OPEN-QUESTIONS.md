@@ -38,6 +38,27 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
       exactly `true`. All four are unset. Gate 4 cannot be tested end to end against a
       scratch address until the first three exist.
 
+## Order tracker
+
+- [x] Resolved 22 August 2026. Read-only Supabase key supplied and the importer works.
+      `npm run import:po-tracker` pulls 102 orders from `po_data` into
+      `data/po-tracker.json` and reconciles against the ledger on every run.
+- [ ] **`po_data` has no shipping-mode column, so the shipping-mode filter row in
+      PO-TRACKER-SPEC section 2 cannot be built.** The `shipping` column holds the order
+      status, not the mode: `Dispatched`, `Booked`, `Processing`, `Cancelled`, plus
+      `Air freight by Expeditors` and `Airfreight via Expeditors`, which are a mode
+      recorded in the status column and spelt two ways. Per section 2 the row is left out
+      rather than shown empty. Should mode become its own column, or should those two
+      values be normalised to one and treated as a status?
+- [ ] The spec expects order statuses `PO pending` and `On hold`. Neither appears in
+      `shipping`. "ON HOLD (Miami)" turns up in `cargo_ready` instead, which also carries
+      free text such as "CARGO READY" alongside real dates. Is on-hold meant to be a
+      status, and should the tab read it out of `cargo_ready`?
+- [ ] Thirteen orders are recorded with a different reference in each system, the same
+      order written `2465639` in the ledger and `2465639-2` in the tracker, and the
+      disagreement runs both ways. Which form is correct, and should one side be
+      corrected at source rather than matched around?
+
 ## Machines and capacity
 - [ ] How many machines exist on site, how many running, how many installed but idle?
 - [ ] Practical output per machine in units and kg per hour; cycle time; cavities; uptime %

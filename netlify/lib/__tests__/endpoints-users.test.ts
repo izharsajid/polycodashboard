@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import login from '../../functions/auth-login.mts'
 import me from '../../functions/auth-me.mts'
-import data from '../../functions/data.mts'
-import list from '../../functions/users-list.mts'
+import dataHandler from '../../functions/data.mts'
+import listHandler from '../../functions/users-list.mts'
 import update from '../../functions/users-update.mts'
 import { listAudit } from '../audit'
 import { useMemoryStores } from '../kv'
@@ -17,6 +17,9 @@ const SAMUEL = 'samuel.story-taylor@polycohealthline.com'
 beforeEach(() => {
   useMemoryStores()
 })
+
+const list = (req: Request) => listHandler(req, ctx())
+const data = (req: Request) => dataHandler(req, ctx())
 
 const signIn = (email: string) => login(post('/api/auth/login', { email, password: PASSWORD }), ctx())
 

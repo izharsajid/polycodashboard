@@ -95,6 +95,10 @@ export const AuditAction = z.enum([
   // accepted, and an account appearing with no entry at all is the thing the
   // audit log exists to prevent.
   'user_created',
+  // Also beyond the list, and required by section 9: an unauthenticated request
+  // to a protected route, and a member reaching for an administrator endpoint,
+  // both have to appear in the log and neither is any of the actions above.
+  'access_refused',
   'role_changed',
   'user_deactivated',
   'user_reactivated',

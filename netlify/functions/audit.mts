@@ -1,7 +1,16 @@
-import type { Config } from '@netlify/functions'
+import type { Config, Context } from '@netlify/functions'
 import { z } from 'zod'
 import { pageAudit } from '../lib/audit'
-import { GENERIC, authenticate, fail, forbiddenUnlessAdmin, json, wrongMethod } from '../lib/http'
+import {
+  GENERIC,
+  authenticate,
+  clientIp,
+  fail,
+  json,
+  refuseUnauthenticated,
+  refuseUnlessAdmin,
+  wrongMethod,
+} from '../lib/http'
 import { AuditAction } from '../lib/schema'
 
 /**
@@ -20,14 +29,16 @@ const Query = z.object({
   cursor: z.string().min(1).max(200).optional(),
 })
 
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   const badMethod = wrongMethod(req, 'GET')
   if (badMethod) return badMethod
 
-  const authed = await authenticate(req)
-  if (!authed) return fail(401, GENERIC.session)
+  const ip = clientIp(context)
 
-  const notAdmin = forbiddenUnlessAdmin(authed)
+  const authed = await authenticate(req)
+  if (!authed) return refuseUnauthenticated(req, ip)
+
+  const notAdmin = await refuseUnlessAdmin(req, authed, ip)
   if (notAdmin) return notAdmin
 
   const params = Object.fromEntries(new URL(req.url).searchParams)

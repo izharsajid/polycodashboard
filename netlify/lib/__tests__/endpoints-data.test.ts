@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import data from '../../functions/data.mts'
+import dataHandler from '../../functions/data.mts'
 import login from '../../functions/auth-login.mts'
 import { Ledger, Statements } from '../../../src/lib/schema'
 import { useMemoryStores } from '../kv'
@@ -12,6 +12,8 @@ const IZHAR = 'izhar@ecofibre.bh'
 beforeEach(() => {
   useMemoryStores()
 })
+
+const data = (req: Request) => dataHandler(req, ctx())
 
 const signIn = () => login(post('/api/auth/login', { email: IZHAR, password: PASSWORD }), ctx())
 

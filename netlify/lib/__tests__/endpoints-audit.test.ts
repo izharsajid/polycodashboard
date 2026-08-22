@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import auditEndpoint from '../../functions/audit.mts'
+import auditHandler from '../../functions/audit.mts'
 import login from '../../functions/auth-login.mts'
 import logout from '../../functions/auth-logout.mts'
 import invite from '../../functions/users-invite.mts'
@@ -18,6 +18,8 @@ beforeEach(() => {
   useMemoryStores()
   onDeliver(async () => {})
 })
+
+const auditEndpoint = (req: Request) => auditHandler(req, ctx())
 
 const signIn = (email: string, password = PASSWORD) =>
   login(post('/api/auth/login', { email, password }), ctx())

@@ -1,5 +1,12 @@
-import type { Config } from '@netlify/functions'
-import { GENERIC, authenticate, fail, json, publicUser, wrongMethod } from '../lib/http'
+import type { Config, Context } from '@netlify/functions'
+import {
+  authenticate,
+  clientIp,
+  json,
+  publicUser,
+  refuseUnauthenticated,
+  wrongMethod,
+} from '../lib/http'
 import { listUsers } from '../lib/users'
 
 /**
@@ -10,12 +17,12 @@ import { listUsers } from '../lib/users'
  * publicUser() decides what leaves. No password hash, no failed attempt counts,
  * no lockout state, and no pay data of any kind.
  */
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   const badMethod = wrongMethod(req, 'GET')
   if (badMethod) return badMethod
 
   const authed = await authenticate(req)
-  if (!authed) return fail(401, GENERIC.session)
+  if (!authed) return refuseUnauthenticated(req, clientIp(context))
 
   return json({ users: (await listUsers()).map(publicUser) })
 }

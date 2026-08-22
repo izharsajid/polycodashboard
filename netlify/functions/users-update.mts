@@ -6,10 +6,11 @@ import {
   authenticate,
   clientIp,
   fail,
-  forbiddenUnlessAdmin,
   json,
   publicUser,
   readBody,
+  refuseUnauthenticated,
+  refuseUnlessAdmin,
   wrongMethod,
 } from '../lib/http'
 import { Role } from '../lib/schema'
@@ -29,10 +30,12 @@ export default async (req: Request, context: Context) => {
   const badMethod = wrongMethod(req, 'PATCH')
   if (badMethod) return badMethod
 
-  const authed = await authenticate(req)
-  if (!authed) return fail(401, GENERIC.session)
+  const ip = clientIp(context)
 
-  const notAdmin = forbiddenUnlessAdmin(authed)
+  const authed = await authenticate(req)
+  if (!authed) return refuseUnauthenticated(req, ip)
+
+  const notAdmin = await refuseUnlessAdmin(req, authed, ip)
   if (notAdmin) return notAdmin
 
   const body = await readBody(req, Body)
@@ -53,7 +56,6 @@ export default async (req: Request, context: Context) => {
     return fail(403, 'You cannot change your own role or deactivate your own account.')
   }
 
-  const ip = clientIp(context)
   let updated = target
 
   if (body.role !== undefined && body.role !== target.role) {

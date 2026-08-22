@@ -26,6 +26,7 @@ const ACTION_LABEL: Record<AuditActionT, string> = {
   user_deactivated: 'Deactivated',
   user_reactivated: 'Reactivated',
   user_created: 'Account created',
+  access_refused: 'Access refused',
   data_edited: 'Data edited',
   export_downloaded: 'Exported',
   rate_limit_exceeded: 'Rate limit hit',

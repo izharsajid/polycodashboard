@@ -1,7 +1,7 @@
-import type { Config } from '@netlify/functions'
+import type { Config, Context } from '@netlify/functions'
 import ledger from '../../data/polyco-ledger.json' with { type: 'json' }
 import statements from '../../data/monthly-funding-statements.json' with { type: 'json' }
-import { GENERIC, authenticate, fail, json, wrongMethod } from '../lib/http'
+import { authenticate, clientIp, json, refuseUnauthenticated, wrongMethod } from '../lib/http'
 
 /**
  * The figures, behind the session.
@@ -24,12 +24,12 @@ import { GENERIC, authenticate, fail, json, wrongMethod } from '../lib/http'
  * the deliberate exports that the entry is meant to catch. Tab 8's export gets
  * its own entry when it is built.
  */
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   const badMethod = wrongMethod(req, 'GET')
   if (badMethod) return badMethod
 
   const authed = await authenticate(req)
-  if (!authed) return fail(401, GENERIC.session)
+  if (!authed) return refuseUnauthenticated(req, clientIp(context))
 
   return json({ ledger, statements })
 }

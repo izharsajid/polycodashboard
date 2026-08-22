@@ -2,8 +2,10 @@ import type { Config, Context } from '@netlify/functions'
 import { z } from 'zod'
 import { record } from '../lib/audit'
 import { deliver } from '../lib/delivery'
-import { GENERIC, clientIp, fail, json, readBody, wrongMethod } from '../lib/http'
+import { RATE_LIMITS } from '../lib/config'
+import { GENERIC, clientIp, fail, json, readBody, refuseTooMany, wrongMethod } from '../lib/http'
 import { issueToken, revokeTokensFor } from '../lib/invitations'
+import { take } from '../lib/rate-limit'
 import { Email } from '../lib/schema'
 import { getUserByEmail } from '../lib/users'
 
@@ -34,6 +36,21 @@ export default async (req: Request, context: Context) => {
   if (!body) return fail(400, GENERIC.badRequest)
 
   const ip = clientIp(context)
+
+  // A 429 here does not undo the "same answer either way" rule. It is keyed on
+  // the address as typed, so an address with an account and one without hit the
+  // limit identically, and neither learns anything from the other's behaviour.
+  if (ip) {
+    const byIp = await take('forgot-ip', ip, RATE_LIMITS.forgot)
+    if (!byIp.allowed) {
+      return refuseTooMany(byIp, { ip, actorEmail: body.email, detail: 'reset requests from one address' })
+    }
+  }
+  const byAccount = await take('forgot-account', body.email, RATE_LIMITS.forgot)
+  if (!byAccount.allowed) {
+    return refuseTooMany(byAccount, { ip, actorEmail: body.email, detail: 'reset requests for one account' })
+  }
+
   const user = await getUserByEmail(body.email)
 
   if (!user || user.status !== 'active') {

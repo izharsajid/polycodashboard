@@ -1,5 +1,7 @@
 import type { Context } from '@netlify/functions'
 import type { z } from 'zod'
+import { record } from './audit'
+import type { Allowance } from './rate-limit'
 import type { RoleT, SessionT, UserStatusT, UserT } from './schema'
 import { destroySession, readSessionCookie, resolveSession } from './sessions'
 import { getUser } from './users'
@@ -40,6 +42,7 @@ export const GENERIC = {
   role: 'You do not have access to that.',
   link: 'That link is no longer valid. Ask for a new one.',
   method: 'That method is not allowed here.',
+  tooMany: 'Too many attempts. Wait a few minutes and try again.',
 } as const
 
 export async function readBody<T extends z.ZodTypeAny>(
@@ -90,12 +93,69 @@ export async function authenticate(req: Request): Promise<Authenticated | null> 
   return { user, session, token }
 }
 
+const routeOf = (req: Request) => new URL(req.url).pathname
+
+/**
+ * A protected resource asked for without a session.
+ *
+ * Logged, because AUTH-SPEC section 9 wants this in the audit log, and because
+ * repeated refusals against `/api/data` are worth being able to see. Not used on
+ * `/api/auth/me`, which answers 401 as a matter of routine every time a signed-out
+ * visitor loads the login page; logging that would bury everything else.
+ */
+export async function refuseUnauthenticated(req: Request, ip: string | null): Promise<Response> {
+  await record({
+    action: 'access_refused',
+    result: 'failure',
+    ip,
+    target: routeOf(req),
+    detail: 'no valid session',
+  })
+  return fail(401, GENERIC.session)
+}
+
 /**
  * AUTH-SPEC section 8: hiding a link in the interface is not access control.
  * Every administrator endpoint calls this, every time, after authenticate().
  */
-export function forbiddenUnlessAdmin(authed: Authenticated): Response | null {
-  return authed.user.role === 'admin' ? null : fail(403, GENERIC.role)
+export async function refuseUnlessAdmin(
+  req: Request,
+  authed: Authenticated,
+  ip: string | null,
+): Promise<Response | null> {
+  if (authed.user.role === 'admin') return null
+
+  await record({
+    action: 'access_refused',
+    result: 'failure',
+    actorId: authed.user.id,
+    actorEmail: authed.user.email,
+    ip,
+    target: routeOf(req),
+    detail: 'member asked for an administrator endpoint',
+  })
+  return fail(403, GENERIC.role)
+}
+
+/** 429, with how long to wait, and a note in the log. AUTH-SPEC section 5. */
+export async function refuseTooMany(
+  refusal: Extract<Allowance, { allowed: false }>,
+  note: {
+    actorId?: string | null
+    actorEmail?: string | null
+    ip?: string | null
+    detail: string
+  },
+): Promise<Response> {
+  await record({
+    action: 'rate_limit_exceeded',
+    result: 'failure',
+    actorId: note.actorId ?? null,
+    actorEmail: note.actorEmail ?? null,
+    ip: note.ip ?? null,
+    detail: note.detail,
+  })
+  return fail(429, GENERIC.tooMany, { 'retry-after': String(refusal.retryAfterSeconds) })
 }
 
 export type PublicUser = {

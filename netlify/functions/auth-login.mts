@@ -2,8 +2,19 @@ import type { Config, Context } from '@netlify/functions'
 import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import { record } from '../lib/audit'
-import { GENERIC, clientIp, fail, json, publicUser, readBody, wrongMethod } from '../lib/http'
+import { LOCKOUT_MS, LOCKOUT_THRESHOLD, RATE_LIMITS } from '../lib/config'
+import {
+  GENERIC,
+  clientIp,
+  fail,
+  json,
+  publicUser,
+  readBody,
+  refuseTooMany,
+  wrongMethod,
+} from '../lib/http'
 import { hashPassword, verifyPassword } from '../lib/password'
+import { take } from '../lib/rate-limit'
 import { Email, PasswordInput } from '../lib/schema'
 import { createSession, sessionCookie } from '../lib/sessions'
 import { getUserByEmail, saveUser } from '../lib/users'
@@ -31,6 +42,20 @@ export default async (req: Request, context: Context) => {
 
   const ip = clientIp(context)
   const now = new Date()
+
+  // Before the lookup and before Argon2id, so that neither is work an attacker
+  // can make us do repeatedly.
+  if (ip) {
+    const byIp = await take('login-ip', ip, RATE_LIMITS.login, now)
+    if (!byIp.allowed) {
+      return refuseTooMany(byIp, { ip, actorEmail: body.email, detail: 'login attempts from one address' })
+    }
+  }
+  const byAccount = await take('login-account', body.email, RATE_LIMITS.login, now)
+  if (!byAccount.allowed) {
+    return refuseTooMany(byAccount, { ip, actorEmail: body.email, detail: 'login attempts on one account' })
+  }
+
   const user = await getUserByEmail(body.email)
 
   if (!user) {
@@ -48,54 +73,100 @@ export default async (req: Request, context: Context) => {
     return fail(401, GENERIC.signIn)
   }
 
-  if (user.lockedUntil && Date.parse(user.lockedUntil) > now.getTime()) {
+  let current = user
+
+  if (current.lockedUntil) {
+    if (Date.parse(current.lockedUntil) > now.getTime()) {
+      await record(
+        {
+          action: 'sign_in_failed',
+          result: 'failure',
+          actorId: current.id,
+          actorEmail: current.email,
+          ip,
+          detail: `account locked until ${current.lockedUntil}`,
+        },
+        now,
+      )
+      return fail(401, GENERIC.signIn)
+    }
+
+    // The lock has run its course. There is no background job to lift it, so it
+    // is lifted here, on the next attempt, and the log gets its matching pair.
+    current = await saveUser({ ...current, lockedUntil: null, failedAttempts: 0 })
     await record(
       {
-        action: 'sign_in_failed',
-        result: 'failure',
-        actorId: user.id,
-        actorEmail: user.email,
+        action: 'account_unlocked',
+        result: 'success',
+        actorId: current.id,
+        actorEmail: current.email,
         ip,
-        detail: 'account locked',
+        detail: 'lock expired',
       },
       now,
     )
-    return fail(401, GENERIC.signIn)
   }
 
   // Always pay for one verification. An invited account has no hash and a
   // deactivated one is refused whatever the password, and neither should be
   // faster than a real attempt.
-  const passwordOk = await verifyPassword(body.password, user.passwordHash ?? (await decoyHash()))
-  if (!passwordOk || user.status !== 'active') {
-    // The count is kept from here on. The threshold that turns it into a lock is
-    // gate 8, along with the rate limits.
-    await saveUser({ ...user, failedAttempts: user.failedAttempts + 1 })
+  const passwordOk = await verifyPassword(
+    body.password,
+    current.passwordHash ?? (await decoyHash()),
+  )
+  if (!passwordOk || current.status !== 'active') {
+    const failedAttempts = current.failedAttempts + 1
+    const locked = failedAttempts >= LOCKOUT_THRESHOLD
+
+    await saveUser({
+      ...current,
+      failedAttempts,
+      lockedUntil: locked ? new Date(now.getTime() + LOCKOUT_MS).toISOString() : current.lockedUntil,
+    })
+
     await record(
       {
         action: 'sign_in_failed',
         result: 'failure',
-        actorId: user.id,
-        actorEmail: user.email,
+        actorId: current.id,
+        actorEmail: current.email,
         ip,
-        detail: passwordOk ? `password correct but status is ${user.status}` : 'wrong password',
+        detail: passwordOk
+          ? `password correct but status is ${current.status}`
+          : `wrong password, ${failedAttempts} in a row`,
       },
       now,
     )
+
+    if (locked) {
+      await record(
+        {
+          action: 'account_locked',
+          result: 'success',
+          actorId: current.id,
+          actorEmail: current.email,
+          ip,
+          detail: `${failedAttempts} consecutive failures, locked for ${LOCKOUT_MS / 60000} minutes`,
+        },
+        now,
+      )
+    }
     return fail(401, GENERIC.signIn)
   }
 
+  // Consecutive means consecutive. One success clears the count.
   const signedIn = await saveUser({
-    ...user,
+    ...current,
     failedAttempts: 0,
+    lockedUntil: null,
     lastLoginAt: now.toISOString(),
   })
   const { token } = await createSession(
-    { userId: user.id, ip, userAgent: req.headers.get('user-agent') },
+    { userId: current.id, ip, userAgent: req.headers.get('user-agent') },
     now,
   )
   await record(
-    { action: 'sign_in', result: 'success', actorId: user.id, actorEmail: user.email, ip },
+    { action: 'sign_in', result: 'success', actorId: current.id, actorEmail: current.email, ip },
     now,
   )
 

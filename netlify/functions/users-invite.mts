@@ -2,6 +2,7 @@ import type { Config, Context } from '@netlify/functions'
 import { z } from 'zod'
 import { record } from '../lib/audit'
 import { deliver } from '../lib/delivery'
+import { RATE_LIMITS } from '../lib/config'
 import {
   GENERIC,
   authenticate,
@@ -10,8 +11,10 @@ import {
   json,
   publicUser,
   readBody,
+  refuseTooMany,
   wrongMethod,
 } from '../lib/http'
+import { take } from '../lib/rate-limit'
 import { mayInvite, type InviteRefusal } from '../lib/invite-policy'
 import { issueToken, revokeTokensFor } from '../lib/invitations'
 import { Email, Role } from '../lib/schema'
@@ -49,6 +52,16 @@ export default async (req: Request, context: Context) => {
 
   const ip = clientIp(context)
   const inviter = authed.user
+
+  const allowance = await take('invite-user', inviter.id, RATE_LIMITS.invite)
+  if (!allowance.allowed) {
+    return refuseTooMany(allowance, {
+      actorId: inviter.id,
+      actorEmail: inviter.email,
+      ip,
+      detail: 'invitations sent by one person',
+    })
+  }
 
   const decision = mayInvite(inviter, body.email, body.role)
   if (!decision.allowed) {

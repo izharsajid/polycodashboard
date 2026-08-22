@@ -4,6 +4,26 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
 
 ## Access and disclosure
 
+- [ ] **Blocking gate 9. `data/monthly-funding-statements.json` carries named individual
+      pay.** Six statement lines, December 2025 through May 2026, read
+      `Payroll for Izhar and Hamza (5,000 each)`. That is two named people and their
+      individual pay, in `/data`, served by `/api/data`, and rendered on Tab 2 to every
+      signed-in user including the Polyco team.
+      `AUTH-SPEC.md` section 2 says individual pay "is not in `/data`, is not in the
+      database, and is not rendered anywhere", and that it binds every user including
+      administrators. `BUILD-SPEC.md` section 2 excludes both individual pay and director
+      expenses. So the pre-flight check "confirm no individual pay data appears anywhere"
+      currently fails.
+      Polyco has held the original statements since June 2025, so this is not new to
+      them, but that is a reason to decide deliberately rather than a reason it can stay.
+      It is Izhar's own pay and Hamza's; Hamza's is his to agree to, not ours.
+      Three ways out, all needing a decision and a data PR: reword the description to
+      `Directors' payroll` and keep the amount, which loses nothing a reader needs; drop
+      the six lines and restate the affected statement totals, which breaks the "exactly
+      as issued" rule; or record that the exclusion does not apply to these two by name,
+      with Hamza's agreement. Not changed here, because a number in `/data` is not mine to
+      edit and this one is a judgement about disclosure.
+
 - [x] Resolved 22 August 2026, by Izhar. `AUTH-SPEC.md` stands. One site, one build, one
       set of figures, every signed-in user seeing all of them, with individual pay the
       only exclusion and it applies to everyone. `src/redaction`, the `VITE_MODE` split

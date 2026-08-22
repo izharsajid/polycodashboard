@@ -80,7 +80,7 @@ describe('POST /api/auth/login', () => {
 
     expect((await signIn()).status).toBe(401)
     const [entry] = await listAudit({ action: 'sign_in_failed' })
-    expect(entry.detail).toBe('account locked')
+    expect(entry.detail).toMatch(/^account locked until /)
   })
 
   it('counts failures and clears the count on a good sign-in', async () => {

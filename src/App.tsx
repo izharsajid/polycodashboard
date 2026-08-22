@@ -1,11 +1,28 @@
+import { useState } from 'react'
 import ledgerRaw from '../data/polyco-ledger.json'
-import { Ledger } from './lib/schema'
+import statementsRaw from '../data/monthly-funding-statements.json'
+import { Ledger, Statements } from './lib/schema'
 import Tab1Position from './tabs/Tab1Position'
-import { isPartner } from './redaction'
+import Tab2Funding from './tabs/Tab2Funding'
+import { isPartner, visible } from './redaction'
 
 const ledger = Ledger.parse(ledgerRaw)
+const statements = Statements.parse(statementsRaw)
+
+const TABS = [
+  { section: 'polyco-position', label: 'Where we stand', built: true },
+  { section: 'funding-statements', label: 'Funding statements', built: true },
+  { section: 'order-book', label: 'Still to be made', built: false },
+  { section: 'capacity', label: 'Capacity', built: false },
+  { section: 'configurations', label: 'Configurations', built: false },
+  { section: 'roadmap', label: 'Path to 8', built: false },
+  { section: 'scenarios', label: 'Scenarios', built: false },
+  { section: 'assumptions', label: 'Assumptions', built: false },
+] as const
 
 export default function App() {
+  const [active, setActive] = useState<string>('polyco-position')
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-rule bg-white">
@@ -23,26 +40,35 @@ export default function App() {
 
       <nav className="border-b border-rule bg-paper-panel no-print">
         <div className="mx-auto max-w-6xl px-6 flex gap-6 overflow-x-auto">
-          {[
-            'Where we stand', 'Funding statements', 'Still to be made', 'Capacity',
-            'Configurations', 'Path to 8', 'Scenarios', 'Assumptions',
-          ].map((t, i) => (
-            <span
-              key={t}
-              className={`py-3 text-sm whitespace-nowrap border-b-2 ${
-                i === 0
-                  ? 'border-leaf font-semibold'
-                  : 'border-transparent text-ink-faint'
-              }`}
-            >
-              {t}
-            </span>
-          ))}
+          {TABS.filter((t) => visible(t.section)).map((t) =>
+            t.built ? (
+              <button
+                key={t.section}
+                onClick={() => setActive(t.section)}
+                className={`py-3 text-sm whitespace-nowrap border-b-2 ${
+                  active === t.section
+                    ? 'border-leaf font-semibold'
+                    : 'border-transparent text-ink-muted hover:text-ink'
+                }`}
+              >
+                {t.label}
+              </button>
+            ) : (
+              <span
+                key={t.section}
+                title="In preparation"
+                className="py-3 text-sm whitespace-nowrap border-b-2 border-transparent text-ink-faint cursor-default"
+              >
+                {t.label}
+              </span>
+            ),
+          )}
         </div>
       </nav>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <Tab1Position ledger={ledger} />
+        {active === 'polyco-position' && <Tab1Position ledger={ledger} />}
+        {active === 'funding-statements' && <Tab2Funding statements={statements} />}
       </main>
     </div>
   )

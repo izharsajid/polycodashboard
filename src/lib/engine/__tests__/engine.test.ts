@@ -5,6 +5,7 @@ import { Ledger, Statements } from '../../schema'
 import {
   uncoveredAdvance, orderCover, cumulativeSeries, statementFoots,
   recurringMonthlyCost, statementCoverage, duplicatePoRefs, flaggedRows,
+  fundingSeries, statementMonths, latestStatement, round2,
 } from '../index'
 
 const ledger = Ledger.parse(ledgerRaw)
@@ -92,5 +93,36 @@ describe('monthly funding statements', () => {
     expect(c.gaps).toContain('2026-04-01 to 2026-04-09')
     expect(c.gaps).toContain('2026-07-11 to 2026-07-14')
     expect(c.overlaps.length).toBeGreaterThan(0)
+  })
+
+  it('accumulates funds requested against funds received across all periods', () => {
+    const s = fundingSeries(statements)
+    expect(s.length).toBe(14)
+    const last = s[s.length - 1]
+    // Sums of the reconciliation rows: requested 3,059,910.50 and received 2,472,469.31
+    expect(last.requestedCumulative).toBe(3059910.5)
+    expect(last.receivedCumulative).toBe(2472469.31)
+  })
+
+  it('lists every month from June 2025 to August 2026, leaving the missing statement empty', () => {
+    const months = statementMonths(statements)
+    expect(months.length).toBe(15)
+    expect(months[0].id).toBe('2025-06')
+    const august = months[months.length - 1]
+    expect(august.id).toBe('2026-08')
+    expect(august.statement).toBeNull()
+    expect(august.recon).toBeNull()
+    expect(months.filter((m) => m.statement).length).toBe(14)
+  })
+
+  it('bridges the recurring cost back to the stated total through the excluded lines', () => {
+    const jul = latestStatement(statements)
+    expect(jul.id).toBe('2026-07')
+    const r = recurringMonthlyCost(jul)
+    // Salaries, rental, supplier payments, GOSI, electricity, petty cash,
+    // accommodation and visas on the July 2026 statement.
+    expect(r.total).toBe(149485.1)
+    const excludedSum = r.excluded.reduce((a, l) => a + l.amount, 0)
+    expect(round2(r.total + excludedSum)).toBe(jul.stated_total)
   })
 })

@@ -1,4 +1,4 @@
-import type { LedgerT, LedgerRowT, StatementsT, StatementT } from '../schema'
+import type { LedgerT, LedgerRowT, StatementsT, StatementT, ReconRowT } from '../schema'
 
 export const round2 = (n: number) => Math.round(n * 1e2) / 1e2
 
@@ -114,10 +114,83 @@ const NON_RECURRING = [
 ]
 
 export function recurringMonthlyCost(s: StatementT) {
-  const lines = s.lines.filter(
-    (l) => l.amount > 0 && !NON_RECURRING.some((re) => re.test(l.description)),
-  )
-  return { total: round2(lines.reduce((a, l) => a + l.amount, 0)), lines }
+  const lines: StatementT['lines'] = []
+  const excluded: StatementT['lines'] = []
+  for (const l of s.lines) {
+    if (l.amount > 0 && !NON_RECURRING.some((re) => re.test(l.description))) lines.push(l)
+    else excluded.push(l)
+  }
+  return { total: round2(lines.reduce((a, l) => a + l.amount, 0)), lines, excluded }
+}
+
+export function latestStatement(d: StatementsT): StatementT {
+  return [...d.statements].sort((a, b) => a.period_start.localeCompare(b.period_start))[
+    d.statements.length - 1
+  ]
+}
+
+export type FundingPoint = {
+  period: string
+  requested: number
+  received: number
+  requestedCumulative: number
+  receivedCumulative: number
+}
+
+/** Funds requested against funds received, per period and cumulative. */
+export function fundingSeries(d: StatementsT): FundingPoint[] {
+  const rows = [...d.reconciliation_to_ledger].sort((a, b) => a.period.localeCompare(b.period))
+  let requested = 0
+  let received = 0
+  return rows.map((r) => {
+    requested += r.requested
+    received += r.received_total
+    return {
+      period: r.period,
+      requested: r.requested,
+      received: r.received_total,
+      requestedCumulative: round2(requested),
+      receivedCumulative: round2(received),
+    }
+  })
+}
+
+export type StatementMonth = {
+  id: string
+  statement: StatementT | null
+  recon: ReconRowT | null
+}
+
+/**
+ * Every month from the first statement to the last month any statement covers,
+ * including months with no statement. A missing month renders as a flag, never
+ * as a silent gap.
+ */
+export function statementMonths(d: StatementsT): StatementMonth[] {
+  const first = d.statements
+    .map((s) => s.period_start.slice(0, 7))
+    .reduce((a, b) => (a < b ? a : b))
+  const last = d.statements
+    .map((s) => s.period_end.slice(0, 7))
+    .reduce((a, b) => (a > b ? a : b))
+
+  const out: StatementMonth[] = []
+  let [y, m] = first.split('-').map(Number)
+  const [lastY, lastM] = last.split('-').map(Number)
+  while (y < lastY || (y === lastY && m <= lastM)) {
+    const id = `${y}-${String(m).padStart(2, '0')}`
+    out.push({
+      id,
+      statement: d.statements.find((s) => s.id === id) ?? null,
+      recon: d.reconciliation_to_ledger.find((r) => r.period === id) ?? null,
+    })
+    m += 1
+    if (m === 13) {
+      m = 1
+      y += 1
+    }
+  }
+  return out
 }
 
 export type Coverage = { gaps: string[]; overlaps: string[] }

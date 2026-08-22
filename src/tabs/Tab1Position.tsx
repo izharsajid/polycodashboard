@@ -1,155 +1,203 @@
+import { useState } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
 import type { LedgerT } from '../lib/schema'
 import { cumulativeSeries, orderCover, uncoveredAdvance, fmt } from '../lib/engine'
-import { Tile, SectionHead, Note } from '../components/ui'
+import { positionFinding } from '../lib/engine/findings'
+import { Finding, SectionHead, Tile, Working } from '../components/ui'
 
 function monthLabel(iso: string) {
   const [y, m] = iso.split('-')
   return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1]} ${y.slice(2)}`
 }
 
+/** Twelve months back from the last point in the series. */
+const RECENT_MONTHS = 12
+
 export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
   const s = ledger.summary
   const advance = uncoveredAdvance(ledger)
   const cover = orderCover(ledger)
-  const series = cumulativeSeries(ledger)
+  const finding = positionFinding(ledger)
+  const full = cumulativeSeries(ledger)
+  const [showAll, setShowAll] = useState(false)
+
   const asAt = new Date(s.as_at + 'T00:00:00Z').toLocaleDateString('en-GB', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   })
 
+  // The series runs from January 2023 and the part that matters is the recent
+  // divergence, which is otherwise compressed into the right of the axis.
+  const cutoff = new Date(full[full.length - 1].date + 'T00:00:00Z')
+  cutoff.setUTCMonth(cutoff.getUTCMonth() - RECENT_MONTHS)
+  const recent = full.filter((p) => p.date >= cutoff.toISOString().slice(0, 10))
+  const series = showAll ? full : recent
+
+  // One tick per month. The series is keyed on ledger dates, several of which can
+  // land in the same month, and letting the axis pick its own ticks prints the
+  // same month label twice, which reads as an error.
+  const monthTicks: string[] = []
+  const seenMonths = new Set<string>()
+  for (const point of series) {
+    const month = point.date.slice(0, 7)
+    if (seenMonths.has(month)) continue
+    seenMonths.add(month)
+    monthTicks.push(point.date)
+  }
+
+  const flagged = ledger.rows.filter((r) => r.flags.length).length
   const coverPct = Math.round((cover / advance) * 100)
 
   return (
     <section>
       <SectionHead
-        n="01"
-        title="Where we stand with Polyco"
-        lede={`All figures in US dollars, as at ${asAt}. Advances received are set against the value of
-               goods delivered and against every order still open.`}
+        kicker="Polyco position"
+        title="Where we stand"
+        lede="Advances received set against goods delivered, and against every order still open. All figures in US dollars."
+        asAt={`As at ${asAt}`}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-8">
-        <Tile label="Received from Polyco" value={fmt(s.total_received)} sub="Cumulative, all periods" />
-        <Tile label="Value delivered" value={fmt(s.total_delivered)} sub="Goods shipped and charges recharged" />
-        <Tile label="Open order book" value={fmt(s.pos_pending_to_deliver)} tone="leaf" sub="Purchase orders still to make" />
+      <Finding>{finding.sentence}</Finding>
+
+      <div className="grid gap-card-gap sm:grid-cols-3">
         <Tile
-          label="Containers ready and in process"
-          value={fmt(s.containers_ready_next_month + s.containers_in_process_following_month)}
+          label="Received from Polyco"
+          value={fmt(finding.received)}
+          sub="Cumulative, all periods"
           tone="leaf"
-          sub={`${fmt(s.containers_ready_next_month)} ready, ${fmt(s.containers_in_process_following_month)} in process`}
+        />
+        <Tile
+          label="Value delivered"
+          value={fmt(finding.delivered)}
+          sub="Goods shipped, including recharges"
         />
         <Tile
           label="Advance not yet covered"
-          value={fmt(advance)}
-          tone="ember"
-          sub="After every open order and ready container has shipped"
+          value={fmt(finding.uncovered)}
+          sub="After every open order and ready container ships"
+          tone="alert"
         />
       </div>
 
-      <div className="rulebox p-5 mb-8">
-        <h3 className="text-base font-semibold mb-1">
-          Polyco has funded production faster than shipping has allowed us to deliver
-        </h3>
-        <p className="text-sm text-ink-muted mb-5 max-w-3xl leading-relaxed">
-          The shaded band is the difference between what Polyco has paid and what has been
-          delivered against it. It widened through 2026 because payments continued while
-          shipping conditions held goods in Bahrain.
-        </p>
+      <div className="card mt-card-gap">
+        <div className="px-card pt-card pb-card">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-[17px] font-bold text-leaf-deep">
+                Payment has run ahead of delivery since shipping tightened
+              </h3>
+              <p className="lede mt-1 max-w-2xl">
+                The gap between the two lines is the advance Polyco is holding with us.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAll((v) => !v)}
+              className="no-print rounded-field border border-rule-field px-2.5 py-1 text-[13px] font-extrabold text-leaf-deep hover:bg-leaf-wash"
+            >
+              {showAll ? 'Last 12 months' : 'Full history'}
+            </button>
+          </div>
 
-        <div className="h-[340px] -ml-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-              <defs>
-                <pattern id="gapFill" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                  <rect width="6" height="6" fill="#F8EEE2" />
-                  <line x1="0" y1="0" x2="0" y2="6" stroke="#C4762A" strokeWidth="1.2" opacity="0.55" />
-                </pattern>
-              </defs>
-              <CartesianGrid stroke="#DDE3DF" vertical={false} />
-              <XAxis
-                dataKey="date" tickFormatter={monthLabel} minTickGap={48}
-                tick={{ fill: '#5C6B64', fontSize: 11 }} stroke="#B8C2BC"
-              />
-              <YAxis
-                tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} width={56}
-                tick={{ fill: '#5C6B64', fontSize: 11 }} stroke="#B8C2BC"
-              />
-              <Tooltip
-                labelFormatter={(v) => monthLabel(String(v))}
-                formatter={(v: number, n: string) => [fmt(v), n]}
-                contentStyle={{
-                  border: '1px solid #DDE3DF', borderRadius: 0, fontSize: 12,
-                  fontFamily: '"IBM Plex Mono", monospace',
-                }}
-              />
-              <Area
-                type="stepAfter" dataKey="receivedCumulative" name="Received"
-                stroke="#2F5C27" strokeWidth={2} fill="url(#gapFill)" fillOpacity={1} isAnimationActive={false}
-              />
-              <Area
-                type="stepAfter" dataKey="deliveredCumulative" name="Delivered"
-                stroke="#C4762A" strokeWidth={2} fill="#FBFCFB" fillOpacity={1} isAnimationActive={false}
-              />
-              <ReferenceLine y={0} stroke="#B8C2BC" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+          <div className="mt-5 h-[300px] -ml-2 sm:h-[340px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+                <defs>
+                  {/* Derived from `rule`, per DESIGN.md: efdashboard has no hatch,
+                      and a hatch survives a monochrome printer where a tint does not. */}
+                  <pattern id="gapFill" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                    <rect width="6" height="6" fill="#FFFFFF" />
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="#DFE5DC" strokeWidth="1.6" />
+                  </pattern>
+                </defs>
+                <CartesianGrid stroke="#DFE5DC" vertical={false} />
+                <XAxis
+                  dataKey="date" tickFormatter={monthLabel} ticks={monthTicks} minTickGap={40}
+                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                />
+                <YAxis
+                  tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} width={56}
+                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                />
+                <Tooltip
+                  labelFormatter={(v) => monthLabel(String(v))}
+                  formatter={(v: number, n: string) => [fmt(v), n]}
+                  contentStyle={{
+                    border: '1px solid #DFE5DC', borderRadius: 6, fontSize: 12,
+                    fontFamily: '"IBM Plex Mono", monospace',
+                  }}
+                />
+                {/* Solid against dashed, so the two series stay apart in greyscale. */}
+                <Area
+                  type="stepAfter" dataKey="receivedCumulative" name="Received"
+                  stroke="#294525" strokeWidth={2} fill="url(#gapFill)" fillOpacity={1}
+                  isAnimationActive={false}
+                />
+                <Area
+                  type="stepAfter" dataKey="deliveredCumulative" name="Delivered"
+                  stroke="#507A48" strokeWidth={2} strokeDasharray="6 3" fill="#FFFFFF"
+                  fillOpacity={1} isAnimationActive={false}
+                />
+                <ReferenceLine y={0} stroke="#D8E5CE" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
 
-        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-ink-muted">
-          <span className="flex items-center gap-2">
-            <span className="h-[2px] w-5 bg-leaf-deep inline-block" /> Received, cumulative
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="h-[2px] w-5 bg-ember inline-block" /> Delivered, cumulative
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="h-3 w-5 inline-block border border-ember/40 bg-ember-wash" /> Advance outstanding
-          </span>
-        </div>
-      </div>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-lede text-ink-muted">
+            <span className="flex items-center gap-2">
+              <span className="h-[2px] w-5 bg-leaf-deep inline-block" /> Received, cumulative
+            </span>
+            <span className="flex items-center gap-2">
+              <span
+                className="h-0 w-5 inline-block border-t-2 border-dashed border-leaf"
+              /> Delivered, cumulative
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-3 w-5 inline-block border border-rule" style={{
+                backgroundImage: 'repeating-linear-gradient(45deg,#DFE5DC 0 1.6px,#FFF 1.6px 6px)',
+              }} /> Advance outstanding
+            </span>
+          </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div className="rulebox p-5">
-          <h3 className="text-base font-semibold mb-3">How the advance is covered</h3>
-          <table className="w-full text-sm">
-            <tbody>
-              <Row label="Received from Polyco" value={s.total_received} />
-              <Row label="Less: value delivered" value={-s.total_delivered} />
-              <Row label="Advance held against future delivery" value={s.total_received - s.total_delivered} rule />
-              <Row label="Less: open purchase orders" value={-s.pos_pending_to_deliver} />
-              <Row label="Less: containers ready to load" value={-s.containers_ready_next_month} />
-              <Row label="Less: containers in process" value={-s.containers_in_process_following_month} />
-              <Row label="Advance not yet covered by an order" value={advance} rule strong />
-            </tbody>
-          </table>
-          <p className="mt-4 text-xs text-ink-muted leading-relaxed">
-            Cargo clearing and freight recharged to Polyco are already inside delivered value.
-            They total {fmt(s.recharges_included_in_delivered)} and are shown here for information,
-            not deducted a second time.
+          <p className="lede mt-4 border-t border-rule pt-4">
+            Open orders and finished containers cover {coverPct}% of the advance. An order
+            delivered against this balance brings in no payment, because it has already been
+            paid for.{' '}
+            {flagged > 0 && (
+              <span className="text-alert">
+                {flagged} ledger lines carry a date recorded inconsistently in the source
+                workbook and are being confirmed.
+              </span>
+            )}
           </p>
         </div>
-
-        <div className="rulebox p-5 flex flex-col gap-3">
-          <h3 className="text-base font-semibold">What this means</h3>
-          <Note>
-            Open orders and finished containers cover {coverPct}% of the advance Polyco is holding
-            with us. Delivering all of them leaves {fmt(advance)} still to be worked off in
-            future production.
-          </Note>
-          <Note>
-            An order delivered against this balance produces no payment, because it has already
-            been paid for. Orders that bring in cash and orders that draw the balance down are
-            two different things and are counted separately throughout.
-          </Note>
-          <Note tone="alert">
-            Every figure above ties to the statement ledger at {asAt}. {ledger.rows.filter(r => r.flags.length).length} lines
-            carry a date recorded inconsistently in the source workbook and are being confirmed
-            before this statement is reissued.
-          </Note>
-        </div>
       </div>
+
+      <Working
+        title="How the advance is covered"
+        lede="The reconciliation behind the three figures above."
+        defaultOpen
+      >
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[22rem] text-table-cell">
+          <tbody>
+            <Row label="Received from Polyco" value={s.total_received} />
+            <Row label="Less: value delivered" value={-s.total_delivered} />
+            <Row label="Advance held against future delivery" value={s.total_received - s.total_delivered} rule />
+            <Row label="Less: open purchase orders" value={-s.pos_pending_to_deliver} />
+            <Row label="Less: containers ready to load" value={-s.containers_ready_next_month} />
+            <Row label="Less: containers in process" value={-s.containers_in_process_following_month} />
+            <Row label="Advance not yet covered by an order" value={advance} rule strong />
+          </tbody>
+        </table>
+        </div>
+        <p className="lede mt-4">
+          Cargo clearing and freight recharged to Polyco are already inside delivered value.
+          They total {fmt(s.recharges_included_in_delivered)} and are shown for information,
+          not deducted a second time.
+        </p>
+      </Working>
     </section>
   )
 }
@@ -159,8 +207,8 @@ function Row({
 }: { label: string; value: number; rule?: boolean; strong?: boolean }) {
   return (
     <tr className={rule ? 'border-t border-rule' : undefined}>
-      <td className={`py-1.5 pr-4 ${strong ? 'font-semibold' : ''}`}>{label}</td>
-      <td className={`py-1.5 text-right num ${strong ? 'font-semibold' : ''}`}>
+      <td className={`py-2 pr-4 ${strong ? 'font-bold text-ink-strong' : 'text-ink'}`}>{label}</td>
+      <td className={`py-2 text-right num ${strong ? 'font-bold text-ink-strong' : 'text-ink'}`}>
         {value < 0 ? `(${fmt(Math.abs(value))})` : fmt(value)}
       </td>
     </tr>

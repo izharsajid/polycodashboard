@@ -13,17 +13,17 @@ export default function Header({ user }: { user: PublicUser }) {
   const { signOut } = useSession()
 
   return (
-    <header className="border-b border-rule bg-white">
+    <header className="border-b border-rule bg-paper-surface">
       <div className="mx-auto max-w-6xl px-6 py-4 flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex items-baseline gap-3">
-          <span className="text-sm font-bold tracking-tight">ECOFIBRE</span>
+          <span className="text-[15px] font-bold tracking-tight text-leaf">ECOFIBRE</span>
           <span className="text-ink-faint">/</span>
-          <span className="text-sm text-ink-muted">Polyco Healthline</span>
+          <span className="text-[15px] text-ink-muted">Polyco Healthline</span>
         </div>
 
         <div className="flex items-baseline gap-4">
-          <span className="eyebrow">Position, capacity and configuration</span>
-          <span className="text-ink-faint no-print">|</span>
+          <span className="eyebrow hidden sm:inline">Position, capacity and configuration</span>
+          <span className="text-ink-faint no-print hidden sm:inline">|</span>
           {user.role === 'admin' && (
             <button
               type="button"

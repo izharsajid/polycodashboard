@@ -12,9 +12,23 @@
 }
 
 @layer components {
+  /* Kept from this project, deliberately. Financial figures line up on the
+     decimal; efdashboard's tables do not need to and left-align instead. */
   .num { @apply font-mono tabular-nums; }
-  .eyebrow { @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-faint; }
-  .rulebox { @apply border border-rule bg-white; }
+
+  /* The category label above a section heading. efdashboard's .inventory-kicker. */
+  .eyebrow { @apply text-kicker font-extrabold uppercase text-leaf-kicker; }
+
+  /* The one line under a section heading saying what the section shows. */
+  .lede { @apply text-lede text-ink-muted; }
+
+  .rulebox { @apply border border-rule bg-paper-surface; }
+
+  /* efdashboard's card: white, 14px, soft green shadow, green accent on top. */
+  .card {
+    @apply bg-paper-surface rounded-card shadow-card overflow-hidden;
+  }
+  .card-accent { @apply border-t-accent border-leaf; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -25,4 +39,23 @@
   body { @apply bg-white; }
   .no-print { display: none !important; }
   .page-break { break-before: page; }
+
+  /* These go into a board pack. Everything the reader chose to collapse still
+     prints, because a printed page has no disclosure control to open. */
+  details { display: block !important; }
+  details > summary { display: none !important; }
+
+  /* The card shadow is invisible on paper and the rounded corner is noise, so
+     cards fall back to a rule. Nothing that carries meaning changes. */
+  .card {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: 1px solid theme('colors.rule.DEFAULT');
+    break-inside: avoid;
+  }
+
+  /* A figure split across a page break is a figure nobody trusts. */
+  table, tr, .recharts-wrapper { break-inside: avoid; }
+
+  @page { margin: 14mm; }
 }

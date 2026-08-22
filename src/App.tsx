@@ -108,16 +108,19 @@ function Dashboard({ user }: { user: PublicUser }) {
     <div className="min-h-screen">
       <Header user={user} />
 
-      <nav className="border-b border-rule bg-paper-panel no-print">
-        <div className="mx-auto max-w-6xl px-6 flex gap-6 overflow-x-auto">
+      {/* efdashboard's tab strip: active is a white tab lifted out of the page,
+          inactive sits flat on it. Under the header, as it is there. */}
+      <nav className="border-b border-rule bg-paper no-print">
+        <div className="mx-auto max-w-6xl px-6 flex gap-1 overflow-x-auto">
           {TABS.map((t) =>
             t.built ? (
               <button
                 key={t.section}
                 onClick={() => setActive(t.section)}
-                className={`py-3 text-sm whitespace-nowrap border-b-2 ${
+                aria-current={active === t.section ? 'page' : undefined}
+                className={`whitespace-nowrap px-4 py-2.5 text-[15px] rounded-t-[5px] -mb-px border border-b-0 ${
                   active === t.section
-                    ? 'border-leaf font-semibold'
+                    ? 'bg-paper-surface border-rule font-medium text-leaf'
                     : 'border-transparent text-ink-muted hover:text-ink'
                 }`}
               >
@@ -127,7 +130,7 @@ function Dashboard({ user }: { user: PublicUser }) {
               <span
                 key={t.section}
                 title="In preparation"
-                className="py-3 text-sm whitespace-nowrap border-b-2 border-transparent text-ink-faint cursor-default"
+                className="whitespace-nowrap px-4 py-2.5 text-[15px] text-ink-faint cursor-default"
               >
                 {t.label}
               </span>

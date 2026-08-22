@@ -99,6 +99,12 @@ export const AuditAction = z.enum([
   // to a protected route, and a member reaching for an administrator endpoint,
   // both have to appear in the log and neither is any of the actions above.
   'access_refused',
+  // Documents against an order. PO-TRACKER-SPEC section 4 asks for each of these
+  // to be attributed and logged; section 7 of AUTH-SPEC already wanted downloads.
+  'document_uploaded',
+  'document_viewed',
+  'document_downloaded',
+  'document_deleted',
   'role_changed',
   'user_deactivated',
   'user_reactivated',

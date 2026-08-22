@@ -43,21 +43,33 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
 - [x] Resolved 22 August 2026. Read-only Supabase key supplied and the importer works.
       `npm run import:po-tracker` pulls 102 orders from `po_data` into
       `data/po-tracker.json` and reconciles against the ledger on every run.
-- [ ] **`po_data` has no shipping-mode column, so the shipping-mode filter row in
-      PO-TRACKER-SPEC section 2 cannot be built.** The `shipping` column holds the order
-      status, not the mode: `Dispatched`, `Booked`, `Processing`, `Cancelled`, plus
-      `Air freight by Expeditors` and `Airfreight via Expeditors`, which are a mode
-      recorded in the status column and spelt two ways. Per section 2 the row is left out
-      rather than shown empty. Should mode become its own column, or should those two
-      values be normalised to one and treated as a status?
-- [ ] The spec expects order statuses `PO pending` and `On hold`. Neither appears in
-      `shipping`. "ON HOLD (Miami)" turns up in `cargo_ready` instead, which also carries
-      free text such as "CARGO READY" alongside real dates. Is on-hold meant to be a
-      status, and should the tab read it out of `cargo_ready`?
-- [ ] Thirteen orders are recorded with a different reference in each system, the same
-      order written `2465639` in the ledger and `2465639-2` in the tracker, and the
-      disagreement runs both ways. Which form is correct, and should one side be
-      corrected at source rather than matched around?
+### Three things to fix at source in efdashboard, not to work around here
+
+Each of these is currently handled by code on our side. That code should be temporary.
+Every one of them is a disagreement between two systems about what a thing is called, and
+matching around a naming problem means carrying the same exceptions forever and being
+unable to tell a new error from an old one.
+
+- [ ] **The `-N` suffix disagreement needs settling in `po_data`.** Thirteen orders are
+      written one way in the ledger and another in the tracker: `2465639` against
+      `2465639-2`, and it runs both ways. The importer pairs them and reports each one,
+      which is the right behaviour for an exception and the wrong one for a permanent
+      state. Left alone, every future reconciliation carries these same 13 and a
+      fourteenth genuine mismatch would be lost among them. Decide which form is correct
+      and correct the other at source.
+- [ ] **The two spellings of the Expeditors airfreight status need collapsing to one.**
+      `shipping` holds both `Air freight by Expeditors` and `Airfreight via Expeditors`.
+      They are the same thing, so any count, filter or grouping built on that column
+      splits one status across two pills until it is fixed in `po_data`.
+- [ ] **`ON HOLD (Miami)` belongs in a status column, not in `cargo_ready`.** That column
+      is otherwise dates, and it also carries `CARGO READY` as free text. On hold is a
+      state the spec expects to filter by, and it cannot be filtered reliably while it
+      lives in a date field. `PO pending`, which section 2 also expects, does not appear
+      anywhere.
+- [ ] **`po_data` has no shipping-mode column at all**, so the shipping-mode filter row in
+      PO-TRACKER-SPEC section 2 is left out rather than shown empty, per that section.
+      The only mode information in the table is the two Expeditors values above, sitting
+      in the status column. Should mode become a column of its own?
 
 ## Machines and capacity
 - [ ] How many machines exist on site, how many running, how many installed but idle?

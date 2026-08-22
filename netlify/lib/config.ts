@@ -37,6 +37,8 @@ export const RATE_LIMITS = {
   login: { limit: 10, windowMs: 15 * 60 * 1000 },
   forgot: { limit: 5, windowMs: 60 * 60 * 1000 },
   invite: { limit: 20, windowMs: 24 * 60 * 60 * 1000 },
+  /** PO-TRACKER-SPEC section 5. */
+  upload: { limit: 50, windowMs: 60 * 60 * 1000 },
 } as const
 
 /** AUTH-SPEC section 1. A member may invite within their own domain only. */
@@ -77,4 +79,7 @@ export const STORES = {
   sessions: 'sessions',
   audit: 'audit',
   rateLimits: 'rate-limits',
+  /** Document bytes and their metadata, kept apart so a listing is cheap. */
+  documents: 'documents',
+  documentMeta: 'document-meta',
 } as const

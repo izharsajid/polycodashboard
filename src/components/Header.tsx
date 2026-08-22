@@ -1,7 +1,7 @@
 import type { PublicUser } from '../../netlify/lib/http'
 import { useSession } from '../auth/session'
 import { navigate } from '../lib/navigation'
-import { ACCOUNT } from '../lib/router'
+import { ACCOUNT, ADMIN } from '../lib/router'
 
 const ROLE_LABEL: Record<PublicUser['role'], string> = {
   admin: 'Administrator',
@@ -24,6 +24,15 @@ export default function Header({ user }: { user: PublicUser }) {
         <div className="flex items-baseline gap-4">
           <span className="eyebrow">Position, capacity and configuration</span>
           <span className="text-ink-faint no-print">|</span>
+          {user.role === 'admin' && (
+            <button
+              type="button"
+              onClick={() => navigate(ADMIN)}
+              className="no-print text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
+            >
+              People
+            </button>
+          )}
           <button
             type="button"
             onClick={() => navigate(ACCOUNT)}

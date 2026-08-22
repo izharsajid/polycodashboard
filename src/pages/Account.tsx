@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { PublicUser } from '../../netlify/lib/http'
 import Header from '../components/Header'
+import InviteForm from '../components/InviteForm'
 import { api } from '../lib/api'
 import { whenLocal } from '../lib/format'
 import { navigate } from '../lib/navigation'
@@ -139,10 +140,19 @@ export default function Account({ user }: { user: PublicUser }) {
           </form>
         </section>
 
+        <section className="mt-14 border-t border-rule pt-8">
+          <h2 className="text-base font-semibold tracking-tight mb-1">Invite a colleague</h2>
+          <p className="text-sm text-ink-muted leading-relaxed mb-6">
+            They choose their own password from a link that works once. Nothing is sent
+            while sending is switched off, so adding someone now tells them nothing.
+          </p>
+          <InviteForm actor={user} />
+        </section>
+
         <button
           type="button"
           onClick={() => navigate(DASHBOARD)}
-          className="mt-10 text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
+          className="mt-12 text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
         >
           Back to the dashboard
         </button>

@@ -90,6 +90,14 @@ export async function authenticate(req: Request): Promise<Authenticated | null> 
   return { user, session, token }
 }
 
+/**
+ * AUTH-SPEC section 8: hiding a link in the interface is not access control.
+ * Every administrator endpoint calls this, every time, after authenticate().
+ */
+export function forbiddenUnlessAdmin(authed: Authenticated): Response | null {
+  return authed.user.role === 'admin' ? null : fail(403, GENERIC.role)
+}
+
 export type PublicUser = {
   id: string
   email: string

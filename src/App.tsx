@@ -6,6 +6,7 @@ import { useDashboardData } from './data/useDashboardData'
 import { navigate, useLocation } from './lib/navigation'
 import {
   ACCOUNT,
+  ADMIN,
   DASHBOARD,
   FORGOT,
   INVITE,
@@ -16,6 +17,7 @@ import {
   tokenFromHash,
 } from './lib/router'
 import Account from './pages/Account'
+import Admin from './pages/Admin'
 import Forgot from './pages/Forgot'
 import Invite from './pages/Invite'
 import Login from './pages/Login'
@@ -72,6 +74,17 @@ function Routed() {
   if (path === LOGIN || path === FORGOT) return <Send to={DASHBOARD} />
 
   if (path === ACCOUNT) return <Account user={session.user} />
+
+  // A member who types the address gets the dashboard rather than a refusal.
+  // There is nothing here to tell them about, and the endpoints refuse them
+  // anyway, which is where the actual control lives.
+  if (path === ADMIN) {
+    return session.user.role === 'admin' ? (
+      <Admin user={session.user} />
+    ) : (
+      <Send to={DASHBOARD} />
+    )
+  }
 
   return <Dashboard user={session.user} />
 }

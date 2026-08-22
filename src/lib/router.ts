@@ -10,6 +10,7 @@ export const FORGOT = '/forgot'
 export const INVITE = '/invite'
 export const RESET = '/reset'
 export const ACCOUNT = '/account'
+export const ADMIN = '/admin'
 export const DASHBOARD = '/'
 
 /**

@@ -57,20 +57,37 @@ export type AuditQuery = {
   action?: AuditActionT
   actorId?: string
   limit?: number
+  /** The nextCursor from a previous page. Returns entries strictly older. */
+  cursor?: string
 }
 
+export type AuditPage = {
+  entries: AuditEntryT[]
+  /** Null when that was the last page. */
+  nextCursor: string | null
+}
+
+const DEFAULT_LIMIT = 50
+const MAX_LIMIT = 200
+
 /**
- * Newest first. Filtering and paging in the admin view come at gate 7; this is
- * the read the tests and the seed checks need, and enough to answer "what
- * happened just now" from a script.
+ * Newest first, a page at a time.
+ *
+ * The cursor is a key rather than an offset. Keys are timestamp first, so paging
+ * by key is stable even though entries are being appended while somebody reads:
+ * new arrivals sort above the cursor and never shuffle the page in front of them.
  */
-export async function listAudit(query: AuditQuery = {}): Promise<AuditEntryT[]> {
+export async function pageAudit(query: AuditQuery = {}): Promise<AuditPage> {
+  const limit = Math.min(Math.max(query.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT)
   const keys = (await audit().keys()).sort().reverse()
-  const out: AuditEntryT[] = []
-  const limit = query.limit ?? 100
+  const entries: AuditEntryT[] = []
+
+  let last: string | null = null
+  let more = false
 
   for (const key of keys) {
-    if (out.length >= limit) break
+    if (query.cursor && key >= query.cursor) continue
+
     const parsed = AuditEntry.safeParse(await audit().get(key))
     if (!parsed.success) continue
 
@@ -79,7 +96,20 @@ export async function listAudit(query: AuditQuery = {}): Promise<AuditEntryT[]> 
     if (query.to && entry.timestamp >= query.to) continue
     if (query.action && entry.action !== query.action) continue
     if (query.actorId && entry.actorId !== query.actorId) continue
-    out.push(entry)
+
+    // One past the limit, purely to learn whether there is another page.
+    if (entries.length === limit) {
+      more = true
+      break
+    }
+    entries.push(entry)
+    last = key
   }
-  return out
+
+  return { entries, nextCursor: more ? last : null }
+}
+
+/** The whole page, for callers that do not care about paging. */
+export async function listAudit(query: AuditQuery = {}): Promise<AuditEntryT[]> {
+  return (await pageAudit(query)).entries
 }

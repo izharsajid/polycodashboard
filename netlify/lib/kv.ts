@@ -1,4 +1,7 @@
 import { getStore, type Store } from '@netlify/blobs'
+import { randomBytes } from 'node:crypto'
+import { mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 /**
  * A narrow key/value face over Netlify Blobs.
@@ -117,8 +120,109 @@ export function memoryKv(): Kv {
   }
 }
 
+/**
+ * A store on disk, for local work only, switched on by NETLIFY_BLOBS_LOCAL_DIR.
+ *
+ * `netlify dev` gives its own local Blobs store to the function runtime and to
+ * nothing else, so a script run alongside it cannot seed an account and there is
+ * no way to sign in and exercise the thing end to end. This closes that: the
+ * functions and the seed scripts share one directory, and a whole flow can be run
+ * on a laptop.
+ *
+ * Never set the variable in a deployed environment. It is absent by default, it
+ * is documented in .env.example as local-only, and it announces itself the first
+ * time it is used so it can never be on quietly.
+ */
+function fileKv(name: string, root: string): Kv {
+  const dir = join(root, name)
+  const ready = mkdir(dir, { recursive: true }).then(() => undefined)
+
+  // Keys hold colons and could hold slashes. Encoding keeps one key to one file
+  // in one directory, and keeps the mapping reversible for keys().
+  const pathFor = (key: string) => join(dir, encodeURIComponent(key))
+
+  type Held = { etag: string; value: unknown }
+
+  const read = async (key: string): Promise<Held | null> => {
+    await ready
+    try {
+      return JSON.parse(await readFile(pathFor(key), 'utf8')) as Held
+    } catch {
+      return null
+    }
+  }
+
+  // Write whole, then move into place, so a reader never sees half a record.
+  const write = async (key: string, held: Held) => {
+    await ready
+    const temporary = `${pathFor(key)}.${randomBytes(6).toString('hex')}.tmp`
+    await writeFile(temporary, JSON.stringify(held), 'utf8')
+    await rename(temporary, pathFor(key))
+  }
+
+  return {
+    async get<T>(key: string) {
+      return ((await read(key))?.value as T | undefined) ?? null
+    },
+    async getWithEtag<T>(key: string) {
+      const held = await read(key)
+      return held ? { value: held.value as T, etag: held.etag } : null
+    },
+    async put(key: string, value: unknown) {
+      await write(key, { etag: randomBytes(8).toString('hex'), value })
+    },
+    async create(key: string, value: unknown) {
+      await ready
+      try {
+        // wx fails if the file exists, and the check and the write are the same
+        // operation, which is what makes this a real create-only.
+        await writeFile(
+          pathFor(key),
+          JSON.stringify({ etag: randomBytes(8).toString('hex'), value }),
+          { encoding: 'utf8', flag: 'wx' },
+        )
+        return true
+      } catch {
+        return false
+      }
+    },
+    async replace(key: string, value: unknown, etag: string) {
+      const held = await read(key)
+      if (!held || held.etag !== etag) return false
+      await write(key, { etag: randomBytes(8).toString('hex'), value })
+      return true
+    },
+    async delete(key: string) {
+      await ready
+      await unlink(pathFor(key)).catch(() => undefined)
+    },
+    async keys(prefix?: string) {
+      await ready
+      const files = await readdir(dir).catch(() => [] as string[])
+      return files
+        .filter((f) => !f.endsWith('.tmp'))
+        .map((f) => decodeURIComponent(f))
+        .filter((k) => (prefix ? k.startsWith(prefix) : true))
+        .sort()
+    },
+  }
+}
+
+let announced = false
+
+function defaultFactory(name: string): Kv {
+  const root = process.env.NETLIFY_BLOBS_LOCAL_DIR
+  if (!root) return blobsKv(name)
+
+  if (!announced) {
+    announced = true
+    console.warn(`[kv] NETLIFY_BLOBS_LOCAL_DIR is set. Storing data on disk at ${root}.`)
+  }
+  return fileKv(name, root)
+}
+
 const cache = new Map<string, Kv>()
-let factory: (name: string) => Kv = blobsKv
+let factory: (name: string) => Kv = defaultFactory
 
 export function kv(name: string): Kv {
   let hit = cache.get(name)
@@ -136,6 +240,6 @@ export function useMemoryStores() {
 }
 
 export function useBlobStores() {
-  factory = blobsKv
+  factory = defaultFactory
   cache.clear()
 }

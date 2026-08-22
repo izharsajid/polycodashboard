@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { PublicUser } from '../../netlify/lib/http'
+import AuditLog from '../components/AuditLog'
 import Header from '../components/Header'
 import InviteForm from '../components/InviteForm'
 import { api } from '../lib/api'
@@ -18,7 +19,6 @@ const STATUS_LABEL: Record<PublicUser['status'], string> = {
  * behind it checks the role again on the server, because hiding a link is not
  * access control.
  *
- * The audit log joins this page at gate 7.
  */
 export default function Admin({ user }: { user: PublicUser }) {
   const [users, setUsers] = useState<PublicUser[] | null>(null)
@@ -140,6 +140,10 @@ export default function Admin({ user }: { user: PublicUser }) {
             someone now tells them nothing.
           </p>
           <InviteForm actor={user} onInvited={() => void load()} />
+        </section>
+
+        <section className="mt-14 border-t border-rule pt-8">
+          <AuditLog users={users ?? []} />
         </section>
 
         <button

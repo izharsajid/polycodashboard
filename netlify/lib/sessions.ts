@@ -120,13 +120,15 @@ export async function revokeUserSessions(
  * matches the absolute limit; the idle limit is enforced in resolveSession, where
  * it cannot be edited by whoever holds the cookie.
  */
+const ATTRIBUTES = 'Path=/; HttpOnly; Secure; SameSite=Strict'
+
 export function sessionCookie(token: string): string {
   const maxAge = Math.floor(SESSION_ABSOLUTE_MS / 1000)
-  return `${SESSION_COOKIE}=${token}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict`
+  return `${SESSION_COOKIE}=${token}; Max-Age=${maxAge}; ${ATTRIBUTES}`
 }
 
 export function clearedSessionCookie(): string {
-  return `${SESSION_COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict`
+  return `${SESSION_COOKIE}=; Max-Age=0; ${ATTRIBUTES}`
 }
 
 export function readSessionCookie(header: string | null | undefined): string | null {

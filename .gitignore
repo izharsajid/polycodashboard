@@ -2,6 +2,7 @@ node_modules
 dist
 .netlify
 deno.lock
+.netlify-blobs
 .env
 .env.*
 !.env.example

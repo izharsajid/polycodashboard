@@ -46,8 +46,7 @@ export const TOKEN_BYTES = 32
  * The __Host- prefix binds the cookie to this exact origin: a sibling host cannot
  * set it and it cannot be widened to a parent domain. The browser enforces that
  * only if Secure and Path=/ are both present, which is why they are not optional
- * in sessionCookie(). Note that this means local dev must be served over https,
- * or from a host the browser treats as trustworthy such as localhost.
+ * in sessionCookie().
  */
 export const SESSION_COOKIE = '__Host-ef_session'
 

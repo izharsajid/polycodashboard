@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import * as auditModule from '../audit'
-import { listAudit, record } from '../audit'
+import { listAudit, pageAudit, record } from '../audit'
 import { useMemoryStores } from '../kv'
 
 const MINUTE = 60 * 1000
@@ -92,9 +92,68 @@ describe('the audit log', () => {
   })
 
   it('offers no way to delete or amend an entry', async () => {
-    // AUTH-SPEC section 7: append only, no delete endpoint. The module exports a
-    // writer and a reader, so there is nothing to call and nothing to wire up by
+    // AUTH-SPEC section 7: append only, no delete endpoint. The module exports
+    // writers and readers, so there is nothing to call and nothing to wire up by
     // accident later.
-    expect(Object.keys(auditModule).sort()).toEqual(['auditKey', 'listAudit', 'record'])
+    expect(Object.keys(auditModule).sort()).toEqual([
+      'auditKey',
+      'listAudit',
+      'pageAudit',
+      'record',
+    ])
+  })
+})
+
+describe('paging the audit log', () => {
+  async function twelve() {
+    for (let i = 0; i < 12; i++) {
+      await record({ action: 'sign_in', result: 'success', actorId: 'a' }, after(i * MINUTE))
+    }
+  }
+
+  it('returns a page and a cursor, then the rest', async () => {
+    await twelve()
+
+    const first = await pageAudit({ limit: 5 })
+    expect(first.entries).toHaveLength(5)
+    expect(first.nextCursor).not.toBeNull()
+
+    const second = await pageAudit({ limit: 5, cursor: first.nextCursor! })
+    expect(second.entries).toHaveLength(5)
+
+    const third = await pageAudit({ limit: 5, cursor: second.nextCursor! })
+    expect(third.entries).toHaveLength(2)
+    expect(third.nextCursor).toBeNull()
+  })
+
+  it('never repeats or drops an entry across pages', async () => {
+    await twelve()
+
+    const seen: string[] = []
+    let cursor: string | null = null
+    do {
+      const page: Awaited<ReturnType<typeof pageAudit>> = await pageAudit({ limit: 5, cursor: cursor ?? undefined })
+      seen.push(...page.entries.map((e) => e.id))
+      cursor = page.nextCursor
+    } while (cursor)
+
+    expect(seen).toHaveLength(12)
+    expect(new Set(seen).size).toBe(12)
+  })
+
+  it('keeps the filter while paging', async () => {
+    await twelve()
+    await record({ action: 'sign_out', result: 'success', actorId: 'b' }, after(20 * MINUTE))
+
+    const page = await pageAudit({ action: 'sign_out' })
+    expect(page.entries).toHaveLength(1)
+    expect(page.entries[0].actorId).toBe('b')
+    expect(page.nextCursor).toBeNull()
+  })
+
+  it('will not be talked into an unbounded page', async () => {
+    await twelve()
+    expect((await pageAudit({ limit: 100000 })).entries).toHaveLength(12)
+    expect((await pageAudit({ limit: 0 })).entries).toHaveLength(1)
   })
 })

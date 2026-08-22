@@ -39,10 +39,14 @@ function stop(message: string): never {
 }
 
 async function main() {
-  if (!process.env.NETLIFY_SITE_ID || !(process.env.NETLIFY_BLOBS_TOKEN ?? process.env.NETLIFY_AUTH_TOKEN)) {
+  const remote =
+    process.env.NETLIFY_SITE_ID &&
+    (process.env.NETLIFY_BLOBS_TOKEN ?? process.env.NETLIFY_AUTH_TOKEN)
+
+  if (!remote && !process.env.NETLIFY_BLOBS_LOCAL_DIR) {
     stop(
       'Set NETLIFY_SITE_ID and NETLIFY_BLOBS_TOKEN first, or this writes nowhere.\n' +
-        'See .env.example.',
+        'To work locally instead, set NETLIFY_BLOBS_LOCAL_DIR. See .env.example.',
     )
   }
 

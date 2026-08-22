@@ -45,8 +45,10 @@ It is not a management accounts pack. See section 2.
 
 ## 2. Hard exclusions
 
-**Nothing below appears anywhere in this project, in any build, in any data file, in
-any chart, or in the repository.**
+**Nothing below appears anywhere in this project, in any data file, in any chart, in
+the database, in the API, or in the repository.** These are excluded from the project
+as a whole rather than from one audience. There is one shared view, so there is no
+audience to exclude them from. See section 3.
 
 - Balance sheet of any kind
 - Bank balances, cash position, cash runway, treasury
@@ -63,32 +65,41 @@ any chart, or in the repository.**
 If a calculation appears to need one of these, it is the wrong calculation. Stop and
 ask.
 
-**What is permitted:** the monthly Financial Overview statements exactly as already
-issued to Polyco, including every line item and remark, and total monthly operating
-cost by machine configuration. Polyco has received these statements since June 2025
-and has paid against them, so the cost base is already shared. Nothing outside those
-statements is disclosed.
+**Individual pay is excluded for a different reason from the rest of the list, and the
+reason matters.** Staff cost appears as a monthly total, as it has on every Financial
+Overview statement since June 2025. Per-person pay is personal data belonging to the
+employee, not commercial information belonging to EcoFibre, and it is not ours to
+disclose to a third party under Bahrain's Personal Data Protection Law. That exclusion
+binds every user of the system, both administrators included, in every view.
+
+**Everything not on the list above is shared.** The monthly Financial Overview
+statements exactly as issued, including every line item and remark. Total monthly
+operating cost by machine configuration. Capacity, the order book, the roadmap,
+headcount by configuration and the build-up of the configuration model. Polyco has
+received the statements since June 2025 and has paid against them, so the cost base is
+already shared, and the working beneath it is shared too.
 
 ---
 
-## 3. Two audiences, one codebase
+## 3. One shared view
 
-`VITE_MODE = internal | partner`, deployed as **two separate Netlify sites from two
-separate builds**, so the partner bundle never contains internal data.
+EcoFibre and Polyco operate on a fully transparent basis. **One dashboard, one build,
+one set of figures, and every signed-in user sees all of it.** There is no partner
+mode, no redacted view, no hidden tab, no `VITE_MODE` and no redaction layer. Code that
+shows one user a different number from another does not belong in this project.
 
-**Both builds** show the monthly funding statements in full, because Polyco already
-holds them.
+The disclosure boundary is **the sign-in, not the build**. Who may see the dashboard is
+settled by authentication and the invitation flow in `AUTH-SPEC.md`. What appears on it
+is settled by section 2 above. The single exception in both directions is individual
+pay, which no one sees.
 
-**Internal build** adds anything beyond those statements: cost per container, per
-tonne and per unit, headcount detail, and the configuration model's underlying build-up.
+This replaced an earlier two-site split, where a partner build was compiled with
+`VITE_MODE=partner` and a whitelist hid anything beneath the shared statements. Two
+builds meant two things to keep true, and the parts it hid were the working behind
+figures Polyco already had. A shared decision needs shared workings.
 
-**Partner build** shows the statements, the totals by configuration, capacity, the
-order book and the roadmap, and nothing beneath them.
-
-Implement redaction as a **whitelist**, not a blacklist: in partner mode a field is
-hidden unless explicitly permitted. Write a test asserting no forbidden key appears in
-any partner-mode payload and run it in CI. A blacklist will leak the first time
-someone adds a field.
+Read `.claude/skills/partner-disclosure/SKILL.md` before changing any UI, any data file
+or any chart, and before any invitation goes out.
 
 ---
 
@@ -97,7 +108,9 @@ someone adds a field.
 - Vite + React 18 + TypeScript (strict), Tailwind, Recharts, Zod, Vitest
 - GitHub source control, Netlify hosting, deploy on push to `main`, PR previews so a
   data change is reviewed before it merges
-- No backend, no database, no auth in Phase 1
+- No backend, no database and no auth through Phase 1. Authentication, the Netlify
+  Functions API and the Netlify Blobs datastore arrive with `AUTH-SPEC.md`, which is a
+  later phase and has its own gates.
 
 ```
 /data                      # the only place numbers live
@@ -115,8 +128,10 @@ someone adds a field.
 /src
   /lib/engine              # pure calculation functions, no React
   /lib/schema              # Zod schemas mirroring /data
-  /redaction               # partner-mode whitelist
   /tabs  /components
+/netlify
+  /functions               # the API, see AUTH-SPEC.md
+  /lib                     # users, sessions, invitations, audit, hashing
 /scripts
   import-polyco-statement.ts
   import-po-tracker.ts
@@ -256,7 +271,7 @@ must render as unavailable.
 
 Derived: current installed capacity, current utilised capacity, and the gap. Express
 output in three units throughout — units per month, cases per month, and
-**containers (FEU) per month**. Containers is the primary unit on every partner-facing
+**containers (FEU) per month**. Containers is the primary unit on every
 screen, because that is how Polyco plans.
 
 ### Tab 5 — Operating configurations
@@ -492,15 +507,15 @@ data to get moving.
    every exception flag.
 6. **Tab 3 — What is still to be made,** as far as the ledger and PO tracker allow.
    The machine and mould columns stay blank and flagged until Phase B.
-7. Redaction layer and partner build, so the Phase A tabs can be shared before the rest
-   is finished. Review before any URL goes to Polyco.
+7. Authentication, so the Phase A tabs can be shared before the rest is finished. See
+   `AUTH-SPEC.md` and its own gate sequence. Review before anyone is invited.
 
 **Phase B — blocked on data**
 
 8. Tab 4 capacity, Tab 5 operating configurations.
 9. Tab 6 roadmap to 8 machines.
 10. Tab 7 scenario builder.
-11. Tab 8 assumptions, PDF export, final partner review.
+11. Tab 8 assumptions, PDF export, final review with Polyco.
 
 At each gate output a short note showing what reconciles and what does not.
 
@@ -600,5 +615,6 @@ before anything is issued to Polyco, and each renders as a flag in the meantime.
 **Presentation**
 19. Resolved: operating cost is shown to Polyco in absolute US$, because the monthly
     Financial Overview statements have disclosed it line by line since June 2025.
-20. Confirm the partner build is a separate Netlify site with its own URL.
-21. Confirm the redaction whitelist before the partner build goes live.
+20. Resolved: one site, one build, one set of figures, with access controlled by
+    sign-in rather than by a separate partner build. See section 3.
+21. Confirm no individual pay data appears anywhere before anyone is invited.

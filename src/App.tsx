@@ -4,7 +4,6 @@ import statementsRaw from '../data/monthly-funding-statements.json'
 import { Ledger, Statements } from './lib/schema'
 import Tab1Position from './tabs/Tab1Position'
 import Tab2Funding from './tabs/Tab2Funding'
-import { isPartner, visible } from './redaction'
 
 const ledger = Ledger.parse(ledgerRaw)
 const statements = Statements.parse(statementsRaw)
@@ -32,15 +31,13 @@ export default function App() {
             <span className="text-ink-faint">/</span>
             <span className="text-sm text-ink-muted">Polyco Healthline</span>
           </div>
-          <span className="eyebrow">
-            Position, capacity and configuration{isPartner ? '' : ' · internal'}
-          </span>
+          <span className="eyebrow">Position, capacity and configuration</span>
         </div>
       </header>
 
       <nav className="border-b border-rule bg-paper-panel no-print">
         <div className="mx-auto max-w-6xl px-6 flex gap-6 overflow-x-auto">
-          {TABS.filter((t) => visible(t.section)).map((t) =>
+          {TABS.map((t) =>
             t.built ? (
               <button
                 key={t.section}

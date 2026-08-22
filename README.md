@@ -7,7 +7,7 @@ and Polyco Healthline Ltd.
 
 ```bash
 npm install
-npm test        # 14 engine tests, including the exposure figure
+npm test        # engine tests, including the exposure figure, and the auth tests
 npm run dev
 npm run build   # validates data, type-checks, then builds
 ```
@@ -28,14 +28,17 @@ Do not edit a figure in the interface code. Open a pull request against the rele
 in `/data`. The build validates every file against its schema and fails on a bad value, so
 a mistake is caught before it merges — and every change carries an author and a date.
 
-## Two builds
+## One shared view
 
-`VITE_MODE=internal` for us, `VITE_MODE=partner` for Polyco, deployed as two separate
-Netlify sites from two separate builds. Read `.claude/skills/partner-disclosure/SKILL.md`
-before changing anything the partner build can reach.
+EcoFibre and Polyco see the same dashboard and the same figures. One site, one build, no
+partner mode and no redaction layer. Access is controlled by sign-in, and the only thing
+withheld from anyone is individual pay. Read
+`.claude/skills/partner-disclosure/SKILL.md` before changing any UI, any data file or any
+chart.
 
 ## Read before working
 
 - `CLAUDE.md` — how to work in this repo
 - `BUILD-SPEC.md` — the authoritative brief
+- `AUTH-SPEC.md` — authentication and access control
 - `OPEN-QUESTIONS.md` — what is still needed

@@ -1,48 +1,67 @@
 ---
 name: partner-disclosure
-description: What Polyco Healthline may and may not see in this dashboard, and how the partner build is separated from the internal build. Use this skill before writing or changing any UI, any data file, any chart, or the redaction layer, and before deploying anything or sharing a URL. Applies even to small changes — a single added field is exactly how a disclosure leak happens.
+description: What Polyco Healthline sees in this dashboard, which is everything every EcoFibre user sees. One shared view, one build, no redaction layer. Use this skill before writing or changing any UI, any data file or any chart, and before any invitation goes out or any URL is shared. Applies even to small changes, because a single added field is exactly how a disclosure problem starts.
 ---
 
-# Partner disclosure
+# Disclosure
 
-This dashboard is shown to a customer. Two builds, one codebase, controlled by
-`VITE_MODE = internal | partner`, deployed as **two separate Netlify sites from two
-separate builds** so the partner bundle never contains internal data.
+EcoFibre and Polyco operate on a fully transparent basis. There is **one dashboard,
+one build, one set of figures**, and every signed-in user sees all of it. There is no
+partner mode, no redacted view, no hidden tab, and no `VITE_MODE`. If you find yourself
+writing code that shows one user a different number from another, stop: that is not this
+project.
 
-## Whitelist, not blacklist
+The disclosure boundary is **the sign-in, not the build**. Who may see the dashboard is
+settled by authentication and the invitation flow in `AUTH-SPEC.md`. What appears on it
+is settled here.
 
-In partner mode a field is **hidden unless explicitly permitted**. A blacklist leaks the
-first time somebody adds a field. There is a CI test asserting no forbidden key appears
-in any partner-mode payload; keep it passing and extend it when you add data.
+## The one exclusion, and it applies to everybody
 
-## Permitted in the partner build
+**Individual salaries and any named person's pay.**
 
-- The monthly Financial Overview statements exactly as already issued, every line and
-  remark. Polyco has held these since June 2025 and paid against them, so this cost
-  detail is already shared.
-- The Polyco ledger, the advance position and the reconciliation.
-- Total monthly operating cost by machine configuration, in absolute US$.
-- Capacity, utilisation, lead times, delivery performance, the order book.
-- The roadmap to 8 machines and the order volume each step requires.
+Staff cost appears as a monthly total, exactly as it has appeared on the Financial
+Overview statements Polyco has received since June 2025. Per-person pay is personal data
+belonging to the employee, not commercial information belonging to EcoFibre, and it is
+not ours to disclose to a third party under Bahrain's Personal Data Protection Law.
 
-## Never in any build, partner or internal
+This is not a restriction aimed at Polyco. It binds every user of the system, including
+both administrators, in every view. Individual pay is not in `/data`, not in the
+database, not in the API and not rendered anywhere. If a future data file would carry
+per-person pay, it does not come into this repository.
+
+## Never in this project at all
+
+These are excluded from the whole project, not from one audience. They are not secrets
+being kept from Polyco; they are the wrong material for the question this dashboard
+answers, and several of them are other people's confidential information.
 
 Balance sheet. Bank balances, cash position, treasury. Loans, overdraft, HBTF, interest,
 finance cost, debt service, security, covenants. Accumulated losses, profit and loss,
 equity, capital accounts. Supplier names, supplier balances, creditor ageing, purchase
 prices. Individual salaries or any named person's pay. Raw material unit prices. Gross or
-contribution margin. Director or MD expenses. Any other customer or market. Government
-support, grants, subsidies, tax.
+contribution margin, unit cost, cost per tonne, cost per unit. Director or MD expenses.
+Any other customer or market. Government support, grants, subsidies, tax.
 
-## Internal build only
+If a calculation appears to need one of these, it is the wrong calculation. Stop and ask.
 
-Anything derived beneath the shared statements: cost per container, per tonne and per
-unit; headcount detail; the underlying build-up of the configuration model.
+## Shared, because everything not excluded is shared
+
+- The monthly Financial Overview statements exactly as issued, every line and remark.
+- The Polyco ledger, the advance position and the reconciliation.
+- Total monthly operating cost by machine configuration, in absolute US$.
+- Capacity, utilisation, lead times, delivery performance, the order book.
+- Headcount by configuration, and the build-up of the configuration model.
+- The roadmap to 8 machines and the order volume each step requires.
+
+The last two used to be internal only. They are not now. What remains excluded is the
+list above, and unit cost, cost per tonne and margin stay excluded for everyone, because
+section 2 of `BUILD-SPEC.md` keeps them out of the project entirely rather than out of
+one audience's view.
 
 ## Presentation rules
 
-- **Containers per month is the primary unit** on every partner-facing screen. Tonnes and
-  units stay in the engine. Polyco plans in POs and containers.
+- **Containers per month is the primary unit** on every screen. Tonnes and units stay in
+  the engine. Polyco plans in POs and containers, and so do we.
 - **Shutdown is a costed column, not a zero.** It carries the cost of holding the site and
   assets, the one-off cost to stop, the one-off cost to restart, and a restart lead time.
   Presenting it as free would be seen through immediately.
@@ -52,10 +71,13 @@ unit; headcount detail; the underlying build-up of the configuration model.
 ## Language
 
 Plain and direct, accessible to a non-technical reader. No em dashes. No absolute claims.
-No aggressive framing. Never expose internal cost mechanisms, percentage mark-ups or
-pricing logic in partner-facing copy — they will be used in the next price negotiation.
-Errors explain what happened and how to fix it; they do not apologise and are never vague.
+No aggressive framing. Every reader of this dashboard is either a colleague or the
+customer, so write for both at once: no internal shorthand, and nothing framed as a
+negotiating position. Errors explain what happened and how to fix it; they do not
+apologise and are never vague.
 
-## Before any URL goes to Polyco
+## Before anyone outside EcoFibre is let in
 
-Confirm with Izhar. The partner site is a deliberate disclosure, not a deployment step.
+Confirm with Izhar. Access is granted by invitation, one address at a time, and an
+invitation is a deliberate disclosure rather than a deployment step. See `AUTH-SPEC.md`
+section 11 for the order in which the first accounts are released.

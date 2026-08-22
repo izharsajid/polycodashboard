@@ -54,8 +54,8 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 - `.claude/skills/polyco-ledger` — the ledger and statement rules. Read it before
   touching anything in `/data`, the importers, or the exposure calculation.
-- `.claude/skills/partner-disclosure` — what Polyco may and may not see. Read it before
-  building any UI or changing the redaction layer.
+- `.claude/skills/partner-disclosure` — what appears on the one shared dashboard, which
+  every signed-in user sees in full. Read it before building any UI.
 
 ## Status
 

@@ -5,5 +5,5 @@
     "strict": true, "noUnusedLocals": true, "noUnusedParameters": true,
     "noEmit": true, "skipLibCheck": true, "types": ["node", "vite/client"], "isolatedModules": true, "allowImportingTsExtensions": true
   },
-  "include": ["src", "scripts"]
+  "include": ["src", "scripts", "netlify"]
 }

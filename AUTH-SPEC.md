@@ -125,12 +125,17 @@ specific in the log.
 | POST | `/api/auth/password` | signed in | change own password, requires current password |
 | POST | `/api/auth/forgot` | anyone | send reset link, always returns 200 |
 | POST | `/api/auth/reset` | anyone | consume reset token, set new password |
-| GET | `/api/invitations/:token` | anyone | validate token, return email only |
-| POST | `/api/invitations/:token/accept` | anyone | set password, activate account |
+| POST | `/api/invitations/validate` | anyone | token in the body, returns the email only |
+| POST | `/api/invitations/accept` | anyone | token in the body, set password, activate account |
 | GET | `/api/users` | signed in | list users, names and roles, no pay data |
 | POST | `/api/users/invite` | member, admin | invite an address; members restricted to own domain |
 | PATCH | `/api/users/:id` | admin | change role, deactivate, reactivate |
 | GET | `/api/audit` | admin | audit log, paginated, filterable |
+
+Both invitation endpoints take the token in the body and are POST for that reason, even
+though validating one only reads. A token in the path is a token in an access log, in
+browser history and in the referrer of the next request, which section 9 forbids.
+`/api/auth/reset` takes its token the same way.
 
 **Rate limits**, by IP and by account: login 10 per 15 minutes, forgot-password 5 per
 hour, invitations 20 per day per user. On breach, return 429 and log it.
@@ -192,9 +197,11 @@ secret.
 
 - **`/login`** — email and password, a forgot-password link, nothing else. No hint about
   whether an address exists.
-- **`/invite/:token`** — shows the invited email, takes a new password twice, activates
-  the account, signs them in.
-- **`/reset/:token`** — same shape.
+- **`/invite#token`** — shows the invited email, takes a new password twice, activates
+  the account, signs them in. The token is in the fragment, not the path: a browser never
+  sends a fragment to the server, so it stays out of the access log and out of the
+  referrer of whatever the page loads next. In the path it would be in both.
+- **`/reset#token`** — same shape.
 - **`/account`** — change own password, see own last sign-in.
 - **`/admin`** — administrators only. User list with role and status, invite form, role
   controls, and the audit log with filters by user, action and date.

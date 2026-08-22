@@ -11,13 +11,22 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
 - [ ] Display names for the three Polyco addresses and for Hamza. The user record carries
       a name and it is shown in the header and the admin list. Needed at gate 4, not
       before.
-- [ ] How does an invitation or a reset link actually reach somebody? `AUTH-SPEC.md`
-      section 3 lists the stack and there is no mail provider in it, so nothing can be
-      sent today. The flows are built and tested against a delivery seam in
-      `netlify/lib/delivery.ts` whose default sends nothing, which is what section 1 asks
-      for right now. A provider has to be chosen before gate 4 can be tested end to end
-      against a scratch address, and certainly before anyone is invited. Netlify has no
-      mail service of its own, so this means a third party and a key to go with it.
+- [x] Resolved 22 August 2026. The figures were compiled into the public JavaScript
+      bundle, where the session guard could not reach them, because `src/App.tsx` imported
+      the two `/data` files at build time. They now come from `GET /api/data`, which the
+      tabs fetch once the session resolves. Verified twice: the built bundle carries no
+      ledger content, only Zod field names, and the endpoint returns 401 with nothing in
+      the body when called without a session.
+- [x] Resolved 22 August 2026. Invitation and reset links carry the token in the fragment,
+      as `/invite#token`, not in the path. A fragment is never sent to the server, so the
+      token stays out of the access log and out of the referrer. `AUTH-SPEC.md` section 8
+      updated to match.
+- [ ] Which sender address do invitation and reset links come from, and is its domain
+      verified with Resend yet? Resend is wired in at `netlify/lib/delivery-resend.ts` and
+      held shut: it needs `RESEND_API_KEY`, an `EMAIL_FROM` on a verified domain, and
+      `PUBLIC_BASE_URL`, and it sends nothing at all unless `EMAIL_SENDING_ENABLED` is
+      exactly `true`. All four are unset. Gate 4 cannot be tested end to end against a
+      scratch address until the first three exist.
 
 ## Machines and capacity
 - [ ] How many machines exist on site, how many running, how many installed but idle?

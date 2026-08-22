@@ -1,16 +1,17 @@
+import { sendViaResend } from './delivery-resend'
+
 /**
- * The seam where a link would leave the system, and the reason it currently does
- * not.
+ * The seam where a link leaves the system, and the reason none currently does.
  *
- * AUTH-SPEC section 1 is explicit: no invitation is generated and no email leaves
- * the system until Izhar says so. Section 3 lists the stack and there is no mail
- * provider in it. So the default handler does nothing at all. A token is issued,
- * the fact is recorded, and the link goes nowhere.
+ * The provider is Resend. It is wired in and it is shut: an email leaves only
+ * when `EMAIL_SENDING_ENABLED` is `true`, which nothing sets. AUTH-SPEC section 1
+ * says nothing goes out until Izhar releases it, so the release is one switch
+ * somebody throws on purpose rather than a consequence of a deploy or of a key
+ * turning up in the environment.
  *
- * That is a decision, not an unfinished edge. When a provider is chosen it is
- * wired in here, in one place, and no endpoint changes. Until then the flows can
- * be built and tested end to end without any risk of something reaching a real
- * inbox by accident.
+ * Until then a token is issued, the fact is recorded, and the link goes nowhere.
+ * The flows can be built and tested end to end with no risk of anything reaching
+ * a real inbox.
  *
  * The handler receives the raw token, because a link cannot be built without one.
  * It must never write that token to the audit log, to the console, or to any
@@ -23,9 +24,11 @@ export type Delivery = {
   expiresAt: string
 }
 
-const nothingLeaves: (delivery: Delivery) => Promise<void> = async () => {}
+const viaProvider: (delivery: Delivery) => Promise<void> = async (delivery) => {
+  await sendViaResend(delivery)
+}
 
-let handler = nothingLeaves
+let handler = viaProvider
 
 export async function deliver(delivery: Delivery): Promise<void> {
   await handler(delivery)
@@ -37,5 +40,5 @@ export function onDeliver(next: (delivery: Delivery) => Promise<void>): void {
 }
 
 export function resetDelivery(): void {
-  handler = nothingLeaves
+  handler = viaProvider
 }

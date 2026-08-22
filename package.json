@@ -8,7 +8,9 @@
     "build": "npm run validate && tsc -b --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "validate": "tsx scripts/validate-data.ts"
+    "validate": "tsx scripts/validate-data.ts",
+    "seed:admin": "tsx scripts/seed-admin.ts",
+    "seed:invited": "tsx scripts/seed-invited.ts"
   },
   "dependencies": {
     "@netlify/blobs": "^11.0.1",

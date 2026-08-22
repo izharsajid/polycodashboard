@@ -1,0 +1,84 @@
+/**
+ * Creates the four accounts that exist so the user list, the role model and the
+ * admin panel can be built and tested against real addresses.
+ *
+ *   npm run seed:invited
+ *
+ * AUTH-SPEC section 1: seeded with status `invited` and no password. **No
+ * invitation is generated and no email leaves the system.** This script issues no
+ * token, so there is nothing that could be sent even by accident, and the people
+ * themselves learn nothing until Izhar releases access. See section 11 for the
+ * order that happens in.
+ *
+ * Safe to run twice. An account that already exists is left exactly as it is.
+ */
+import { record } from '../netlify/lib/audit'
+import type { RoleT } from '../netlify/lib/schema'
+import { createUser, getUserByEmail } from '../netlify/lib/users'
+
+/**
+ * Names are read off the addresses, apart from Hamza's, which AUTH-SPEC gives.
+ * They show in the header and the admin list. Correct any that are wrong before
+ * anybody is invited: it is one edit in the admin panel, and nothing has been
+ * sent, so a wrong spelling costs nothing today.
+ */
+const ACCOUNTS: { email: string; name: string; role: RoleT }[] = [
+  { email: 'hamza@ecofibre.bh', name: 'Hamza Sajid', role: 'admin' },
+  { email: 'samuel.story-taylor@polycohealthline.com', name: 'Samuel Story-Taylor', role: 'member' },
+  { email: 'andy.blewett@polycohealthline.com', name: 'Andy Blewett', role: 'member' },
+  { email: 'jack.prichard@polycohealthline.com', name: 'Jack Prichard', role: 'member' },
+]
+
+const SEEDER = 'izhar@ecofibre.bh'
+
+function stop(message: string): never {
+  console.error(`\n${message}\n`)
+  process.exit(1)
+}
+
+async function main() {
+  if (!process.env.NETLIFY_SITE_ID || !(process.env.NETLIFY_BLOBS_TOKEN ?? process.env.NETLIFY_AUTH_TOKEN)) {
+    stop(
+      'Set NETLIFY_SITE_ID and NETLIFY_BLOBS_TOKEN first, or this writes nowhere.\n' +
+        'See .env.example.',
+    )
+  }
+
+  const seeder = await getUserByEmail(SEEDER)
+  if (!seeder) stop(`Run npm run seed:admin first, so ${SEEDER} exists to own these.`)
+
+  console.log('')
+  for (const account of ACCOUNTS) {
+    const existing = await getUserByEmail(account.email)
+    if (existing) {
+      console.log(`  ${account.email} already exists, status ${existing.status}. Left alone.`)
+      continue
+    }
+
+    const user = await createUser({
+      email: account.email,
+      name: account.name,
+      role: account.role,
+      status: 'invited',
+      createdBy: seeder.id,
+    })
+
+    await record({
+      action: 'user_created',
+      result: 'success',
+      actorId: seeder.id,
+      actorEmail: seeder.email,
+      target: user.email,
+      detail: `seeded as ${user.role}, invited, no token issued and nothing sent`,
+    })
+
+    console.log(`  ${account.email} created as ${account.role}, invited, no password.`)
+  }
+
+  console.log('\nNo invitation token was issued and no email was sent.')
+  console.log('Release access when you are ready. See AUTH-SPEC.md section 11.\n')
+}
+
+main().catch((error) => {
+  stop(`Could not seed the accounts: ${error instanceof Error ? error.message : 'unknown error'}`)
+})

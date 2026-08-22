@@ -90,6 +90,11 @@ export const AuditAction = z.enum([
   'invitation_sent',
   'invitation_accepted',
   'invitation_refused_domain',
+  // Beyond section 7's list. An account created without an invitation, which is
+  // how the seeded accounts arrive, is neither an invitation sent nor one
+  // accepted, and an account appearing with no entry at all is the thing the
+  // audit log exists to prevent.
+  'user_created',
   'role_changed',
   'user_deactivated',
   'user_reactivated',

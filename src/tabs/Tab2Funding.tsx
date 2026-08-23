@@ -11,6 +11,7 @@ import {
 import { settlementFinding } from '../lib/engine/findings'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { money, moneyWhole } from '../lib/format'
+import { Exceptions } from '../components/Exceptions'
 import { Finding, Flag, Money, Note, SectionHead, Tile, Working } from '../components/ui'
 
 const MONTHS = [
@@ -63,14 +64,6 @@ function Confidence({ c }: { c: ReconRowT['match_confidence'] }) {
   return (
     <span className={`inline-block whitespace-nowrap rounded-full px-1 py-[3px] text-eyebrow font-semibold ${cls}`}>
       {label}
-    </span>
-  )
-}
-
-function EstimateTag() {
-  return (
-    <span className="inline-block rounded-full bg-watch-soft px-1 py-[3px] text-eyebrow font-semibold text-watch">
-      Estimated
     </span>
   )
 }
@@ -150,7 +143,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         icon={<CalendarDays size={19} className="text-ink-50" aria-hidden />}
         kicker="Funding and settlement"
         title="Monthly funding statements"
-        lede={`A monthly Financial Overview has been issued to Polyco since ${monthName(months[0].id)}, setting out the funds required line by line. All figures in US dollars.`}
+        lede={`What was asked for each month, what arrived, and the gap. US dollars.`}
         asAt={`Latest statement covers to ${dateLong(latest.period_end)}`}
       />
 
@@ -590,50 +583,15 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         </div>
       </Working>
 
-      {/* Every open item in one place, rather than scattered across fourteen months. */}
-      <div className="mt-6 border-t border-rule pt-3">
-        <div className="px-2 pt-2 pb-2">
-          <p className="eyebrow">Open items</p>
-          <h3 className="mt-1 text-subtitle font-semibold text-accent">
-            What is missing, what conflicts, what is unmatched
-          </h3>
-          <p className="lede mt-1 max-w-3xl">
-            {exceptions.length} open items. Each renders as a flag rather than being quietly
-            filled, and stays here until the underlying document or confirmation arrives.
-          </p>
-
-          <div className="mt-3 flex flex-col gap-1">
-            {exceptions.map((e, i) => (
-              <Note key={i} tone="alert">
-                {e}
-              </Note>
-            ))}
-          </div>
-
-          {capacityNotes.length > 0 && (
-            <div className="mt-3 border-t border-rule pt-3">
-              <h4 className="text-body font-semibold text-ink mb-1">
-                Capacity notes carried on the statements
-              </h4>
-              <p className="lede mb-2">
-                Quoted as written when issued. Each is an estimated input to the configuration
-                model until confirmed against current headcount.
-              </p>
-              <div className="flex flex-col gap-2">
-                {capacityNotes.map((c) => (
-                  <div key={c.text} className="flex flex-col gap-1 border-l-2 border-watch pl-2 py-1">
-                    <div className="flex flex-wrap items-center gap-1">
-                      <EstimateTag />
-                      <span className="eyebrow">{c.months.map(monthName).join(', ')}</span>
-                    </div>
-                    <p className="text-table leading-relaxed">{c.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      {/* One count, opening on demand. Section 9: delete every stacked note panel. */}
+      <div className="mt-6 border-t border-rule pt-2">
+        <Exceptions items={exceptions} label="open items on the statements" />
+        <Exceptions
+          items={capacityNotes.map((c) => `${c.months.map(monthName).join(', ')}: ${c.text}`)}
+          label="capacity notes carried on the statements, all estimates"
+        />
       </div>
+
     </section>
   )
 }

@@ -73,7 +73,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         icon={<Scale size={19} className="text-ink-50" aria-hidden />}
         kicker="Polyco position"
         title="Where we stand"
-        lede="Advances received set against goods delivered, and against every order still open. All figures in US dollars."
+        lede="What Polyco has paid, what has shipped against it, and what is left. US dollars."
         asAt={`As at ${asAt}`}
       />
 
@@ -184,9 +184,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         </div>
 
         <p className="lede mt-2">
-          Open orders and finished containers cover {coverPct}% of the advance. An order
-          delivered against this balance brings in no payment, because it has already been
-          paid for.
+          Open orders and finished containers cover {coverPct}% of the advance.
         </p>
       </div>
 
@@ -209,9 +207,8 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         </table>
         </div>
         <p className="lede mt-2">
-          Cargo clearing and freight recharged to Polyco are already inside delivered value.
-          They total {money(s.recharges_included_in_delivered)} and are shown for information,
-          not deducted a second time.
+          Cargo clearing and freight of {money(s.recharges_included_in_delivered)} sit inside
+          delivered value and are not deducted twice.
         </p>
       </Working>
     </section>

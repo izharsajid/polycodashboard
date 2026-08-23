@@ -97,21 +97,16 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
         icon={<BookOpen size={19} className="text-ink-50" aria-hidden />}
         kicker="Account"
         title="Statement"
-        lede="Every transaction between the two companies, in date order, with a running balance. Export a range and reconcile it against your own ledger."
+        lede="Every transaction between the two companies, in date order. US dollars."
         asAt={`Ledger as at ${dayLong(ledger.summary.as_at)}`}
       />
 
       <Finding>{finding}</Finding>
 
-      <p className="lede -mt-4 mb-4 max-w-3xl">
-        Funds received from Polyco increase the balance. Delivered value reduces it. A positive
-        balance means EcoFibre holds value yet to be delivered.
-      </p>
-
       <div className="grid gap-2 sm:grid-cols-3">
         <Tile label="Opening balance" value={moneyWhole(headline.opening)} sub={state.from ? `Carried into ${dayLong(state.from)}` : 'Nothing before the first transaction'} />
         <Tile label="Movement in period" value={moneyWhole(headline.movement)} sub={`${rows.length} entries shown`} />
-        <Tile label="Closing balance" value={moneyWhole(headline.closing)} sub="Value EcoFibre holds yet to deliver" tone="critical" />
+        <Tile label="Closing balance" value={moneyWhole(headline.closing)} sub="Receipts raise it, deliveries reduce it. Positive means value yet to deliver." tone="critical" />
       </div>
 
       {/* Controls in one bar, not scattered. Section 6. */}

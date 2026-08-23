@@ -1,4 +1,4 @@
-import { Package } from 'lucide-react'
+import { Package, Paperclip } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { LedgerT, PoOrderT, PoTrackerT } from '../lib/schema'
 import {
@@ -6,6 +6,7 @@ import {
   filterOrders, groupOrders, ledgerRowsFor, orderStatuses, pillCounts, summarise,
   type PoFilters,
 } from '../lib/engine/po-filter'
+import { api } from '../lib/api'
 import { CLEARED, readPoUrl, togglePill, writePoUrl } from '../lib/po-url'
 import { whenLocal } from '../lib/format'
 import { Finding, SectionHead } from '../components/ui'
@@ -58,6 +59,22 @@ export default function Tab4Orders({
 }) {
   const [filters, setFilters] = useState<PoFilters>(() => readPoUrl(window.location.search))
   const [openOrder, setOpenOrder] = useState<PoOrderT | null>(null)
+
+  /**
+   * How many documents each order carries, so a reader sees at a glance which
+   * have paperwork. One request rather than one per row.
+   */
+  const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({})
+  useEffect(() => {
+    let live = true
+    void (async () => {
+      const result = await api.get<{ counts: Record<string, number> }>('/api/orders/document-counts')
+      if (live && result.ok) setDocumentCounts(result.data.counts)
+    })()
+    return () => {
+      live = false
+    }
+  }, [])
 
   const update = useCallback((next: PoFilters) => {
     setFilters(next)
@@ -174,7 +191,7 @@ export default function Tab4Orders({
         <table className="w-full min-w-[52rem] text-table">
           <thead>
             <tr className="text-left bg-rule-soft">
-              {['#', 'PO and product', 'Status', 'Cargo ready', 'Dispatch', 'Film', 'Remarks', ''].map(
+              {['#', 'PO and product', 'Status', 'Cargo ready', 'Dispatch', 'Film', 'Remarks', 'Docs', ''].map(
                 (label, i) => (
                   <th
                     key={i}
@@ -190,17 +207,17 @@ export default function Tab4Orders({
           <tbody>
             <Band label="Open and awaiting dispatch" count={groups.open.length} />
             {groups.open.map((order) => (
-              <OrderRow key={order.id} order={order} onOpen={() => setOpenOrder(order)} />
+              <OrderRow key={order.id} order={order} count={documentCounts[order.po_number] ?? 0} onOpen={() => setOpenOrder(order)} />
             ))}
 
             <Band label="Dispatched" count={groups.dispatched.length} />
             {groups.dispatched.map((order) => (
-              <OrderRow key={order.id} order={order} onOpen={() => setOpenOrder(order)} />
+              <OrderRow key={order.id} order={order} count={documentCounts[order.po_number] ?? 0} onOpen={() => setOpenOrder(order)} />
             ))}
 
             {visible.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-2 py-4 text-center text-ink-70">
+                <td colSpan={9} className="px-2 py-4 text-center text-ink-70">
                   No orders match that combination.
                 </td>
               </tr>
@@ -233,7 +250,7 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
 function Band({ label, count }: { label: string; count: number }) {
   return (
     <tr className="bg-rule-soft">
-      <td colSpan={8} className="border-y border-rule px-2 py-1 text-label font-semibold text-accent">
+      <td colSpan={9} className="border-y border-rule px-2 py-1 text-label font-semibold text-accent">
         {label}
         <span className="ml-1 num font-normal text-ink-70">{count}</span>
       </td>
@@ -241,7 +258,7 @@ function Band({ label, count }: { label: string; count: number }) {
   )
 }
 
-function OrderRow({ order, onOpen }: { order: PoOrderT; onOpen: () => void }) {
+function OrderRow({ order, count, onOpen }: { order: PoOrderT; count: number; onOpen: () => void }) {
   return (
     <tr
       onClick={onOpen}
@@ -275,6 +292,16 @@ function OrderRow({ order, onOpen }: { order: PoOrderT; onOpen: () => void }) {
         {order.rolls && <span className="block text-ink-70">{order.rolls}</span>}
       </td>
       <td className="px-2 py-2 text-ink-70 max-w-[16rem]">{order.remarks}</td>
+      <td className="px-2 py-2 whitespace-nowrap text-label text-ink-50">
+        {count > 0 ? (
+          <span className="inline-flex items-center gap-1">
+            <Paperclip size={13} aria-hidden />
+            {count}
+          </span>
+        ) : (
+          ''
+        )}
+      </td>
       <td className="px-2 py-2 whitespace-nowrap text-accent underline underline-offset-2">Open</td>
     </tr>
   )

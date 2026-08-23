@@ -210,3 +210,20 @@ export async function softDeleteDocument(
   await metaStore().put(storageKey(meta.orderId, meta.id), deleted)
   return deleted
 }
+
+/**
+ * How many live documents each order carries, keyed by order.
+ *
+ * The table wants a count against every row, and one request for the set beats
+ * one request per order.
+ */
+export async function documentCounts(): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {}
+
+  for (const key of await metaStore().keys()) {
+    const parsed = DocumentMeta.safeParse(await metaStore().get(key))
+    if (!parsed.success || parsed.data.deletedAt !== null) continue
+    counts[parsed.data.orderId] = (counts[parsed.data.orderId] ?? 0) + 1
+  }
+  return counts
+}

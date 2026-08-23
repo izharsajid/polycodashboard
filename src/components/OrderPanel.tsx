@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DocumentGroupT, DocumentMetaT } from '../../netlify/lib/documents'
 import type { LedgerRowT, PoOrderT } from '../lib/schema'
-import { fmt } from '../lib/engine'
+import { money } from '../lib/format'
 import { api } from '../lib/api'
 import { whenLocal } from '../lib/format'
 import { StatusPill } from './Pill'
+import {
+  Download, Eye, FileImage, FileSpreadsheet, FileText, Trash2, Upload, X,
+} from 'lucide-react'
+
+/** A distinguishing mark per file type, so a list of documents is scannable. */
+function typeIcon(contentType: string) {
+  if (contentType.startsWith('image/')) return FileImage
+  if (/sheet|excel/.test(contentType)) return FileSpreadsheet
+  return FileText
+}
 
 const GROUPS: { key: DocumentGroupT; label: string; lede: string }[] = [
   { key: 'purchase-order', label: 'Purchase order', lede: 'The order as issued, and any revision.' },
@@ -114,9 +124,9 @@ export default function OrderPanel({
           <button
             type="button"
             onClick={onClose}
-            className="btn-secondary"
+            className="btn-secondary inline-flex items-center gap-1"
           >
-            Close
+            <X size={13} aria-hidden /> Close
           </button>
         </div>
 
@@ -161,7 +171,7 @@ export default function OrderPanel({
                         <td className="py-1 pr-2">{row.type}</td>
                         <td className="py-1 pr-2 text-ink-70">{row.po_number}</td>
                         <td className="py-1 pr-2 text-right num whitespace-nowrap">
-                          {row.delivered_value ? fmt(row.delivered_value, 2) : ''}
+                          {row.delivered_value ? money(row.delivered_value) : ''}
                         </td>
                         <td className="py-1 whitespace-nowrap text-ink-70">
                           {row.delivery_date ?? ''}
@@ -195,16 +205,23 @@ export default function OrderPanel({
                 {documents === null ? (
                   <p className="lede mt-2">Loading.</p>
                 ) : mine.length === 0 ? (
-                  <p className="lede mt-2">No {group.label.toLowerCase()} documents yet.</p>
+                  <p className="lede mt-2">
+                    {group.key === 'purchase-order'
+                      ? 'No purchase order uploaded yet. Drop the PO here.'
+                      : 'No delivery paperwork yet. Drop the packing list or bill of lading here.'}
+                  </p>
                 ) : (
                   <ul className="mt-2 flex flex-col gap-1">
-                    {mine.map((document) => (
+                    {mine.map((document) => {
+                      const DocIcon = typeIcon(document.contentType)
+                      return (
                       <li
                         key={document.id}
                         className={`rulebox rounded px-2 py-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 ${
                           document.deletedAt ? 'opacity-60' : ''
                         }`}
                       >
+                        <DocIcon size={13} aria-hidden className="shrink-0 text-ink-50" />
                         <span className="font-semibold text-ink">{document.filename}</span>
                         <span className="lede">
                           {readableSize(document.size)} · {document.uploadedByEmail} ·{' '}
@@ -220,28 +237,29 @@ export default function OrderPanel({
                             href={`/api/documents/${document.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-accent underline underline-offset-2"
+                            className="inline-flex items-center gap-1 text-accent underline underline-offset-2"
                           >
-                            View
+                            <Eye size={13} aria-hidden /> View
                           </a>
                           <a
                             href={`/api/documents/${document.id}?download=1`}
-                            className="text-accent underline underline-offset-2"
+                            className="inline-flex items-center gap-1 text-accent underline underline-offset-2"
                           >
-                            Download
+                            <Download size={13} aria-hidden /> Download
                           </a>
                           {isAdmin && !document.deletedAt && (
                             <button
                               type="button"
                               onClick={() => void softDelete(document)}
-                              className="text-critical underline underline-offset-2"
+                              className="inline-flex items-center gap-1 text-critical underline underline-offset-2"
                             >
-                              Delete
+                              <Trash2 size={13} aria-hidden /> Delete
                             </button>
                           )}
                         </span>
                       </li>
-                    ))}
+                      )
+                    })}
                   </ul>
                 )}
 
@@ -260,6 +278,7 @@ export default function OrderPanel({
                     dragging === group.key ? 'border-accent bg-accent-soft' : 'border-rule'
                   }`}
                 >
+                  <Upload size={19} aria-hidden className="mx-auto mb-1 text-ink-30" />
                   <p className="lede">
                     Drop a file here, or{' '}
                     <button

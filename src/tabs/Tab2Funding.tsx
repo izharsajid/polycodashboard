@@ -49,16 +49,16 @@ const KIND_SHORT: Record<StatementT['kind'], string> = {
 
 /** efdashboard's .po-state: text on a wash, pill-shaped, at weight 800. */
 const CONFIDENCE: Record<ReconRowT['match_confidence'], { label: string; cls: string }> = {
-  confirmed: { label: 'Matched', cls: 'bg-state-good-wash text-state-good' },
-  probable: { label: 'Probable match', cls: 'bg-state-info-wash text-state-info' },
-  partial: { label: 'Partially funded', cls: 'bg-state-watch-wash text-state-watch' },
-  unmatched: { label: 'No matched receipt', cls: 'bg-state-critical-wash text-state-critical' },
+  confirmed: { label: 'Matched', cls: 'bg-accent-soft text-accent' },
+  probable: { label: 'Probable match', cls: 'bg-rule-soft text-ink-70' },
+  partial: { label: 'Partially funded', cls: 'bg-watch-soft text-watch' },
+  unmatched: { label: 'No matched receipt', cls: 'bg-critical-soft text-critical' },
 }
 
 function Confidence({ c }: { c: ReconRowT['match_confidence'] }) {
   const { label, cls } = CONFIDENCE[c]
   return (
-    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-[3px] text-[11px] font-extrabold ${cls}`}>
+    <span className={`inline-block whitespace-nowrap rounded-full px-1 py-[3px] text-eyebrow font-semibold ${cls}`}>
       {label}
     </span>
   )
@@ -66,7 +66,7 @@ function Confidence({ c }: { c: ReconRowT['match_confidence'] }) {
 
 function EstimateTag() {
   return (
-    <span className="inline-block rounded-full bg-state-watch-wash px-2 py-[3px] text-[11px] font-extrabold text-state-watch">
+    <span className="inline-block rounded-full bg-watch-soft px-1 py-[3px] text-eyebrow font-semibold text-watch">
       Estimated
     </span>
   )
@@ -140,7 +140,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
 
       {finding && <Finding>{finding.sentence}</Finding>}
 
-      <div className="grid gap-card-gap sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-3">
         <Tile
           label="Funds requested"
           value={fmt(lastPoint.requestedCumulative)}
@@ -160,16 +160,16 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         />
       </div>
 
-      <div className="card mt-card-gap">
-        <div className="px-card pt-card pb-card">
-          <h3 className="text-[17px] font-bold text-leaf-deep">
+      <div className="card mt-2">
+        <div className="px-2 pt-2 pb-2">
+          <h3 className="text-subtitle font-semibold text-accent">
             The gap opens in the 2025 periods, not the recent ones
           </h3>
           <p className="lede mt-1 max-w-2xl">
             Cumulative funds requested against cumulative funds received, every statement period.
           </p>
 
-          <div className="mt-5 h-[280px] -ml-2 sm:h-[320px]">
+          <div className="mt-3 h-[280px] -ml-2 sm:h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
                 <CartesianGrid stroke="#DFE5DC" vertical={false} />
@@ -203,12 +203,12 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-lede text-ink-muted">
-            <span className="flex items-center gap-2">
-              <span className="w-5 border-t-2 border-dashed border-ink-strong inline-block" /> Requested, cumulative
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-label text-ink-70">
+            <span className="flex items-center gap-1">
+              <span className="w-5 border-t-2 border-dashed border-ink inline-block" /> Requested, cumulative
             </span>
-            <span className="flex items-center gap-2">
-              <span className="h-[2px] w-5 bg-leaf inline-block" /> Received, cumulative
+            <span className="flex items-center gap-1">
+              <span className="h-[2px] w-5 bg-accent inline-block" /> Received, cumulative
             </span>
           </div>
         </div>
@@ -216,13 +216,13 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
 
       {/* A different question from settlement, so it gets its own block rather than
           a fourth tile competing with the three above. */}
-      <div className="card mt-card-gap">
-        <div className="px-card pt-card pb-card">
+      <div className="card mt-2">
+        <div className="px-2 pt-2 pb-2">
           <p className="eyebrow">Cost of holding the operation open</p>
-          <h3 className="mt-1 text-[17px] font-bold text-leaf-deep">
+          <h3 className="mt-1 text-subtitle font-semibold text-accent">
             {fmt(recurring.total)} a month at the current configuration
           </h3>
-          <p className="lede mt-1.5 max-w-3xl">
+          <p className="lede mt-1 max-w-3xl">
             The recurring lines of the {monthName(latest.id)} statement, excluding raw fibre
             containers, tooling and cargo clearance, insurance instalments and certification. This
             is the figure a temporary shutdown is measured against. A shutdown carries its own
@@ -231,23 +231,23 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           </p>
 
           <Working title="How that figure is derived" lede="Recurring lines, and the bridge back to the stated total.">
-            <div className="grid gap-card-gap lg:grid-cols-2">
+            <div className="grid gap-2 lg:grid-cols-2">
               <div>
-                <h4 className="eyebrow mb-2">Recurring lines</h4>
+                <h4 className="eyebrow mb-1">Recurring lines</h4>
                 <div className="overflow-x-auto">
-                <table className="w-full min-w-[20rem] text-table-cell">
+                <table className="w-full min-w-[20rem] text-table">
                   <tbody>
                     {recurring.lines.map((l, i) => (
                       <tr key={i}>
-                        <td className="py-1.5 pr-4">{l.description}</td>
-                        <td className="py-1.5 text-right whitespace-nowrap">
+                        <td className="py-1 pr-2">{l.description}</td>
+                        <td className="py-1 text-right whitespace-nowrap">
                           <Money n={l.amount} dp={2} />
                         </td>
                       </tr>
                     ))}
-                    <tr className="border-t border-rule-strong">
-                      <td className="py-2 pr-4 font-bold text-ink-strong">Recurring cost per month</td>
-                      <td className="py-2 text-right font-bold text-ink-strong whitespace-nowrap">
+                    <tr className="border-t border-rule">
+                      <td className="py-1 pr-2 font-semibold text-ink">Recurring cost per month</td>
+                      <td className="py-1 text-right font-semibold text-ink whitespace-nowrap">
                         <Money n={recurring.total} dp={2} />
                       </td>
                     </tr>
@@ -256,13 +256,13 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 </div>
               </div>
               <div>
-                <h4 className="eyebrow mb-2">How it is derived</h4>
+                <h4 className="eyebrow mb-1">How it is derived</h4>
                 <div className="overflow-x-auto">
-                <table className="w-full min-w-[20rem] text-table-cell">
+                <table className="w-full min-w-[20rem] text-table">
                   <tbody>
                     <tr>
-                      <td className="py-1.5 pr-4">Stated total, {monthName(latest.id)}</td>
-                      <td className="py-1.5 text-right whitespace-nowrap">
+                      <td className="py-1 pr-2">Stated total, {monthName(latest.id)}</td>
+                      <td className="py-1 text-right whitespace-nowrap">
                         <Money n={latest.stated_total} dp={2} />
                       </td>
                     </tr>
@@ -270,25 +270,25 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                       .filter((l) => l.amount !== 0)
                       .map((l, i) => (
                         <tr key={i}>
-                          <td className="py-1.5 pr-4">
+                          <td className="py-1 pr-2">
                             {l.amount > 0 ? 'Less: ' : 'Add back: '}
                             {l.description}
                           </td>
-                          <td className="py-1.5 text-right whitespace-nowrap">
+                          <td className="py-1 text-right whitespace-nowrap">
                             <Money n={-l.amount} dp={2} />
                           </td>
                         </tr>
                       ))}
-                    <tr className="border-t border-rule-strong">
-                      <td className="py-2 pr-4 font-bold text-ink-strong">Recurring cost per month</td>
-                      <td className="py-2 text-right font-bold text-ink-strong whitespace-nowrap">
+                    <tr className="border-t border-rule">
+                      <td className="py-1 pr-2 font-semibold text-ink">Recurring cost per month</td>
+                      <td className="py-1 text-right font-semibold text-ink whitespace-nowrap">
                         <Money n={recurring.total} dp={2} />
                       </td>
                     </tr>
                   </tbody>
                 </table>
                 </div>
-                <p className="lede mt-3">
+                <p className="lede mt-2">
                   Raw fibre containers move with output and are excluded. Insurance and
                   certification are instalments of an annual cost, not a monthly one. The customs
                   duty refund is a one-off credit and is added back.
@@ -305,15 +305,15 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         defaultOpen
       >
         <div className="overflow-x-auto">
-          <table className="w-full text-table-cell">
+          <table className="w-full text-table">
             <thead>
-              <tr className="text-left border-b border-rule bg-paper-panel">
-                <th className="py-3 px-3.5 text-table-head font-extrabold uppercase text-ink-table">Month</th>
-                <th className="py-3 px-3.5 text-table-head font-extrabold uppercase text-ink-table">Statement</th>
-                <th className="py-3 px-3.5 text-right text-table-head font-extrabold uppercase text-ink-table">Requested US$</th>
-                <th className="py-3 px-3.5 text-right text-table-head font-extrabold uppercase text-ink-table">Received US$</th>
-                <th className="py-3 px-3.5 text-right text-table-head font-extrabold uppercase text-ink-table">Variance</th>
-                <th className="py-3 px-3.5 text-table-head font-extrabold uppercase text-ink-table">Ledger match</th>
+              <tr className="text-left border-b border-rule bg-rule-soft">
+                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Month</th>
+                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Statement</th>
+                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Requested US$</th>
+                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Received US$</th>
+                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Variance</th>
+                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Ledger match</th>
               </tr>
             </thead>
             <tbody>
@@ -325,24 +325,24 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   <tr
                     key={m.id}
                     onClick={() => setSelected(m.id)}
-                    className={`cursor-pointer border-b border-rule-soft ${
-                      m.id === current.id ? 'bg-paper-panel' : 'hover:bg-paper-panel'
+                    className={`cursor-pointer border-b border-rule ${
+                      m.id === current.id ? 'bg-rule-soft' : 'hover:bg-rule'
                     }`}
                   >
-                    <td className="py-2.5 px-3.5 whitespace-nowrap">{monthName(m.id)}</td>
-                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                    <td className="py-2 px-2 whitespace-nowrap">{monthName(m.id)}</td>
+                    <td className="py-2 px-2 whitespace-nowrap">
                       {m.statement ? KIND_SHORT[m.statement.kind] : <Flag>None</Flag>}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
+                    <td className="py-2 px-2 text-right whitespace-nowrap">
                       {m.recon && <Money n={m.recon.requested} dp={2} />}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
+                    <td className="py-2 px-2 text-right whitespace-nowrap">
                       {m.recon && <Money n={m.recon.received_total} dp={2} />}
                     </td>
-                    <td className={`py-2.5 px-3.5 text-right whitespace-nowrap ${loose ? 'text-alert' : ''}`}>
+                    <td className={`py-2 px-2 text-right whitespace-nowrap ${loose ? 'text-critical' : ''}`}>
                       {m.recon && <Money n={m.recon.variance} dp={2} />}
                     </td>
-                    <td className="py-2.5 px-3.5">
+                    <td className="py-2 px-2">
                       {m.recon && <Confidence c={m.recon.match_confidence} />}
                     </td>
                   </tr>
@@ -350,16 +350,16 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
               })}
             </tbody>
             <tfoot>
-              <tr className="border-t border-rule-strong">
-                <td className="py-2.5 px-3.5 font-bold text-ink-strong">Total</td>
+              <tr className="border-t border-rule">
+                <td className="py-2 px-2 font-semibold text-ink">Total</td>
                 <td />
-                <td className="py-2.5 px-3.5 text-right font-bold text-ink-strong whitespace-nowrap">
+                <td className="py-2 px-2 text-right font-semibold text-ink whitespace-nowrap">
                   <Money n={lastPoint.requestedCumulative} dp={2} />
                 </td>
-                <td className="py-2.5 px-3.5 text-right font-bold text-ink-strong whitespace-nowrap">
+                <td className="py-2 px-2 text-right font-semibold text-ink whitespace-nowrap">
                   <Money n={lastPoint.receivedCumulative} dp={2} />
                 </td>
-                <td className="py-2.5 px-3.5 text-right font-bold text-ink-strong whitespace-nowrap">
+                <td className="py-2 px-2 text-right font-semibold text-ink whitespace-nowrap">
                   <Money n={shortfall} dp={2} />
                 </td>
                 <td />
@@ -367,7 +367,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
             </tfoot>
           </table>
         </div>
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-2 flex flex-col gap-1">
           {statements.reconciliation_notes.map((n, i) => (
             <Note key={i} tone={/resolve|confirm/i.test(n) ? 'alert' : 'plain'}>
               {n}
@@ -390,35 +390,35 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   role="tab"
                   aria-selected={active}
                   onClick={() => setSelected(m.id)}
-                  className={`px-3 py-2 text-[13px] whitespace-nowrap rounded-t-[5px] -mb-px border border-b-0 flex items-center gap-1.5 ${
+                  className={`px-2 py-1 text-label whitespace-nowrap rounded -mb-px border border-b-0 flex items-center gap-1 ${
                     active
-                      ? 'bg-paper-surface border-rule font-medium text-leaf'
-                      : 'border-transparent text-ink-muted hover:text-ink'
+                      ? 'bg-surface border-rule font-medium text-accent'
+                      : 'border-transparent text-ink-70 hover:text-ink'
                   }`}
                 >
                   {monthShort(m.id)}
-                  {!m.statement && <span className="h-1.5 w-1.5 rounded-full bg-alert inline-block" aria-hidden />}
+                  {!m.statement && <span className="h-1.5 w-1.5 rounded-full bg-critical inline-block" aria-hidden />}
                   {m.statement?.kind === 'actuals' && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-ember inline-block" aria-hidden />
+                    <span className="h-1.5 w-1.5 rounded-full bg-watch inline-block" aria-hidden />
                   )}
                 </button>
               )
             })}
           </div>
-          <p className="lede mt-1.5">
+          <p className="lede mt-1">
             Red mark: no statement exists for the month. Amber mark: actuals only, no funding request.
           </p>
         </div>
 
-        <div className="grid gap-card-gap lg:grid-cols-3 mt-5">
+        <div className="grid gap-2 lg:grid-cols-3 mt-3">
           <div className="lg:col-span-2">
             {st ? (
               <>
-                <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-                  <h4 className="text-[15px] font-bold text-ink-strong">{monthName(st.id)}</h4>
+                <div className="flex flex-wrap items-baseline justify-between gap-1 mb-1">
+                  <h4 className="text-body font-semibold text-ink">{monthName(st.id)}</h4>
                   <span className="eyebrow">{KIND_LABEL[st.kind]}</span>
                 </div>
-                <p className="lede mb-4">
+                <p className="lede mb-2">
                   Covers {dateLong(st.period_start)} to {dateLong(st.period_end)}
                   {st.prepared_date
                     ? `, prepared ${dateLong(st.prepared_date)}`
@@ -426,30 +426,30 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   . Reproduced line for line as issued.
                 </p>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-table-cell">
+                  <table className="w-full text-table">
                     <thead>
-                      <tr className="text-left border-b border-rule bg-paper-panel">
-                        <th className="py-3 px-3.5 text-table-head font-extrabold uppercase text-ink-table">Line as issued</th>
-                        <th className="py-3 px-3.5 text-table-head font-extrabold uppercase text-ink-table">Remarks</th>
-                        <th className="py-3 px-3.5 text-right text-table-head font-extrabold uppercase text-ink-table">US$</th>
+                      <tr className="text-left border-b border-rule bg-rule-soft">
+                        <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Line as issued</th>
+                        <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Remarks</th>
+                        <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">US$</th>
                       </tr>
                     </thead>
                     <tbody>
                       {st.lines.map((l, i) => (
-                        <tr key={i} className="align-top border-b border-rule-soft">
-                          <td className="py-2.5 px-3.5">{l.description}</td>
-                          <td className="py-2.5 px-3.5 text-ink-muted max-w-[18rem]">{l.remarks ?? ''}</td>
-                          <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
+                        <tr key={i} className="align-top border-b border-rule">
+                          <td className="py-2 px-2">{l.description}</td>
+                          <td className="py-2 px-2 text-ink-70 max-w-[18rem]">{l.remarks ?? ''}</td>
+                          <td className="py-2 px-2 text-right whitespace-nowrap">
                             <Money n={l.amount} dp={2} />
                           </td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="border-t border-rule-strong">
-                        <td className="py-2.5 px-3.5 font-bold text-ink-strong">Stated total</td>
+                      <tr className="border-t border-rule">
+                        <td className="py-2 px-2 font-semibold text-ink">Stated total</td>
                         <td />
-                        <td className="py-2.5 px-3.5 text-right font-bold text-ink-strong whitespace-nowrap">
+                        <td className="py-2 px-2 text-right font-semibold text-ink whitespace-nowrap">
                           <Money n={st.stated_total} dp={2} />
                         </td>
                       </tr>
@@ -457,9 +457,9 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   </table>
                 </div>
                 {foot?.ok ? (
-                  <p className="lede mt-2">Foots to its own line items to the cent.</p>
+                  <p className="lede mt-1">Foots to its own line items to the cent.</p>
                 ) : (
-                  <div className="mt-2 flex items-center gap-2 text-table-cell">
+                  <div className="mt-1 flex items-center gap-1 text-table">
                     <Flag>Does not foot</Flag>
                     <span>
                       Lines sum to <Money n={foot?.computed ?? 0} dp={2} /> against a stated total of{' '}
@@ -468,7 +468,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   </div>
                 )}
                 {st.notes.length > 0 && (
-                  <div className="mt-4 flex flex-col gap-2">
+                  <div className="mt-2 flex flex-col gap-1">
                     {st.notes.map((n, i) => (
                       <Note key={i} tone={/^EXCEPTION/.test(n) ? 'alert' : 'plain'}>
                         {n}
@@ -479,8 +479,8 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
               </>
             ) : (
               <>
-                <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-                  <h4 className="text-[15px] font-bold text-ink-strong">{monthName(current.id)}</h4>
+                <div className="flex flex-wrap items-baseline justify-between gap-1 mb-2">
+                  <h4 className="text-body font-semibold text-ink">{monthName(current.id)}</h4>
                   <Flag>No statement</Flag>
                 </div>
                 <Note tone="alert">
@@ -493,49 +493,49 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           </div>
 
           <div>
-            <h4 className="text-[15px] font-bold text-ink-strong mb-1">Matched receipts</h4>
-            <p className="lede mb-4">From the Polyco ledger, for this period.</p>
+            <h4 className="text-body font-semibold text-ink mb-1">Matched receipts</h4>
+            <p className="lede mb-2">From the Polyco ledger, for this period.</p>
             {rec ? (
               <>
-                <div className="mb-3">
+                <div className="mb-2">
                   <Confidence c={rec.match_confidence} />
                 </div>
                 <div className="overflow-x-auto">
-                <table className="w-full min-w-[18rem] text-table-cell">
+                <table className="w-full min-w-[18rem] text-table">
                   <tbody>
                     <tr>
-                      <td className="py-1.5 pr-4">Requested</td>
-                      <td className="py-1.5 text-right align-top whitespace-nowrap">
+                      <td className="py-1 pr-2">Requested</td>
+                      <td className="py-1 text-right align-top whitespace-nowrap">
                         <Money n={rec.requested} dp={2} />
                       </td>
                     </tr>
                     {rec.receipts.map((r, i) => (
                       <tr key={i}>
-                        <td className="py-1.5 pr-4">
+                        <td className="py-1 pr-2">
                           Received {dateLong(r.date)}
                           {r.note && <div className="lede">{r.note}</div>}
                         </td>
-                        <td className="py-1.5 text-right align-top whitespace-nowrap">
+                        <td className="py-1 text-right align-top whitespace-nowrap">
                           <Money n={r.amount} dp={2} />
                         </td>
                       </tr>
                     ))}
                     {rec.receipts.length === 0 && (
                       <tr>
-                        <td className="py-1.5 pr-4 text-ink-muted" colSpan={2}>
+                        <td className="py-1 pr-2 text-ink-70" colSpan={2}>
                           No receipt in the ledger has been matched to this request.
                         </td>
                       </tr>
                     )}
                     <tr className="border-t border-rule">
-                      <td className="py-1.5 pr-4">Received, total</td>
-                      <td className="py-1.5 text-right whitespace-nowrap">
+                      <td className="py-1 pr-2">Received, total</td>
+                      <td className="py-1 text-right whitespace-nowrap">
                         <Money n={rec.received_total} dp={2} />
                       </td>
                     </tr>
-                    <tr className="border-t border-rule-strong">
-                      <td className="py-2 pr-4 font-bold text-ink-strong">Received less requested</td>
-                      <td className={`py-2 text-right font-bold whitespace-nowrap ${varianceAlert ? 'text-alert' : 'text-ink-strong'}`}>
+                    <tr className="border-t border-rule">
+                      <td className="py-1 pr-2 font-semibold text-ink">Received less requested</td>
+                      <td className={`py-1 text-right font-semibold whitespace-nowrap ${varianceAlert ? 'text-critical' : 'text-ink'}`}>
                         <Money n={rec.variance} dp={2} />
                       </td>
                     </tr>
@@ -543,7 +543,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 </table>
                 </div>
                 {monthNotes.length > 0 && (
-                  <div className="mt-4 flex flex-col gap-2">
+                  <div className="mt-2 flex flex-col gap-1">
                     {monthNotes.map((n, i) => (
                       <Note key={i} tone={/resolve|confirm/i.test(n) ? 'alert' : 'plain'}>
                         {n}
@@ -553,7 +553,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 )}
               </>
             ) : (
-              <p className="text-table-cell text-ink-muted">
+              <p className="text-table text-ink-70">
                 No funding request exists for {monthName(current.id)}, so there is nothing to
                 reconcile yet.
               </p>
@@ -563,18 +563,18 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
       </Working>
 
       {/* Every open item in one place, rather than scattered across fourteen months. */}
-      <div className="card mt-card-gap border-t-accent border-dotted border-alert">
-        <div className="px-card pt-card pb-card">
+      <div className="card mt-2 border-t-2 border-dotted border-critical">
+        <div className="px-2 pt-2 pb-2">
           <p className="eyebrow">Open items</p>
-          <h3 className="mt-1 text-[17px] font-bold text-leaf-deep">
+          <h3 className="mt-1 text-subtitle font-semibold text-accent">
             What is missing, what conflicts, what is unmatched
           </h3>
-          <p className="lede mt-1.5 max-w-3xl">
+          <p className="lede mt-1 max-w-3xl">
             {exceptions.length} open items. Each renders as a flag rather than being quietly
             filled, and stays here until the underlying document or confirmation arrives.
           </p>
 
-          <div className="mt-5 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-1">
             {exceptions.map((e, i) => (
               <Note key={i} tone="alert">
                 {e}
@@ -583,22 +583,22 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           </div>
 
           {capacityNotes.length > 0 && (
-            <div className="mt-6 border-t border-rule pt-5">
-              <h4 className="text-[15px] font-bold text-ink-strong mb-1">
+            <div className="mt-3 border-t border-rule pt-3">
+              <h4 className="text-body font-semibold text-ink mb-1">
                 Capacity notes carried on the statements
               </h4>
-              <p className="lede mb-4">
+              <p className="lede mb-2">
                 Quoted as written when issued. Each is an estimated input to the configuration
                 model until confirmed against current headcount.
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 {capacityNotes.map((c) => (
-                  <div key={c.text} className="flex flex-col gap-1 border-l-2 border-ember pl-3 py-1">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div key={c.text} className="flex flex-col gap-1 border-l-2 border-watch pl-2 py-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       <EstimateTag />
                       <span className="eyebrow">{c.months.map(monthName).join(', ')}</span>
                     </div>
-                    <p className="text-table-cell leading-relaxed">{c.text}</p>
+                    <p className="text-table leading-relaxed">{c.text}</p>
                   </div>
                 ))}
               </div>

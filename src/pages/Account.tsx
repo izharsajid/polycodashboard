@@ -59,12 +59,12 @@ export default function Account({ user }: { user: PublicUser }) {
     <div className="min-h-screen">
       <Header user={user} />
 
-      <main className="mx-auto max-w-2xl px-6 py-10">
-        <header className="mb-8 border-b border-rule pb-4">
-          <h1 className="text-xl font-semibold tracking-tight">Your account</h1>
+      <main className="mx-auto max-w-2xl px-3 py-6">
+        <header className="mb-4 border-b border-rule pb-2">
+          <h1 className="text-title font-semibold tracking-tight">Your account</h1>
         </header>
 
-        <dl className="grid grid-cols-[9rem_1fr] gap-y-3 text-sm mb-12">
+        <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-body mb-6">
           <dt className="eyebrow self-center">Name</dt>
           <dd>{user.name}</dd>
           <dt className="eyebrow self-center">Email</dt>
@@ -72,18 +72,18 @@ export default function Account({ user }: { user: PublicUser }) {
           <dt className="eyebrow self-center">Role</dt>
           <dd>{ROLE_LABEL[user.role]}</dd>
           <dt className="eyebrow self-center">Signed in</dt>
-          <dd className="num text-[13px]">{whenLocal(user.lastLoginAt)}</dd>
+          <dd className="num text-label">{whenLocal(user.lastLoginAt)}</dd>
         </dl>
 
         <section className="max-w-sm">
-          <h2 className="text-base font-semibold tracking-tight mb-1">Change your password</h2>
-          <p className="text-sm text-ink-muted leading-relaxed mb-6">
+          <h2 className="text-subtitle font-semibold tracking-tight mb-1">Change your password</h2>
+          <p className="text-body text-ink-70 leading-relaxed mb-3">
             At least 12 characters. A few words you will remember beat a short one with
             symbols in it. Changing it signs you out everywhere else, but not here.
           </p>
 
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1.5">
+          <form onSubmit={submit} className="flex flex-col gap-2">
+            <label className="flex flex-col gap-1">
               <span className="eyebrow">Current password</span>
               <input
                 type="password"
@@ -91,11 +91,11 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setCurrent(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="rulebox px-3 py-2 text-sm"
+                className="rulebox px-2 py-1 text-body"
               />
             </label>
 
-            <label className="flex flex-col gap-1.5">
+            <label className="flex flex-col gap-1">
               <span className="eyebrow">New password</span>
               <input
                 type="password"
@@ -103,11 +103,11 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setNext(e.target.value)}
                 autoComplete="new-password"
                 required
-                className="rulebox px-3 py-2 text-sm"
+                className="rulebox px-2 py-1 text-body"
               />
             </label>
 
-            <label className="flex flex-col gap-1.5">
+            <label className="flex flex-col gap-1">
               <span className="eyebrow">New password again</span>
               <input
                 type="password"
@@ -115,17 +115,17 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setAgain(e.target.value)}
                 autoComplete="new-password"
                 required
-                className="rulebox px-3 py-2 text-sm"
+                className="rulebox px-2 py-1 text-body"
               />
             </label>
 
             {error && (
-              <p role="alert" className="border-l-2 border-alert pl-3 py-1 text-sm text-ink">
+              <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
                 {error}
               </p>
             )}
             {done && (
-              <p role="status" className="border-l-2 border-leaf pl-3 py-1 text-sm text-ink">
+              <p role="status" className="border-l-2 border-accent pl-2 py-1 text-body text-ink">
                 {done}
               </p>
             )}
@@ -133,16 +133,16 @@ export default function Account({ user }: { user: PublicUser }) {
             <button
               type="submit"
               disabled={busy}
-              className="bg-leaf-deep text-white text-sm font-semibold py-2.5 mt-2 disabled:opacity-50"
+              className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
             >
               {busy ? 'Changing it' : 'Change password'}
             </button>
           </form>
         </section>
 
-        <section className="mt-14 border-t border-rule pt-8">
-          <h2 className="text-base font-semibold tracking-tight mb-1">Invite a colleague</h2>
-          <p className="text-sm text-ink-muted leading-relaxed mb-6">
+        <section className="mt-8 border-t border-rule pt-4">
+          <h2 className="text-subtitle font-semibold tracking-tight mb-1">Invite a colleague</h2>
+          <p className="text-body text-ink-70 leading-relaxed mb-3">
             They choose their own password from a link that works once. Nothing is sent
             while sending is switched off, so adding someone now tells them nothing.
           </p>
@@ -152,7 +152,7 @@ export default function Account({ user }: { user: PublicUser }) {
         <button
           type="button"
           onClick={() => navigate(DASHBOARD)}
-          className="mt-12 text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
+          className="mt-6 text-body text-ink-70 underline underline-offset-2 hover:text-ink"
         >
           Back to the dashboard
         </button>

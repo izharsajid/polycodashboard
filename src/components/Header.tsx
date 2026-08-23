@@ -13,22 +13,22 @@ export default function Header({ user }: { user: PublicUser }) {
   const { signOut } = useSession()
 
   return (
-    <header className="border-b border-rule bg-paper-surface">
-      <div className="mx-auto max-w-6xl px-6 py-4 flex flex-wrap items-baseline justify-between gap-3">
-        <div className="flex items-baseline gap-3">
-          <span className="text-[15px] font-bold tracking-tight text-leaf">ECOFIBRE</span>
-          <span className="text-ink-faint">/</span>
-          <span className="text-[15px] text-ink-muted">Polyco Healthline</span>
+    <header className="border-b border-rule bg-surface">
+      <div className="mx-auto max-w-6xl px-3 py-2 flex flex-wrap items-baseline justify-between gap-2">
+        <div className="flex items-baseline gap-2">
+          <span className="text-body font-semibold tracking-tight text-accent">ECOFIBRE</span>
+          <span className="text-ink-50">/</span>
+          <span className="text-body text-ink-70">Polyco Healthline</span>
         </div>
 
-        <div className="flex items-baseline gap-4">
+        <div className="flex items-baseline gap-2">
           <span className="eyebrow hidden sm:inline">Position, capacity and configuration</span>
-          <span className="text-ink-faint no-print hidden sm:inline">|</span>
+          <span className="text-ink-50 no-print hidden sm:inline">|</span>
           {user.role === 'admin' && (
             <button
               type="button"
               onClick={() => navigate(ADMIN)}
-              className="no-print text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
+              className="no-print text-body text-ink-70 underline underline-offset-2 hover:text-ink"
             >
               People
             </button>
@@ -36,15 +36,15 @@ export default function Header({ user }: { user: PublicUser }) {
           <button
             type="button"
             onClick={() => navigate(ACCOUNT)}
-            className="text-sm text-ink-muted hover:text-ink underline underline-offset-2 decoration-rule-strong"
+            className="text-body text-ink-70 hover:text-ink underline underline-offset-2 decoration-rule"
           >
             {user.name}
-            <span className="text-ink-faint"> · {ROLE_LABEL[user.role]}</span>
+            <span className="text-ink-50"> · {ROLE_LABEL[user.role]}</span>
           </button>
           <button
             type="button"
             onClick={() => void signOut()}
-            className="no-print text-sm text-ink-muted underline underline-offset-2 hover:text-ink"
+            className="no-print text-body text-ink-70 underline underline-offset-2 hover:text-ink"
           >
             Sign out
           </button>

@@ -96,19 +96,19 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
 
   return (
     <section>
-      <h2 className="text-base font-semibold tracking-tight mb-1">Audit log</h2>
-      <p className="text-sm text-ink-muted leading-relaxed mb-6 max-w-2xl">
+      <h2 className="text-subtitle font-semibold tracking-tight mb-1">Audit log</h2>
+      <p className="text-body text-ink-70 leading-relaxed mb-3 max-w-2xl">
         Every sign-in, invitation, role change and password change, kept as it happened.
         Entries are added and never altered or removed.
       </p>
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-wrap gap-2 mb-3">
         <label className="flex flex-col gap-1">
           <span className="eyebrow">Person</span>
           <select
             value={filters.actorId}
             onChange={(e) => setFilters({ ...filters, actorId: e.target.value })}
-            className="rulebox px-2 py-1.5 text-sm"
+            className="rulebox px-1 py-1 text-body"
           >
             <option value="">Anyone</option>
             {users.map((u) => (
@@ -124,7 +124,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
           <select
             value={filters.action}
             onChange={(e) => setFilters({ ...filters, action: e.target.value })}
-            className="rulebox px-2 py-1.5 text-sm"
+            className="rulebox px-1 py-1 text-body"
           >
             <option value="">Anything</option>
             {ACTIONS.map((a) => (
@@ -141,7 +141,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
             type="date"
             value={filters.from}
             onChange={(e) => setFilters({ ...filters, from: e.target.value })}
-            className="rulebox px-2 py-1.5 text-sm"
+            className="rulebox px-1 py-1 text-body"
           />
         </label>
 
@@ -151,50 +151,50 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
             type="date"
             value={filters.to}
             onChange={(e) => setFilters({ ...filters, to: e.target.value })}
-            className="rulebox px-2 py-1.5 text-sm"
+            className="rulebox px-1 py-1 text-body"
           />
         </label>
 
         <button
           type="button"
           onClick={() => setFilters(EMPTY)}
-          className="self-end text-sm text-ink-muted underline underline-offset-2 hover:text-ink pb-2"
+          className="self-end text-body text-ink-70 underline underline-offset-2 hover:text-ink pb-1"
         >
           Clear
         </button>
       </div>
 
       {error && (
-        <p role="alert" className="border-l-2 border-alert pl-3 py-1 text-sm text-ink mb-4">
+        <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink mb-2">
           {error}
         </p>
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
+        <table className="w-full text-body border-collapse">
           <thead>
-            <tr className="border-b border-rule-strong text-left">
-              <th className="eyebrow py-2 pr-4 font-semibold">When</th>
-              <th className="eyebrow py-2 pr-4 font-semibold">Who</th>
-              <th className="eyebrow py-2 pr-4 font-semibold">What</th>
-              <th className="eyebrow py-2 pr-4 font-semibold">On</th>
-              <th className="eyebrow py-2 pr-4 font-semibold">Detail</th>
-              <th className="eyebrow py-2 pr-4 font-semibold">From</th>
-              <th className="eyebrow py-2 font-semibold">Outcome</th>
+            <tr className="border-b border-rule text-left">
+              <th className="eyebrow py-1 pr-2 font-semibold">When</th>
+              <th className="eyebrow py-1 pr-2 font-semibold">Who</th>
+              <th className="eyebrow py-1 pr-2 font-semibold">What</th>
+              <th className="eyebrow py-1 pr-2 font-semibold">On</th>
+              <th className="eyebrow py-1 pr-2 font-semibold">Detail</th>
+              <th className="eyebrow py-1 pr-2 font-semibold">From</th>
+              <th className="eyebrow py-1 font-semibold">Outcome</th>
             </tr>
           </thead>
           <tbody>
             {entries.map((entry) => (
               <tr key={entry.id} className="border-b border-rule align-top">
-                <td className="py-2 pr-4 num text-[12px] whitespace-nowrap">
+                <td className="py-1 pr-2 num text-label whitespace-nowrap">
                   {whenLocal(entry.timestamp)}
                 </td>
-                <td className="py-2 pr-4">{nameFor(entry)}</td>
-                <td className="py-2 pr-4">{ACTION_LABEL[entry.action]}</td>
-                <td className="py-2 pr-4 text-ink-muted">{entry.target ?? ''}</td>
-                <td className="py-2 pr-4 text-ink-muted">{entry.detail ?? ''}</td>
-                <td className="py-2 pr-4 num text-[12px] text-ink-faint">{entry.ip ?? ''}</td>
-                <td className={`py-2 ${entry.result === 'failure' ? 'text-alert' : 'text-ink-muted'}`}>
+                <td className="py-1 pr-2">{nameFor(entry)}</td>
+                <td className="py-1 pr-2">{ACTION_LABEL[entry.action]}</td>
+                <td className="py-1 pr-2 text-ink-70">{entry.target ?? ''}</td>
+                <td className="py-1 pr-2 text-ink-70">{entry.detail ?? ''}</td>
+                <td className="py-1 pr-2 num text-label text-ink-50">{entry.ip ?? ''}</td>
+                <td className={`py-1 ${entry.result === 'failure' ? 'text-critical' : 'text-ink-70'}`}>
                   {entry.result === 'failure' ? 'Refused' : 'Done'}
                 </td>
               </tr>
@@ -204,7 +204,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
       </div>
 
       {entries.length === 0 && !busy && (
-        <p className="text-sm text-ink-muted py-4">Nothing matches that.</p>
+        <p className="text-body text-ink-70 py-2">Nothing matches that.</p>
       )}
 
       {cursor && (
@@ -212,7 +212,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
           type="button"
           disabled={busy}
           onClick={() => void fetchPage(filters, cursor)}
-          className="mt-4 text-sm text-ink-muted underline underline-offset-2 hover:text-ink disabled:opacity-50"
+          className="mt-2 text-body text-ink-70 underline underline-offset-2 hover:text-ink disabled:opacity-50"
         >
           {busy ? 'Loading' : 'Show older'}
         </button>

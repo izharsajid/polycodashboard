@@ -12,12 +12,12 @@ import OrderPanel from '../components/OrderPanel'
 
 /** The state palette from DESIGN.md. No colour is invented for a status. */
 const STATUS_TONE: Record<string, string> = {
-  Dispatched: 'bg-state-good-wash text-state-good',
-  Booked: 'bg-state-plan-wash text-state-plan',
-  Processing: 'bg-state-info-wash text-state-info',
-  Cancelled: 'bg-state-off-wash text-state-off',
+  Dispatched: 'bg-accent-soft text-accent',
+  Booked: 'bg-rule-soft text-ink-70',
+  Processing: 'bg-rule-soft text-ink-70',
+  Cancelled: 'bg-rule-soft text-ink-50',
 }
-const DEFAULT_TONE = 'bg-state-watch-wash text-state-watch'
+const DEFAULT_TONE = 'bg-watch-soft text-watch'
 
 function monthLabel(month: string) {
   if (month === NOT_DISPATCHED) return 'Not dispatched'
@@ -34,10 +34,10 @@ function dayLong(iso: string | null) {
 }
 
 export function StatusPill({ status }: { status: string }) {
-  if (!status) return <span className="text-ink-faint">Not set</span>
+  if (!status) return <span className="text-ink-50">Not set</span>
   return (
     <span
-      className={`inline-block whitespace-nowrap rounded-full px-2 py-[3px] text-[11px] font-extrabold ${
+      className={`inline-block whitespace-nowrap rounded-full px-1 py-[3px] text-eyebrow font-semibold ${
         STATUS_TONE[status] ?? DEFAULT_TONE
       }`}
     >
@@ -54,15 +54,15 @@ function Pill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-2.5 py-1 text-[12px] whitespace-nowrap ${
+      className={`rounded-full border px-2 py-1 text-label whitespace-nowrap ${
         active
-          ? 'border-leaf bg-leaf-wash font-bold text-leaf-deep'
-          : 'border-rule-field text-ink-muted hover:text-ink hover:bg-paper-panel'
+          ? 'border-accent bg-accent-soft font-semibold text-accent'
+          : 'border-rule text-ink-70 hover:text-ink hover:bg-rule'
       }`}
     >
       {label}
       {count !== undefined && (
-        <span className={`ml-1.5 num ${active ? 'text-leaf-deep' : 'text-ink-faint'}`}>{count}</span>
+        <span className={`ml-1 num ${active ? 'text-accent' : 'text-ink-50'}`}>{count}</span>
       )}
     </button>
   )
@@ -121,7 +121,7 @@ export default function Tab4Orders({
       <Finding>{finding}</Finding>
 
       <div className="card no-print">
-        <div className="px-card py-4 flex flex-col gap-3">
+        <div className="px-2 py-2 flex flex-col gap-2">
           <FilterRow label="Product">
             <Pill label="All" active={filters.families.length === 0} onClick={() => update({ ...filters, families: [] })} />
             {[...PRODUCT_FAMILIES, 'Other' as const].map((family) => (
@@ -163,7 +163,7 @@ export default function Tab4Orders({
 
           {/* No shipping-mode row: po_data has no such column. See OPEN-QUESTIONS.md. */}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-2">
             <p className="lede">
               {summary.visible} shown · {summary.notDispatched} not dispatched ·{' '}
               {summary.dispatched} dispatched
@@ -171,7 +171,7 @@ export default function Tab4Orders({
                 <button
                   type="button"
                   onClick={() => update(CLEARED)}
-                  className="ml-3 underline underline-offset-2 hover:text-ink"
+                  className="ml-2 underline underline-offset-2 hover:text-ink"
                 >
                   Clear all
                 </button>
@@ -182,22 +182,22 @@ export default function Tab4Orders({
               value={filters.search}
               onChange={(e) => update({ ...filters, search: e.target.value })}
               placeholder="Search PO number or product"
-              className="rulebox rounded-field px-3 py-1.5 text-[13px] w-full sm:w-72"
+              className="rulebox rounded px-2 py-1 text-label w-full sm:w-72"
             />
           </div>
         </div>
       </div>
 
-      <div className="card mt-card-gap overflow-x-auto">
-        <table className="w-full min-w-[52rem] text-table-cell">
+      <div className="card mt-2 overflow-x-auto">
+        <table className="w-full min-w-[52rem] text-table">
           <thead>
-            <tr className="text-left bg-paper-panel">
+            <tr className="text-left bg-rule-soft">
               {['#', 'PO and product', 'Status', 'Cargo ready', 'Dispatch', 'Film', 'Remarks', ''].map(
                 (label, i) => (
                   <th
                     key={i}
                     scope="col"
-                    className="border-b border-rule px-3 py-2.5 text-table-head font-extrabold uppercase text-ink-table whitespace-nowrap"
+                    className="border-b border-rule px-2 py-2 text-eyebrow font-semibold uppercase text-ink-50 whitespace-nowrap"
                   >
                     {label}
                   </th>
@@ -218,7 +218,7 @@ export default function Tab4Orders({
 
             {visible.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-ink-muted">
+                <td colSpan={8} className="px-2 py-4 text-center text-ink-70">
                   No orders match that combination.
                 </td>
               </tr>
@@ -241,19 +241,19 @@ export default function Tab4Orders({
 
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline gap-2">
+    <div className="flex flex-wrap items-baseline gap-1">
       <span className="eyebrow w-28 shrink-0">{label}</span>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
+      <div className="flex flex-wrap gap-1">{children}</div>
     </div>
   )
 }
 
 function Band({ label, count }: { label: string; count: number }) {
   return (
-    <tr className="bg-paper-panel">
-      <td colSpan={8} className="border-y border-rule px-3 py-2 text-[13px] font-bold text-leaf-deep">
+    <tr className="bg-rule-soft">
+      <td colSpan={8} className="border-y border-rule px-2 py-1 text-label font-semibold text-accent">
         {label}
-        <span className="ml-2 num font-normal text-ink-muted">{count}</span>
+        <span className="ml-1 num font-normal text-ink-70">{count}</span>
       </td>
     </tr>
   )
@@ -263,37 +263,37 @@ function OrderRow({ order, onOpen }: { order: PoOrderT; onOpen: () => void }) {
   return (
     <tr
       onClick={onOpen}
-      className="cursor-pointer border-b border-rule-soft align-top hover:bg-paper-panel"
+      className="cursor-pointer border-b border-rule align-top hover:bg-rule"
     >
-      <td className="px-3 py-2.5 num text-ink-faint">{order.row_no}</td>
-      <td className="px-3 py-2.5">
-        <span className="font-bold text-ink-strong">{order.po_number}</span>
-        <span className="block text-ink-muted">{order.product}</span>
-        <span className="mt-0.5 flex flex-wrap gap-1">
+      <td className="px-2 py-2 num text-ink-50">{order.row_no}</td>
+      <td className="px-2 py-2">
+        <span className="font-semibold text-ink">{order.po_number}</span>
+        <span className="block text-ink-70">{order.product}</span>
+        <span className="mt-1 flex flex-wrap gap-1">
           {familiesFor(order.product).map((family) => (
-            <span key={family} className="text-[10px] font-extrabold uppercase text-leaf-kicker">
+            <span key={family} className="text-eyebrow font-semibold uppercase text-ink-50">
               {family}
             </span>
           ))}
         </span>
       </td>
-      <td className="px-3 py-2.5"><StatusPill status={order.order_status} /></td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-2 py-2"><StatusPill status={order.order_status} /></td>
+      <td className="px-2 py-2 whitespace-nowrap">
         {order.cargo_ready_date ? dayLong(order.cargo_ready_date) : (
-          <span className="text-ink-muted">{order.cargo_ready || ''}</span>
+          <span className="text-ink-70">{order.cargo_ready || ''}</span>
         )}
       </td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-2 py-2 whitespace-nowrap">
         {order.dispatched_date ? dayLong(order.dispatched_date) : (
-          <span className="text-ink-faint">{order.dispatched || 'Not dispatched'}</span>
+          <span className="text-ink-50">{order.dispatched || 'Not dispatched'}</span>
         )}
       </td>
-      <td className="px-3 py-2.5">
+      <td className="px-2 py-2">
         {order.film}
-        {order.rolls && <span className="block text-ink-muted">{order.rolls}</span>}
+        {order.rolls && <span className="block text-ink-70">{order.rolls}</span>}
       </td>
-      <td className="px-3 py-2.5 text-ink-muted max-w-[16rem]">{order.remarks}</td>
-      <td className="px-3 py-2.5 whitespace-nowrap text-leaf underline underline-offset-2">Open</td>
+      <td className="px-2 py-2 text-ink-70 max-w-[16rem]">{order.remarks}</td>
+      <td className="px-2 py-2 whitespace-nowrap text-accent underline underline-offset-2">Open</td>
     </tr>
   )
 }

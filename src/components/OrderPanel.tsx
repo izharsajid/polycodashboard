@@ -102,26 +102,26 @@ export default function OrderPanel({
       onClick={onClose}
     >
       <div
-        className="h-full w-full max-w-2xl overflow-y-auto bg-paper-surface shadow-card"
+        className="h-full w-full max-w-2xl overflow-y-auto bg-surface "
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 border-b border-rule bg-paper-surface px-card py-4 flex items-start justify-between gap-4">
+        <div className="sticky top-0 border-b border-rule bg-surface px-2 py-2 flex items-start justify-between gap-2">
           <div>
             <p className="eyebrow">Order</p>
-            <h2 className="mt-1 text-section font-bold text-leaf-deep">{order.po_number}</h2>
+            <h2 className="mt-1 text-title font-semibold text-accent">{order.po_number}</h2>
             <p className="lede mt-1">{order.product}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-field border border-rule-field px-2.5 py-1 text-[13px] font-extrabold text-leaf-deep hover:bg-leaf-wash"
+            className="rounded border border-rule px-2 py-1 text-label font-semibold text-accent hover:bg-accent-soft"
           >
             Close
           </button>
         </div>
 
-        <div className="px-card py-5">
-          <dl className="grid grid-cols-[9rem_1fr] gap-y-2.5 text-table-cell">
+        <div className="px-2 py-3">
+          <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-table">
             <dt className="eyebrow self-center">Status</dt>
             <dd><StatusPill status={order.order_status} /></dd>
             <dt className="eyebrow self-center">Cargo ready</dt>
@@ -133,13 +133,13 @@ export default function OrderPanel({
             <dt className="eyebrow self-center">Quantity</dt>
             <dd>{order.qty || '—'}</dd>
             <dt className="eyebrow self-center">Remarks</dt>
-            <dd className="text-ink-muted">{order.remarks || '—'}</dd>
+            <dd className="text-ink-70">{order.remarks || '—'}</dd>
             <dt className="eyebrow self-center">Tracker row</dt>
             <dd className="num">{order.row_no}</dd>
           </dl>
 
-          <section className="mt-8 border-t border-rule pt-5">
-            <h3 className="text-[15px] font-bold text-ink-strong">Matching ledger entries</h3>
+          <section className="mt-4 border-t border-rule pt-3">
+            <h3 className="text-body font-semibold text-ink">Matching ledger entries</h3>
             {ledger.rows.length === 0 ? (
               <p className="lede mt-1">
                 Nothing in the statement ledger carries this reference. For an order that has not
@@ -148,22 +148,22 @@ export default function OrderPanel({
             ) : (
               <>
                 {!ledger.exact && (
-                  <p className="lede mt-1 text-state-watch">
+                  <p className="lede mt-1 text-watch">
                     Matched on the base number, not the full reference. The two systems spell this
                     one differently.
                   </p>
                 )}
-                <table className="mt-3 w-full text-table-cell">
+                <table className="mt-2 w-full text-table">
                   <tbody>
                     {ledger.rows.map((row) => (
-                      <tr key={row.source_row} className="border-b border-rule-soft align-top">
-                        <td className="py-1.5 pr-3 num text-ink-faint">{row.source_row}</td>
-                        <td className="py-1.5 pr-3">{row.type}</td>
-                        <td className="py-1.5 pr-3 text-ink-muted">{row.po_number}</td>
-                        <td className="py-1.5 pr-3 text-right num whitespace-nowrap">
+                      <tr key={row.source_row} className="border-b border-rule align-top">
+                        <td className="py-1 pr-2 num text-ink-50">{row.source_row}</td>
+                        <td className="py-1 pr-2">{row.type}</td>
+                        <td className="py-1 pr-2 text-ink-70">{row.po_number}</td>
+                        <td className="py-1 pr-2 text-right num whitespace-nowrap">
                           {row.delivered_value ? fmt(row.delivered_value, 2) : ''}
                         </td>
-                        <td className="py-1.5 whitespace-nowrap text-ink-muted">
+                        <td className="py-1 whitespace-nowrap text-ink-70">
                           {row.delivery_date ?? ''}
                         </td>
                       </tr>
@@ -171,7 +171,7 @@ export default function OrderPanel({
                   </tbody>
                 </table>
                 {ledger.rows.some((r) => r.flags.length > 0) && (
-                  <p className="lede mt-2 text-state-watch">
+                  <p className="lede mt-1 text-watch">
                     {ledger.rows.filter((r) => r.flags.length > 0).length} of these carry a data flag.
                   </p>
                 )}
@@ -180,7 +180,7 @@ export default function OrderPanel({
           </section>
 
           {error && (
-            <p role="alert" className="mt-6 border-l-2 border-alert pl-3 py-1 text-table-cell">
+            <p role="alert" className="mt-3 border-l-2 border-critical pl-2 py-1 text-table">
               {error}
             </p>
           )}
@@ -188,45 +188,45 @@ export default function OrderPanel({
           {GROUPS.map((group) => {
             const mine = (documents ?? []).filter((d) => d.group === group.key)
             return (
-              <section key={group.key} className="mt-8 border-t border-rule pt-5">
-                <h3 className="text-[15px] font-bold text-ink-strong">{group.label}</h3>
+              <section key={group.key} className="mt-4 border-t border-rule pt-3">
+                <h3 className="text-body font-semibold text-ink">{group.label}</h3>
                 <p className="lede mt-1">{group.lede}</p>
 
                 {documents === null ? (
-                  <p className="lede mt-3">Loading.</p>
+                  <p className="lede mt-2">Loading.</p>
                 ) : mine.length === 0 ? (
-                  <p className="lede mt-3">No {group.label.toLowerCase()} documents yet.</p>
+                  <p className="lede mt-2">No {group.label.toLowerCase()} documents yet.</p>
                 ) : (
-                  <ul className="mt-3 flex flex-col gap-2">
+                  <ul className="mt-2 flex flex-col gap-1">
                     {mine.map((document) => (
                       <li
                         key={document.id}
-                        className={`rulebox rounded-field px-3 py-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 ${
+                        className={`rulebox rounded px-2 py-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 ${
                           document.deletedAt ? 'opacity-60' : ''
                         }`}
                       >
-                        <span className="font-bold text-ink-strong">{document.filename}</span>
+                        <span className="font-semibold text-ink">{document.filename}</span>
                         <span className="lede">
                           {readableSize(document.size)} · {document.uploadedByEmail} ·{' '}
                           {whenLocal(document.uploadedAt)}
                         </span>
                         {document.deletedAt && (
-                          <span className="rounded-full bg-state-critical-wash px-2 py-[2px] text-[11px] font-extrabold text-state-critical">
+                          <span className="rounded-full bg-critical-soft px-1 py-[2px] text-eyebrow font-semibold text-critical">
                             Deleted by {document.deletedByEmail}
                           </span>
                         )}
-                        <span className="ml-auto flex gap-3 text-[13px]">
+                        <span className="ml-auto flex gap-2 text-label">
                           <a
                             href={`/api/documents/${document.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-leaf underline underline-offset-2"
+                            className="text-accent underline underline-offset-2"
                           >
                             View
                           </a>
                           <a
                             href={`/api/documents/${document.id}?download=1`}
-                            className="text-leaf underline underline-offset-2"
+                            className="text-accent underline underline-offset-2"
                           >
                             Download
                           </a>
@@ -234,7 +234,7 @@ export default function OrderPanel({
                             <button
                               type="button"
                               onClick={() => void softDelete(document)}
-                              className="text-alert underline underline-offset-2"
+                              className="text-critical underline underline-offset-2"
                             >
                               Delete
                             </button>
@@ -256,8 +256,8 @@ export default function OrderPanel({
                     setDragging(null)
                     void upload(group.key, e.dataTransfer.files)
                   }}
-                  className={`mt-3 rounded-field border border-dashed px-4 py-5 text-center ${
-                    dragging === group.key ? 'border-leaf bg-leaf-wash' : 'border-rule-field'
+                  className={`mt-2 rounded border border-dashed px-2 py-3 text-center ${
+                    dragging === group.key ? 'border-accent bg-accent-soft' : 'border-rule'
                   }`}
                 >
                   <p className="lede">
@@ -266,7 +266,7 @@ export default function OrderPanel({
                       type="button"
                       disabled={busy}
                       onClick={() => fileInputs.current[group.key]?.click()}
-                      className="text-leaf underline underline-offset-2 disabled:opacity-50"
+                      className="text-accent underline underline-offset-2 disabled:opacity-50"
                     >
                       choose one
                     </button>

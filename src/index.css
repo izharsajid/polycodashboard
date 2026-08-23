@@ -3,69 +3,144 @@
 @tailwind utilities;
 
 @layer base {
-  html { -webkit-text-size-adjust: 100%; }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    @apply bg-paper text-ink font-sans antialiased;
+    @apply bg-paper text-ink font-sans text-body antialiased;
+    /* Tabular figures everywhere a number appears, so digits do not shift as
+       values change. DESIGN-SYSTEM-SPEC section 7. */
+    font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1, 'cv05' 1;
   }
-  :focus-visible { @apply outline-none ring-2 ring-leaf ring-offset-2 ring-offset-paper; }
+
+  /* Every focusable element, visible, in the accent. Section 7. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
+    --tw-ring-offset-color: #FCFCFB;
+  }
+
+  ::placeholder {
+    @apply text-ink-30;
+  }
 }
 
 @layer components {
-  /* Kept from this project, deliberately. Financial figures line up on the
-     decimal; efdashboard's tables do not need to and left-align instead. */
-  .num { @apply font-mono tabular-nums; }
-
-  /* The category label above a section heading. efdashboard's .inventory-kicker. */
-  .eyebrow { @apply text-kicker font-extrabold uppercase text-leaf-kicker; }
-
-  /* The one line under a section heading saying what the section shows. */
-  .lede { @apply text-lede text-ink-muted; }
-
-  .rulebox { @apply border border-rule bg-paper-surface; }
-
-  /* efdashboard's card: white, 14px, soft green shadow, green accent on top. */
-  .card {
-    @apply bg-paper-surface rounded-card shadow-card overflow-hidden;
+  /* Category label above a section heading, and every table header. */
+  .eyebrow {
+    @apply font-sans text-eyebrow font-semibold uppercase text-ink-50;
   }
-  .card-accent { @apply border-t-accent border-leaf; }
+
+  /* The one line under a section heading saying what it shows. */
+  .lede {
+    @apply text-label text-ink-70;
+  }
+
+  /* The one sentence stating what the numbers mean. Serif, never bolded. */
+  .finding {
+    @apply font-serif text-finding font-normal text-ink;
+  }
+
+  .title {
+    @apply font-serif text-title font-semibold text-ink;
+  }
+
+  .subtitle {
+    @apply font-serif text-subtitle font-normal text-ink;
+  }
+
+  /* Figures. Inter, tabular, never in a box and never on a coloured ground. */
+  .figure-xl {
+    @apply font-sans text-figure-xl font-semibold text-ink;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .figure {
+    @apply font-sans text-figure font-semibold text-ink;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A hairline is the only division. There are no cards. */
+  .rule-top {
+    @apply border-t border-rule;
+  }
+
+  .field {
+    @apply rounded border border-rule bg-surface px-2 py-1 text-label text-ink;
+  }
+
+  .btn-primary {
+    @apply rounded bg-accent px-2 py-1 text-label font-medium text-white;
+  }
+
+  .btn-secondary {
+    @apply rounded border border-rule bg-surface px-2 py-1 text-label text-ink;
+  }
+
+  .btn-text {
+    @apply text-label text-ink-70 underline underline-offset-2 hover:text-ink;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @media print {
-  body { @apply bg-white; }
-  .no-print { display: none !important; }
-  .page-break { break-before: page; }
+  body {
+    @apply bg-white;
+  }
 
-  /* These go into a board pack. Everything the reader chose to collapse still
-     prints, because a printed page has no disclosure control to open. */
-  details { display: block !important; }
-  details > summary { display: none !important; }
+  .no-print {
+    display: none !important;
+  }
 
-  /* The card shadow is invisible on paper and the rounded corner is noise, so
-     cards fall back to a rule. Nothing that carries meaning changes. */
-  .card {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    border: 1px solid theme('colors.rule.DEFAULT');
+  .page-break {
+    break-before: page;
+  }
+
+  /* Disclosures print open. Paper has no control to click. */
+  details {
+    display: block !important;
+  }
+
+  details > summary {
+    display: none !important;
+  }
+
+  /* Long tables break across pages; their header repeats on each. */
+  table {
+    break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr,
+  .recharts-wrapper {
     break-inside: avoid;
   }
 
-  /* A figure split across a page break is a figure nobody trusts. */
-  tr, .recharts-wrapper { break-inside: avoid; }
+  .sticky {
+    position: static !important;
+  }
 
-  /* The statement runs to hundreds of rows, so it must break across pages. The
-     header repeats on each one, which is what thead does in print when the table
-     is allowed to break. */
-  table { break-inside: auto; }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-
-  /* Sticky is meaningless on paper and leaves a gap where it would have sat. */
-  thead.sticky, .sticky { position: static !important; }
-
-  @page { margin: 14mm; }
+  @page {
+    margin: 14mm;
+  }
 }

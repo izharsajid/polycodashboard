@@ -115,17 +115,17 @@ function Dashboard({ user }: { user: PublicUser }) {
       {/* efdashboard's tab strip: active is a white tab lifted out of the page,
           inactive sits flat on it. Under the header, as it is there. */}
       <nav className="border-b border-rule bg-paper no-print">
-        <div className="mx-auto max-w-6xl px-6 flex gap-1 overflow-x-auto">
+        <div className="mx-auto max-w-6xl px-3 flex gap-1 overflow-x-auto">
           {TABS.map((t) =>
             t.built ? (
               <button
                 key={t.section}
                 onClick={() => setActive(t.section)}
                 aria-current={active === t.section ? 'page' : undefined}
-                className={`whitespace-nowrap px-4 py-2.5 text-[15px] rounded-t-[5px] -mb-px border border-b-0 ${
+                className={`whitespace-nowrap px-2 py-2 text-body rounded -mb-px border border-b-0 ${
                   active === t.section
-                    ? 'bg-paper-surface border-rule font-medium text-leaf'
-                    : 'border-transparent text-ink-muted hover:text-ink'
+                    ? 'bg-surface border-rule font-medium text-accent'
+                    : 'border-transparent text-ink-70 hover:text-ink'
                 }`}
               >
                 {t.label}
@@ -134,7 +134,7 @@ function Dashboard({ user }: { user: PublicUser }) {
               <span
                 key={t.section}
                 title="In preparation"
-                className="whitespace-nowrap px-4 py-2.5 text-[15px] text-ink-faint cursor-default"
+                className="whitespace-nowrap px-2 py-2 text-body text-ink-50 cursor-default"
               >
                 {t.label}
               </span>
@@ -143,15 +143,15 @@ function Dashboard({ user }: { user: PublicUser }) {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-3 py-6">
         {figures.status === 'loading' && (
-          <p className="text-sm text-ink-muted" aria-busy="true">
+          <p className="text-body text-ink-70" aria-busy="true">
             Loading the figures.
           </p>
         )}
 
         {figures.status === 'failed' && (
-          <p role="alert" className="border-l-2 border-alert pl-3 py-1 text-sm text-ink max-w-2xl">
+          <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink max-w-2xl">
             {figures.error}
           </p>
         )}

@@ -60,7 +60,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
 
       <Finding>{finding.sentence}</Finding>
 
-      <div className="grid gap-card-gap sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-3">
         <Tile
           label="Received from Polyco"
           value={fmt(finding.received)}
@@ -80,11 +80,11 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         />
       </div>
 
-      <div className="card mt-card-gap">
-        <div className="px-card pt-card pb-card">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="card mt-2">
+        <div className="px-2 pt-2 pb-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-[17px] font-bold text-leaf-deep">
+              <h3 className="text-subtitle font-semibold text-accent">
                 Payment has run ahead of delivery since shipping tightened
               </h3>
               <p className="lede mt-1 max-w-2xl">
@@ -94,13 +94,13 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="no-print rounded-field border border-rule-field px-2.5 py-1 text-[13px] font-extrabold text-leaf-deep hover:bg-leaf-wash"
+              className="no-print rounded border border-rule px-2 py-1 text-label font-semibold text-accent hover:bg-accent-soft"
             >
               {showAll ? 'Last 12 months' : 'Full history'}
             </button>
           </div>
 
-          <div className="mt-5 h-[300px] -ml-2 sm:h-[340px]">
+          <div className="mt-3 h-[300px] -ml-2 sm:h-[340px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
                 <defs>
@@ -144,28 +144,28 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-lede text-ink-muted">
-            <span className="flex items-center gap-2">
-              <span className="h-[2px] w-5 bg-leaf-deep inline-block" /> Received, cumulative
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-label text-ink-70">
+            <span className="flex items-center gap-1">
+              <span className="h-[2px] w-5 bg-accent inline-block" /> Received, cumulative
             </span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1">
               <span
-                className="h-0 w-5 inline-block border-t-2 border-dashed border-leaf"
+                className="h-0 w-5 inline-block border-t-2 border-dashed border-accent"
               /> Delivered, cumulative
             </span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1">
               <span className="h-3 w-5 inline-block border border-rule" style={{
                 backgroundImage: 'repeating-linear-gradient(45deg,#DFE5DC 0 1.6px,#FFF 1.6px 6px)',
               }} /> Advance outstanding
             </span>
           </div>
 
-          <p className="lede mt-4 border-t border-rule pt-4">
+          <p className="lede mt-2 border-t border-rule pt-2">
             Open orders and finished containers cover {coverPct}% of the advance. An order
             delivered against this balance brings in no payment, because it has already been
             paid for.{' '}
             {flagged > 0 && (
-              <span className="text-alert">
+              <span className="text-critical">
                 {flagged} ledger lines carry a date recorded inconsistently in the source
                 workbook and are being confirmed.
               </span>
@@ -180,7 +180,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         defaultOpen
       >
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[22rem] text-table-cell">
+        <table className="w-full min-w-[22rem] text-table">
           <tbody>
             <Row label="Received from Polyco" value={s.total_received} />
             <Row label="Less: value delivered" value={-s.total_delivered} />
@@ -192,7 +192,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           </tbody>
         </table>
         </div>
-        <p className="lede mt-4">
+        <p className="lede mt-2">
           Cargo clearing and freight recharged to Polyco are already inside delivered value.
           They total {fmt(s.recharges_included_in_delivered)} and are shown for information,
           not deducted a second time.
@@ -207,8 +207,8 @@ function Row({
 }: { label: string; value: number; rule?: boolean; strong?: boolean }) {
   return (
     <tr className={rule ? 'border-t border-rule' : undefined}>
-      <td className={`py-2 pr-4 ${strong ? 'font-bold text-ink-strong' : 'text-ink'}`}>{label}</td>
-      <td className={`py-2 text-right num ${strong ? 'font-bold text-ink-strong' : 'text-ink'}`}>
+      <td className={`py-1 pr-2 ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>{label}</td>
+      <td className={`py-1 text-right num ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>
         {value < 0 ? `(${fmt(Math.abs(value))})` : fmt(value)}
       </td>
     </tr>

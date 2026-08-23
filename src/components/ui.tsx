@@ -38,23 +38,23 @@ export function Tile({
    * printer; four hues do not.
    */
   const accent = {
-    plain: 'border-solid border-rule-strong',
-    leaf: 'border-solid border-leaf',
-    ember: 'border-dashed border-ember',
-    alert: 'border-dotted border-alert',
+    plain: 'border-solid border-rule',
+    leaf: 'border-solid border-accent',
+    ember: 'border-dashed border-watch',
+    alert: 'border-dotted border-critical',
   }[tone]
 
   return (
-    <div className={`card border-t-accent ${accent} flex flex-col`}>
-      <div className="px-card pt-5 pb-card flex flex-col gap-1.5">
+    <div className={`card border-t-2 ${accent} flex flex-col`}>
+      <div className="px-2 pt-3 pb-2 flex flex-col gap-1">
         <div className="eyebrow">{label}</div>
 
-        <div className="num text-[30px] leading-none font-bold text-ink-strong">{value}</div>
+        <div className="num text-figure-xl leading-none font-semibold text-ink">{value}</div>
 
-        {sub && <div className="text-lede text-ink-muted mt-0.5">{sub}</div>}
+        {sub && <div className="text-label text-ink-70 mt-1">{sub}</div>}
 
         {asAt && (
-          <div className="mt-3 self-start rounded-field border border-rule-field px-2.5 py-1 text-[13px] font-extrabold text-leaf-deep">
+          <div className="mt-2 self-start rounded border border-rule px-2 py-1 text-label font-semibold text-accent">
             {asAt}
           </div>
         )}
@@ -69,7 +69,7 @@ export function Money({ n, dp = 0 }: { n: number; dp?: number }) {
 
 export function Flag({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-block bg-alert-wash text-alert text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5">
+    <span className="inline-block bg-critical-soft text-critical text-eyebrow font-semibold uppercase tracking-wider px-1 py-1">
       {children}
     </span>
   )
@@ -92,12 +92,12 @@ export function SectionHead({
   asAt?: string
 }) {
   return (
-    <header className="mb-7">
+    <header className="mb-4">
       <p className="eyebrow">{kicker}</p>
-      <h2 className="mt-1 text-section font-bold text-leaf-deep">{title}</h2>
-      {lede && <p className="lede mt-1.5 max-w-3xl">{lede}</p>}
+      <h2 className="mt-1 text-title font-semibold text-accent">{title}</h2>
+      {lede && <p className="lede mt-1 max-w-3xl">{lede}</p>}
       {asAt && (
-        <p className="mt-3 inline-block rounded-field border border-rule-field bg-paper-surface px-2.5 py-1 text-[13px] font-extrabold text-leaf-deep">
+        <p className="mt-2 inline-block rounded border border-rule bg-surface px-2 py-1 text-label font-semibold text-accent">
           {asAt}
         </p>
       )}
@@ -112,7 +112,7 @@ export function SectionHead({
  */
 export function Finding({ children }: { children: ReactNode }) {
   return (
-    <p className="mb-7 max-w-3xl text-[17px] leading-relaxed text-ink-strong sm:text-[19px]">
+    <p className="mb-4 max-w-3xl text-subtitle leading-relaxed text-ink sm:text-figure">
       {children}
     </p>
   )
@@ -134,14 +134,14 @@ export function Working({
   defaultOpen?: boolean
 }) {
   return (
-    <details open={defaultOpen} className="card mt-card-gap group print:!block">
-      <summary className="cursor-pointer list-none px-card py-4 no-print">
-        <span className="text-[15px] font-bold text-leaf-deep">{title}</span>
-        <span className="ml-2 text-lede text-ink-muted group-open:hidden">Show</span>
-        <span className="ml-2 text-lede text-ink-muted hidden group-open:inline">Hide</span>
+    <details open={defaultOpen} className="card mt-2 group print:!block">
+      <summary className="cursor-pointer list-none px-2 py-2 no-print">
+        <span className="text-body font-semibold text-accent">{title}</span>
+        <span className="ml-1 text-label text-ink-70 group-open:hidden">Show</span>
+        <span className="ml-1 text-label text-ink-70 hidden group-open:inline">Hide</span>
         {lede && <span className="lede mt-1 block">{lede}</span>}
       </summary>
-      <div className="px-card pb-card pt-1">{children}</div>
+      <div className="px-2 pb-2 pt-1">{children}</div>
     </details>
   )
 }
@@ -149,8 +149,8 @@ export function Working({
 export function Note({ tone = 'plain', children }: { tone?: 'plain' | 'alert'; children: ReactNode }) {
   return (
     <div
-      className={`border-l-2 pl-3 py-1 text-sm leading-relaxed ${
-        tone === 'alert' ? 'border-alert text-ink' : 'border-rule-strong text-ink-muted'
+      className={`border-l-2 pl-2 py-1 text-body leading-relaxed ${
+        tone === 'alert' ? 'border-critical text-ink' : 'border-rule text-ink-70'
       }`}
     >
       {children}

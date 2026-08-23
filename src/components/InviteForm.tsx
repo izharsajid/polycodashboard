@@ -55,28 +55,28 @@ export default function InviteForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4 max-w-sm">
-      <label className="flex flex-col gap-1.5">
+    <form onSubmit={submit} className="flex flex-col gap-2 max-w-sm">
+      <label className="flex flex-col gap-1">
         <span className="eyebrow">Their name</span>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="rulebox px-3 py-2 text-sm"
+          className="rulebox px-2 py-1 text-body"
         />
       </label>
 
-      <label className="flex flex-col gap-1.5">
+      <label className="flex flex-col gap-1">
         <span className="eyebrow">Their email</span>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="rulebox px-3 py-2 text-sm"
+          className="rulebox px-2 py-1 text-body"
         />
-        <span className="text-xs text-ink-muted">
+        <span className="text-label text-ink-70">
           {isAdmin
             ? 'Either polycohealthline.com or ecofibre.bh.'
             : `Colleagues at ${ownDomain}. Ask an administrator for anyone else.`}
@@ -84,12 +84,12 @@ export default function InviteForm({
       </label>
 
       {isAdmin && (
-        <label className="flex flex-col gap-1.5">
+        <label className="flex flex-col gap-1">
           <span className="eyebrow">Role</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as PublicUser['role'])}
-            className="rulebox px-3 py-2 text-sm"
+            className="rulebox px-2 py-1 text-body"
           >
             <option value="member">Member</option>
             <option value="admin">Administrator</option>
@@ -98,12 +98,12 @@ export default function InviteForm({
       )}
 
       {error && (
-        <p role="alert" className="border-l-2 border-alert pl-3 py-1 text-sm text-ink">
+        <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
           {error}
         </p>
       )}
       {done && (
-        <p role="status" className="border-l-2 border-leaf pl-3 py-1 text-sm text-ink">
+        <p role="status" className="border-l-2 border-accent pl-2 py-1 text-body text-ink">
           {done}
         </p>
       )}
@@ -111,7 +111,7 @@ export default function InviteForm({
       <button
         type="submit"
         disabled={busy}
-        className="bg-leaf-deep text-white text-sm font-semibold py-2.5 mt-2 disabled:opacity-50"
+        className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
       >
         {busy ? 'Adding them' : 'Add them'}
       </button>

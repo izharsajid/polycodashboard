@@ -1,119 +1,120 @@
 # Design tokens
 
-Every value here was read off `https://efdashboard.com` as a computed style on
-22 August 2026, not sampled from a screenshot and not approximated. The source
-column says which element it came from, so any of it can be checked again.
+From `DESIGN-SYSTEM-SPEC.md`. This replaces the previous file, which recorded
+tokens read off efdashboard.com. That reference has been retired: efdashboard is
+an internal operations tool, and this is a document two boards read to make a
+decision together.
 
-Where efdashboard has no equivalent, the token is derived from these values and
-marked **derived**. Nothing is invented.
-
-## Colour
-
-| Token | Value | Read from |
-|---|---|---|
-| `paper` | `#FAFAFA` | `body` background |
-| `paper-panel` | `#FBFCFA` | `th` background |
-| `surface` | `#FFFFFF` | card background |
-| `ink` | `#333333` | `body` colour |
-| `ink-muted` | `#6D7869` | section description line |
-| `ink-faint` | `#7B8578` | `.stock-unit` |
-| `ink-strong` | `#263D23` | `.po-number-primary`, `.stock-number` |
-| `leaf` | `#507A48` | `h1`, active tab, card top border |
-| `leaf-deep` | `#294525` | `h2` section headings |
-| `leaf-mid` | `#41613B` | `td` colour |
-| `rule` | `#DFE5DC` | `th` bottom border |
-| `rule-soft` | `#DAE4D4` | `td` bottom border |
-| `rule-field` | `#D8E5CE` | as-at pill border |
-| `kicker` | `#71846B` | `.inventory-kicker` |
-| `th-ink` | `#687365` | `th` colour |
-
-### Status palette
-
-Read from `.po-state` on the PO tracker. Text on wash, `border-radius: 999px`,
-`font-weight: 800`, `font-size: 10.88px`, `padding: 5px 8px`.
-
-| Token | Text | Wash | efdashboard state |
-|---|---|---|---|
-| `state-good` | `#257443` | `#E6F5EB` | Dispatched |
-| `state-info` | `#345C8A` | `#E8F1FB` | Processing |
-| `state-plan` | `#70458A` | `#F1E8F7` | Booked |
-| `state-watch` | `#8A4A10` | `#FFF0D8` | PO pending |
-| `state-critical` | `#AD3029` | `#FDE8E6` | On hold |
-| `state-off` | `#625C5C` | `#ECE9E9` | Cancelled |
-
-`state-critical` is the only red. Per REDESIGN-SPEC §2 it stays reserved for
-shortfalls, exceptions and placeholders, never as an ordinary accent.
-
-**Tone is never carried by colour alone.** These print into board packs, and
-four mid-toned colours are one grey on a monochrome printer. The tile accent
-pairs each colour with a border style: plain is solid and pale, leaf solid and
-dark, ember dashed, alert dotted. The same rule applies to chart series, which
-are distinguished by line style and direct labelling per §6.
-
-**Derived:** `hatch` `#DFE5DC` for the receipts-chart uncovered band, taken from
-`rule` because efdashboard has no hatched fill. Greyscale-safe, so it survives a
-board pack printout (§6).
+The register is **an institutional financial document rendered on a screen**.
+Typography carries the design. Space and rules replace cards. Figures dominate.
 
 ## Typography
 
-efdashboard specifies `"Segoe UI", Tahoma, Geneva, Verdana, sans-serif`.
+Two families loaded, plus the wordmark.
 
-**We use Montserrat instead, deliberately.** Segoe UI is a Windows system font.
-It does not resolve on the Macs and phones this is read on, so it falls through
-to Tahoma, and copying the stack would copy an intention rather than a result.
-Montserrat was already loaded in this project, renders identically everywhere,
-and sits closer to the extracted weights than the fallback does. Every size,
-weight and tracking below is efdashboard's; only the family differs.
-
-| Role | Size | Weight | Line height | Tracking | Read from |
-|---|---|---|---|---|---|
-| Page title | 32px | 700 | 51.2px | normal | `h1` |
-| Section heading | 23.2px | 700 | 29px | normal | `h2` |
-| Category label | 11.52px | 800 | — | 1.3824px, uppercase | `.inventory-kicker` |
-| Description line | 14.08px | 400 | 22.528px | normal | section `p` |
-| Table header | 11.2px | 800 | — | 0.616px, uppercase | `th` |
-| Table cell | 12px | 400 | — | normal | `td` |
-| Figure | 16.8px | 750 | 26.88px | normal | `.stock-number` |
-| Figure unit | 11.52px | 400 | — | normal | `.stock-unit` |
-| Body | 16px | 400 | 25.6px | normal | `body` |
-
-**Kept from this project regardless of the extraction**, per §2: tabular
-figures with thousands separators, right-aligned in tables. efdashboard
-left-aligns its `td` and uses `font-variant-numeric: normal`; financial figures
-have to line up on the decimal, so `.num` keeps `tabular-nums` and tables keep
-`text-right` on figure columns.
-
-The figure size above is efdashboard's inline stock number, which is not a
-headline tile. §4 asks for at most three figures set large enough to be
-remembered, so headline tiles scale that role up while keeping its weight and
-colour. Recorded here so the departure is visible rather than silent.
-
-## Shape and spacing
-
-| Token | Value | Read from |
+| Role | Family | Weights |
 |---|---|---|
-| Card radius | 14px | card |
-| Card shadow | `0 10px 30px rgba(59,89,54,0.08)` | card |
-| Card accent | `border-top: 5px solid #507A48` | `.inventory-toolbar` |
-| Card padding | `24px 26px 18px` | `.inventory-toolbar` |
-| Card gap | 20px | card `margin-bottom` |
-| Field radius | 6px | `.inventory-as-of` |
-| Table cell padding | `12px 14px` header, `9px 14px` body | `th`, `td` |
-| Tab radius | `5px 5px 0 0` | `.tab.active` |
-| Title block | `margin-bottom: 30px` | `h1` parent |
+| Findings, headings, section titles | Source Serif 4 | 400, 600 |
+| Interface, labels, body, tables, every figure | Inter | 400, 500, 600 |
+| EcoFibre wordmark, header only | Montserrat | 700 |
 
-## Section navigation
+Montserrat is retired everywhere except the wordmark. No monospace anywhere:
+Inter's `tnum` figures align on the decimal without the typewriter texture.
 
-Tabs sit under the page header. Active is white on the page background with a
-`5px 5px 0 0` radius and `#507A48` text at weight 500; inactive is the same
-shape without the white fill.
+| Token | Size / line height | Family, weight | Use |
+|---|---|---|---|
+| `finding` | 30px / 1.25 | Serif 400 | The one sentence at the top of a screen |
+| `title` | 21px / 1.3 | Serif 600 | Section heading |
+| `subtitle` | 17px / 1.4 | Serif 400 | Block heading inside a section |
+| `figure-xl` | 42px / 1 | Inter 600, tnum | Headline figures |
+| `figure` | 19px / 1.2 | Inter 600, tnum | Secondary figures |
+| `body` | 15px / 1.6 | Inter 400 | Prose |
+| `label` | 13px / 1.4 | Inter 400 | Descriptions, captions |
+| `eyebrow` | 11px / 1 | Inter 600, 0.14em, uppercase | Category labels, table headers |
+| `table` | 13px / 1.5 | Inter 400, tnum | Table cells |
 
-## Structural pattern
+Serif headings are set at 400 and 600 only. Never bolded further, never
+letterspaced, never uppercase.
 
-Every section opens with three things, per §3:
+## Colour
 
-```
-RAW MATERIALS                                    category label, 11.52px/800, uppercase
-Stock overview                                   heading, 23.2px/700
-Current availability and average daily consumption   description, 14.08px/400
-```
+Near-monochrome with one accent.
+
+| Token | Value | Use |
+|---|---|---|
+| `ink` | `#16181A` | Primary text, headings, figures |
+| `ink-70` | `#4A4F55` | Body prose |
+| `ink-50` | `#6F757C` | Labels, captions, axis text |
+| `ink-30` | `#A8ADB3` | Disabled, placeholder |
+| `rule` | `#E4E6E8` | Hairline borders, table rules |
+| `rule-soft` | `#EFF1F2` | Banding, hover |
+| `paper` | `#FCFCFB` | Page background |
+| `surface` | `#FFFFFF` | Sticky headers, raised areas |
+| `accent` | `#2D5F3F` | The one accent |
+| `accent-soft` | `#EDF2EE` | Accent wash, used rarely |
+| `watch` | `#A26600` | Watch state |
+| `watch-soft` | `#FBF3E4` | Watch wash |
+| `critical` | `#9B2C24` | Shortfall, exception, placeholder |
+| `critical-soft` | `#FAEDEC` | Critical wash |
+
+### Two corrections to the specified palette
+
+Section 7 sets a 4.5:1 minimum for body text and asks for `ink-50` on `paper` to
+be checked and fixed rather than left. Measured on the specified values:
+
+| Token | Specified | Ratio on paper | Corrected to | Ratio |
+|---|---|---|---|---|
+| `ink-50` | `#71777E` | 4.41 — fails | `#6F757C` | 4.53 |
+| `watch` | `#A66A00` | 4.37 — fails | `#A26600` | 4.61 |
+
+`watch` was corrected on the same grounds: it sets 11px pill text, which is body
+size. `ink-30` measures 2.20 and is left as specified, because it is used only
+for disabled controls and placeholder text, which the contrast minimum exempts.
+
+Everything else in the specified palette passes: `ink` 17.34, `ink-70` 8.05,
+`accent` 7.25, `critical` 7.36.
+
+### Rules
+
+- One accent. Active nav, the chart series carrying the message, a primary
+  action. Nothing else.
+- No coloured background behind a figure. Numbers sit on `paper` or `surface`.
+- Red only for a shortfall, an exception or a placeholder.
+- Charts are monochrome: the ink ramp for context, `accent` for the message. Two
+  colours maximum.
+- Every state survives greyscale. If removing colour loses the meaning, there is
+  a mark as well.
+
+## Layout
+
+The card is retired. No radius on containers, no shadow, no accent bars. Sections
+are separated by space, and by a 1px `rule` hairline where a division is genuinely
+needed.
+
+Radius survives in three places only, at 4px: pills, buttons, form fields.
+
+Spacing is an 8px base, exposed as the only steps available:
+
+| Class | Pixels |
+|---|---|
+| `1` | 8 |
+| `2` | 16 |
+| `3` | 24 |
+| `4` | 32 |
+| `6` | 48 |
+| `8` | 64 |
+| `12` | 96 |
+
+Page gutters 48px desktop and 20px phone; 64px between sections; 24px between a
+heading and its content; 8px between a figure and its label. Content is 1280px
+wide, except the statement and the order table which are full bleed.
+
+Everything is left-aligned except figures in tables, which are right-aligned.
+Nothing is centred.
+
+## What the tailwind config does with this
+
+`theme.colors`, `theme.fontFamily`, `theme.fontSize`, `theme.spacing`,
+`theme.borderRadius` and `theme.boxShadow` are **replaced**, not extended. The
+previous palette competed with this one, and leaving it within reach means it
+returns one class at a time.

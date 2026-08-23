@@ -1,3 +1,4 @@
+import { Package } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { LedgerT, PoOrderT, PoTrackerT } from '../lib/schema'
 import {
@@ -92,6 +93,7 @@ export default function Tab4Orders({
   return (
     <section>
       <SectionHead
+        icon={<Package size={19} className="text-ink-50" aria-hidden />}
         kicker="Order book"
         title="Still to be made"
         lede="Every Polyco order on the tracker, what stage it is at, and the documents against it."

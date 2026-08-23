@@ -1,3 +1,4 @@
+import { CalendarDays } from 'lucide-react'
 import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -5,10 +6,11 @@ import {
 import type { StatementsT, StatementT, ReconRowT } from '../lib/schema'
 import {
   fundingSeries, statementMonths, latestStatement, recurringMonthlyCost,
-  statementFoots, statementCoverage, round2, fmt,
+  statementFoots, statementCoverage, round2,
 } from '../lib/engine'
 import { settlementFinding } from '../lib/engine/findings'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
+import { money, moneyWhole } from '../lib/format'
 import { Finding, Flag, Money, Note, SectionHead, Tile, Working } from '../components/ui'
 
 const MONTHS = [
@@ -133,6 +135,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
   return (
     <section>
       <SectionHead
+        icon={<CalendarDays size={19} className="text-ink-50" aria-hidden />}
         kicker="Funding and settlement"
         title="Monthly funding statements"
         lede={`A monthly Financial Overview has been issued to Polyco since ${monthName(months[0].id)}, setting out the funds required line by line. All figures in US dollars.`}
@@ -144,19 +147,19 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
       <div className="grid gap-2 sm:grid-cols-3">
         <Tile
           label="Funds requested"
-          value={fmt(lastPoint.requestedCumulative)}
+          value={moneyWhole(lastPoint.requestedCumulative)}
           sub={`${statements.statements.length} statements, ${monthName(months[0].id)} to ${monthName(latest.id)}`}
         />
         <Tile
           label="Received against statements"
-          value={fmt(lastPoint.receivedCumulative)}
+          value={moneyWhole(lastPoint.receivedCumulative)}
           sub="Ledger receipts matched to statement periods"
         />
         <Tile
           label="Received less requested"
-          value={`(${fmt(Math.abs(shortfall))})`}
+          value={moneyWhole(shortfall)}
           tone="critical"
-          sub={`(${fmt(Math.abs(looseVariance))}) of it sits in the ${looseRows.length} periods with no or partial ledger match`}
+          sub={`${moneyWhole(looseVariance)} of it sits in the ${looseRows.length} periods with no or partial ledger match`}
         />
       </div>
 
@@ -183,7 +186,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 />
                 <Tooltip
                   labelFormatter={(v) => monthName(String(v))}
-                  formatter={(v: number, n: string) => [fmt(v), n]}
+                  formatter={(v: number, n: string) => [money(v), n]}
                   contentStyle={TOOLTIP_STYLE}
                 />
                 {/* Dashed against solid, so they stay apart on a monochrome printer. */}
@@ -217,7 +220,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         <div className="px-2 pt-2 pb-2">
           <p className="eyebrow">Cost of holding the operation open</p>
           <h3 className="mt-1 text-subtitle font-semibold text-accent">
-            {fmt(recurring.total)} a month at the current configuration
+            {moneyWhole(recurring.total)} a month at the current configuration
           </h3>
           <p className="lede mt-1 max-w-3xl">
             The recurring lines of the {monthName(latest.id)} statement, excluding raw fibre

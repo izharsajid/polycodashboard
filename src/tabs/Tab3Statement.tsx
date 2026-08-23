@@ -1,6 +1,7 @@
+import { BookOpen } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { LedgerT } from '../lib/schema'
-import { fmt, round2 } from '../lib/engine'
+import { round2 } from '../lib/engine'
 import {
   COLUMNS, PRESETS, balanceIsMeaningful, cellValue, entryTypeLabel, sortEntries,
   statementView, wholeDollars, type BalancedEntry, type StatementEntry,
@@ -11,6 +12,7 @@ import {
   DATE_PRESETS, DEFAULT_STATE, readStatementUrl, resolvePreset, writeStatementUrl,
   type PresetKey, type StatementUrlState,
 } from '../lib/statement-url'
+import { money, moneyWhole } from '../lib/format'
 import { Finding, SectionHead, Tile } from '../components/ui'
 
 function dayLong(iso: string | null) {
@@ -20,10 +22,7 @@ function dayLong(iso: string | null) {
   return `${+d} ${months[+m - 1]} ${y}`
 }
 
-/** Negatives in parentheses, consistent decimals down each column. Section 6. */
-function money(value: number, dp = 2) {
-  return value < 0 ? `(${fmt(Math.abs(value), dp)})` : fmt(value, dp)
-}
+
 
 export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: string }) {
   const [state, setState] = useState<StatementUrlState>(() =>
@@ -87,14 +86,15 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
   const headline = wholeDollars(view)
 
   const finding =
-    `The account stands at ${money(headline.closing, 0)} in Polyco's favour` +
+    `The account stands at ${moneyWhole(headline.closing)} in Polyco's favour` +
     (view.filtered
-      ? `, opening at ${money(headline.opening, 0)} and moving ${money(headline.movement, 0)} over the range shown.`
-      : `, being ${money(ledger.summary.total_received, 0)} received against ${money(ledger.summary.total_delivered, 0)} delivered.`)
+      ? `, opening at ${moneyWhole(headline.opening)} and moving ${moneyWhole(headline.movement)} over the range shown.`
+      : `, being ${moneyWhole(ledger.summary.total_received)} received against ${moneyWhole(ledger.summary.total_delivered)} delivered.`)
 
   return (
     <section>
       <SectionHead
+        icon={<BookOpen size={19} className="text-ink-50" aria-hidden />}
         kicker="Account"
         title="Statement"
         lede="Every transaction between the two companies, in date order, with a running balance. Export a range and reconcile it against your own ledger."
@@ -109,9 +109,9 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
       </p>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <Tile label="Opening balance" value={money(headline.opening, 0)} sub={state.from ? `Carried into ${dayLong(state.from)}` : 'Nothing before the first transaction'} />
-        <Tile label="Movement in period" value={money(headline.movement, 0)} sub={`${rows.length} entries shown`} />
-        <Tile label="Closing balance" value={money(headline.closing, 0)} sub="Value EcoFibre holds yet to deliver" tone="critical" />
+        <Tile label="Opening balance" value={moneyWhole(headline.opening)} sub={state.from ? `Carried into ${dayLong(state.from)}` : 'Nothing before the first transaction'} />
+        <Tile label="Movement in period" value={moneyWhole(headline.movement)} sub={`${rows.length} entries shown`} />
+        <Tile label="Closing balance" value={moneyWhole(headline.closing)} sub="Value EcoFibre holds yet to deliver" tone="critical" />
       </div>
 
       {/* Controls in one bar, not scattered. Section 6. */}

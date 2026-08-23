@@ -25,8 +25,8 @@ export function monthName(period: string): string {
  * full precision, because that is where the tie is proved.
  */
 export function millions(n: number): string {
-  const sign = n < 0 ? '-' : ''
-  return `${sign}${(Math.abs(n) / 1e6).toFixed(2)}m`
+  const text = `$${(Math.abs(n) / 1e6).toFixed(2)}m`
+  return n < 0 ? `(${text})` : text
 }
 
 export type PositionFinding = {
@@ -85,6 +85,6 @@ export function settlementFinding(d: StatementsT): SettlementFinding | null {
     largestGap,
     sentence:
       `Every statement since ${monthName(run[0].period)} has been matched to receipts, ` +
-      `${run.length} months in a row. The largest gap in that run is ${fmt(largestGap)}.`,
+      `${run.length} months in a row. The largest gap in that run is $${fmt(largestGap)}.`,
   }
 }

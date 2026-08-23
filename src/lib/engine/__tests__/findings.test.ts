@@ -19,9 +19,9 @@ describe('the finding at the top of Tab 1', () => {
   it('reads as a statement, and carries every figure it mentions', () => {
     const { sentence } = positionFinding(ledger)
 
-    expect(sentence).toContain('5.77m')
-    expect(sentence).toContain('3.66m')
-    expect(sentence).toContain('1.41m')
+    expect(sentence).toContain('$5.77m')
+    expect(sentence).toContain('$3.66m')
+    expect(sentence).toContain('$1.41m')
     expect(sentence.split(' ').length).toBeLessThan(40)
   })
 
@@ -31,8 +31,8 @@ describe('the finding at the top of Tab 1', () => {
       ...ledger,
       summary: { ...ledger.summary, total_received: 4_000_000 },
     }
-    expect(positionFinding(smaller).sentence).toContain('4.00m')
-    expect(positionFinding(smaller).sentence).not.toContain('5.77m')
+    expect(positionFinding(smaller).sentence).toContain('$4.00m')
+    expect(positionFinding(smaller).sentence).not.toContain('$5.77m')
   })
 })
 
@@ -51,7 +51,7 @@ describe('the finding at the top of Tab 2', () => {
     // January 2026 fell short by 25,799, which is the one material gap in the run
     // and the thing a reader most needs to see.
     expect(finding.largestGap).toBe(25799)
-    expect(finding.sentence).toContain('25,799')
+    expect(finding.sentence).toContain('$25,799')
     expect(finding.sentence).toContain('January 2026')
   })
 
@@ -80,9 +80,9 @@ describe('the finding at the top of Tab 2', () => {
 
 describe('formatting helpers', () => {
   it('abbreviates to millions for prose only', () => {
-    expect(millions(5771014.86)).toBe('5.77m')
-    expect(millions(1410206.34)).toBe('1.41m')
-    expect(millions(-25799)).toBe('-0.03m')
+    expect(millions(5771014.86)).toBe('$5.77m')
+    expect(millions(1410206.34)).toBe('$1.41m')
+    expect(millions(-25799)).toBe('($0.03m)')
   })
 
   it('names a month', () => {

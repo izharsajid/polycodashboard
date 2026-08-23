@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { fmt } from '../lib/engine'
+import { money } from '../lib/format'
 
 /**
  * A headline figure. No box.
@@ -32,8 +32,8 @@ export function Tile({
   )
 }
 
-export function Money({ n, dp = 0 }: { n: number; dp?: number }) {
-  return <span className="num">{n < 0 ? `(${fmt(Math.abs(n), dp)})` : fmt(n, dp)}</span>
+export function Money({ n, dp = 2 }: { n: number; dp?: 0 | 2 }) {
+  return <span className="num">{money(n, dp)}</span>
 }
 
 export function Flag({ children }: { children: ReactNode }) {

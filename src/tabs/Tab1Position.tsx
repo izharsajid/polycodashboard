@@ -1,11 +1,13 @@
+import { Scale } from 'lucide-react'
 import { useState } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
 import type { LedgerT } from '../lib/schema'
-import { cumulativeSeries, orderCover, uncoveredAdvance, fmt } from '../lib/engine'
+import { cumulativeSeries, orderCover, uncoveredAdvance } from '../lib/engine'
 import { positionFinding } from '../lib/engine/findings'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
+import { money, moneyWhole } from '../lib/format'
 import { Finding, SectionHead, Tile, Working } from '../components/ui'
 
 function monthLabel(iso: string) {
@@ -53,6 +55,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
   return (
     <section>
       <SectionHead
+        icon={<Scale size={19} className="text-ink-50" aria-hidden />}
         kicker="Polyco position"
         title="Where we stand"
         lede="Advances received set against goods delivered, and against every order still open. All figures in US dollars."
@@ -64,17 +67,17 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
       <div className="grid gap-2 sm:grid-cols-3">
         <Tile
           label="Received from Polyco"
-          value={fmt(finding.received)}
+          value={moneyWhole(finding.received)}
           sub="Cumulative, all periods"
         />
         <Tile
           label="Value delivered"
-          value={fmt(finding.delivered)}
+          value={moneyWhole(finding.delivered)}
           sub="Goods shipped, including recharges"
         />
         <Tile
           label="Advance not yet covered"
-          value={fmt(finding.uncovered)}
+          value={moneyWhole(finding.uncovered)}
           sub="After every open order and ready container ships"
           tone="critical"
         />
@@ -122,7 +125,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
                 />
                 <Tooltip
                   labelFormatter={(v) => monthLabel(String(v))}
-                  formatter={(v: number, n: string) => [fmt(v), n]}
+                  formatter={(v: number, n: string) => [money(v), n]}
                   contentStyle={TOOLTIP_STYLE}
                 />
                 {/* Solid against dashed, so the two series stay apart in greyscale. */}
@@ -191,7 +194,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         </div>
         <p className="lede mt-2">
           Cargo clearing and freight recharged to Polyco are already inside delivered value.
-          They total {fmt(s.recharges_included_in_delivered)} and are shown for information,
+          They total {money(s.recharges_included_in_delivered)} and are shown for information,
           not deducted a second time.
         </p>
       </Working>
@@ -206,7 +209,7 @@ function Row({
     <tr className={rule ? 'border-t border-rule' : undefined}>
       <td className={`py-1 pr-2 ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>{label}</td>
       <td className={`py-1 text-right num ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>
-        {value < 0 ? `(${fmt(Math.abs(value))})` : fmt(value)}
+        {money(value)}
       </td>
     </tr>
   )

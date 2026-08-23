@@ -4,6 +4,7 @@ import {
   Tooltip, XAxis, YAxis,
 } from 'recharts'
 import Gantt from '../components/Gantt'
+import ScheduleReconciliation from '../components/ScheduleReconciliation'
 import { machineFinding } from '../lib/engine/findings'
 import { floorBreachMonth, monthlyMachineCount } from '../lib/engine/machines'
 import type { LedgerT, MachineScheduleT, PoTrackerT } from '../lib/schema'
@@ -23,6 +24,7 @@ import { Finding, SectionHead, Tile } from '../components/ui'
 export default function Tab6Machines({
   schedule,
   ledger,
+  tracker,
 }: {
   schedule: MachineScheduleT
   ledger: LedgerT
@@ -175,6 +177,8 @@ export default function Tab6Machines({
           </ResponsiveContainer>
         </div>
       </div>
+
+      <ScheduleReconciliation schedule={schedule} ledger={ledger} tracker={tracker} />
     </section>
   )
 }

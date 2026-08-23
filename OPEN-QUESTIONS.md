@@ -2,6 +2,18 @@
 
 Blocking Phase B. Nothing here blocks Tabs 1 to 3.
 
+## Design system and redesign, this run
+
+- [ ] `DESIGN-SYSTEM-SPEC.md` section 1 asks for `/mnt/skills/public/frontend-design/SKILL.md`
+      and the frontend-design plugin to be read first. Neither exists on this machine, so
+      the work was built from the specification itself, which is detailed enough to follow.
+      If that skill carries conventions the spec does not, this run will not reflect them.
+- [x] The header did not fit a 380px screen: the wordmark, name and sign-out ran to 417px
+      and pushed the page sideways. The Polyco name and the role suffix are now hidden
+      below the small breakpoint, and the name truncates. Verified at 378px.
+- [x] Two palette values were darkened to meet the 4.5:1 body minimum section 7 sets:
+      `ink-50` and `watch`. Measurements are in `DESIGN.md`.
+
 ## Access and disclosure
 
 - [x] Resolved 22 August 2026, by Izhar. The staff cost lines in

@@ -14,7 +14,7 @@ export default function Header({ user }: { user: PublicUser }) {
 
   return (
     <header className="h-8 border-b border-rule bg-surface">
-      <div className="mx-auto flex h-full max-w-page items-center justify-between gap-2 px-6">
+      <div className="mx-auto flex h-full max-w-page items-center justify-between gap-2 px-[20px] sm:px-6">
         <div className="flex items-baseline gap-1">
           <span className="font-wordmark text-body font-semibold tracking-tight text-ink">
             ECOFIBRE
@@ -22,18 +22,18 @@ export default function Header({ user }: { user: PublicUser }) {
           <span className="text-ink-30" aria-hidden>
             /
           </span>
-          <span className="text-body text-ink-50">Polyco Healthline</span>
+          <span className="hidden text-body text-ink-50 sm:inline">Polyco Healthline</span>
         </div>
 
-        <div className="flex items-baseline gap-2">
+        <div className="flex min-w-0 items-baseline gap-2">
           {user.role === 'admin' && (
             <button type="button" onClick={() => navigate(ADMIN)} className="btn-text no-print">
               People
             </button>
           )}
-          <button type="button" onClick={() => navigate(ACCOUNT)} className="btn-text">
+          <button type="button" onClick={() => navigate(ACCOUNT)} className="btn-text truncate">
             {user.name}
-            <span className="text-ink-50"> · {ROLE_LABEL[user.role]}</span>
+            <span className="hidden text-ink-50 sm:inline"> · {ROLE_LABEL[user.role]}</span>
           </button>
           <button type="button" onClick={() => void signOut()} className="btn-text no-print">
             Sign out

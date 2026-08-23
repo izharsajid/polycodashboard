@@ -98,7 +98,19 @@
 
 @media print {
   body {
+    /* Paper becomes white. Section 7. */
     @apply bg-white;
+  }
+
+  /* Nothing on paper is a link to somewhere. */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* A pill's wash prints as grey mush; the mark and the word carry it. */
+  .pill-print-plain {
+    background: transparent !important;
   }
 
   .no-print {

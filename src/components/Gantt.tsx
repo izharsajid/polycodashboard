@@ -70,7 +70,7 @@ function RunBar({
         onClick={onOpen}
         aria-expanded={open}
         style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-        className={`absolute inset-y-1 z-10 flex items-center overflow-hidden rounded-sm px-1 text-left ${
+        className={`absolute inset-y-1 z-10 flex items-center overflow-hidden px-1 text-left ${
           open ? 'ring-2 ring-ink ring-offset-1' : ''
         }`}
         title={`${machine.name}: ${run.product}`}
@@ -131,10 +131,17 @@ export default function Gantt({
         gutters at every breakpoint, which put today seventeen pixels off its own
         date on a wide screen.
       */}
-      <div className="relative pb-4">
+      {/*
+        On a phone the track would be about two hundred pixels for seven months,
+        which is proportionally honest and completely unreadable. The chart keeps
+        its width and scrolls inside its own container instead, so the page never
+        scrolls sideways and the time axis is never compressed to nothing.
+      */}
+      <div className="overflow-x-auto print:overflow-visible chart-print-grey">
+      <div className="relative min-w-[620px] pb-4">
       <div className="grid grid-cols-[68px_1fr_74px] sm:grid-cols-[92px_1fr_96px]">
-        <div className="border-b border-rule" />
-        <div className="relative h-5 border-b border-rule">
+        <div className="sticky left-0 z-40 border-b border-rule bg-paper" />
+        <div className="relative h-3 border-b border-rule">
           {window.months.map((month) => (
             <span
               key={month.period}
@@ -149,14 +156,17 @@ export default function Gantt({
 
         {schedule.machines.map((machine) => (
           <Fragment key={machine.id}>
-            <div className="flex flex-col justify-center border-b border-rule-soft py-1 pr-1">
+            {/* Sticky inside the scroller: scrolling to February must not take
+                the machine names with it, or the reader is looking at eight
+                anonymous rows. */}
+            <div className="sticky left-0 z-40 flex flex-col justify-center border-b border-rule-soft bg-paper py-1 pr-1">
               <span className="text-label font-medium text-ink">{machine.id}</span>
               <span className="truncate text-eyebrow text-ink-50">
                 {machine.status === 'mould_changing' ? 'Mould change' : 'Running'}
               </span>
             </div>
 
-            <div className="relative h-9 border-b border-rule-soft">
+            <div className="relative h-4 border-b border-rule-soft print:break-inside-avoid">
               {/* Month gridlines. A vertical rule is the time axis on a Gantt
                   rather than decoration, which is why section 6's no-vertical-
                   gridlines rule does not apply here. */}
@@ -227,10 +237,11 @@ export default function Gantt({
           <div />
         </div>
       </div>
+      </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-label text-ink-50">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-4 rounded-sm bg-accent" /> Scheduled run
+          <span className="inline-block h-2 w-4 bg-accent" /> Scheduled run
         </span>
         <span className="flex items-center gap-1">
           <span

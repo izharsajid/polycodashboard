@@ -29,7 +29,7 @@ export default function ScheduleReconciliation({
   const notInLedger = recon.foundInTracker.length + recon.foundInNeither.length
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 page-break">
       {/* Both directions in one line. A heading that says only "every order on
           the schedule is accounted for" sits directly above a list of nine
           orders with no machine, and reads as a contradiction of it. */}
@@ -84,7 +84,8 @@ function NoMachine({ recon }: { recon: Recon }) {
         this is a list rather than an exception to act on here.
       </p>
 
-      <table className="mt-2 w-full max-w-4xl text-table">
+      <div className="overflow-x-auto print:overflow-visible">
+      <table className="mt-2 w-full min-w-[520px] max-w-4xl text-table">
         <thead>
           <tr className="border-b border-rule text-left">
             <th className="eyebrow py-1 pr-2">Purchase order</th>
@@ -115,6 +116,7 @@ function NoMachine({ recon }: { recon: Recon }) {
           </tr>
         </tfoot>
       </table>
+      </div>
     </section>
   )
 }
@@ -171,8 +173,11 @@ function NotInLedger({ recon, count, asAt }: { recon: Recon; count: number; asAt
         </ul>
       )}
 
-      {open && (
-        <table className="mt-2 w-full max-w-4xl text-table print:!table">
+      {/* Always rendered, hidden on screen until asked for. Section 6: the
+          reconciliation never silently drops a row, and paper has no control to
+          click. */}
+      <div className={`overflow-x-auto print:overflow-visible ${open ? '' : 'hidden print:block'}`}>
+        <table className="mt-2 w-full min-w-[520px] max-w-4xl text-table">
           <thead>
             <tr className="border-b border-rule text-left">
               <th className="eyebrow py-1 pr-2">Purchase order</th>
@@ -192,7 +197,7 @@ function NotInLedger({ recon, count, asAt }: { recon: Recon; count: number; asAt
             ))}
           </tbody>
         </table>
-      )}
+      </div>
     </section>
   )
 }
@@ -215,7 +220,8 @@ function MultiMachine({ recon }: { recon: Recon }) {
         machines. Listed so the machine count is not read as a double count.
       </p>
 
-      <table className="mt-2 w-full max-w-4xl text-table">
+      <div className="overflow-x-auto print:overflow-visible">
+      <table className="mt-2 w-full min-w-[460px] max-w-4xl text-table">
         <thead>
           <tr className="border-b border-rule text-left">
             <th className="eyebrow py-1 pr-2">Purchase order</th>
@@ -233,6 +239,7 @@ function MultiMachine({ recon }: { recon: Recon }) {
           ))}
         </tbody>
       </table>
+      </div>
     </section>
   )
 }

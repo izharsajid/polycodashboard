@@ -165,3 +165,27 @@ unable to tell a new error from an old one.
 ## Parked exceptions
 See BUILD-SPEC.md section 8a. None block the build; all must be resolved before anything
 is issued to Polyco.
+
+## Machines tab, build notes from this run
+- [x] Three Tailwind classes in the Gantt resolved to nothing, because the design system
+      replaced the spacing and radius scales rather than extending them: `h-5` and `h-9`
+      are not on the 8px scale and `rounded-sm` is not in the radius scale. The month
+      scale row collapsed to its 1px border and its labels floated up into the lede above
+      it, which is why the scale looked missing on the desktop view. Fixed to `h-3`,
+      `h-4` and no radius. Worth a lint rule: a replaced scale makes a wrong class
+      silently do nothing rather than fail.
+- [ ] CAPACITY-SPEC section 3 asks for the Gantt to run September 2026 to March 2027 with
+      today marked, but today is 23 August. The window opens at 1 August instead, so
+      today's rule is visible inside the axis rather than flush against its left edge or
+      outside it altogether.
+- [ ] Section 3 says a mould change is "a distinct hatched segment"; section 2 says draw it
+      as a marker and never as a segment consuming days. Drawn as a hatched marker of
+      fixed pixel width at the changeover, which satisfies both: distinct and hatched, but
+      consuming no calendar.
+- [ ] Section 3 puts the three figures "above" the count chart. They are at the top of the
+      tab, above both charts, because that is where every other tab in this dashboard puts
+      its figures and a reader should only have to learn one layout.
+- [ ] The tab was verified at 380px in a frame where the media queries genuinely apply, and
+      against the print rules lifted out of the compiled stylesheet and applied directly.
+      Neither is a real phone or a real printer. `break-before: page` on the reconciliation
+      cannot be seen that way and is unverified.

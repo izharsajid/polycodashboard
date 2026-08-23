@@ -158,7 +158,12 @@
   }
 
   /* Two colours print as two greys; a dashed context series stays legible. */
-  .recharts-wrapper {
+  .recharts-wrapper,
+  /* The Gantt is hand-built rather than a recharts wrapper. Without this, a page
+     carrying both charts prints one in colour and one in grey, which reads as a
+     mistake rather than a choice. Its two colours are an accent fill and a grey
+     hatch, so nothing is lost by it. */
+  .chart-print-grey {
     filter: grayscale(1);
   }
 

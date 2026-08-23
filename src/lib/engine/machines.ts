@@ -1,6 +1,7 @@
 import type {
   LedgerRowT,
   LedgerT,
+  MachineRunT,
   MachineScheduleT,
   MachineT,
   PoOrderT,
@@ -126,6 +127,59 @@ export function floorBreachMonth(schedule: MachineScheduleT): string | null {
   return monthlyMachineCount(schedule).find((month) => month.belowFloor)?.period ?? null
 }
 
+const DAY_MS = 86_400_000
+const dayNumber = (iso: string) => Date.parse(`${iso}T00:00:00Z`) / DAY_MS
+
+export type GanttWindow = {
+  from: string
+  to: string
+  days: number
+  months: { period: string; startPct: number; widthPct: number }[]
+  todayPct: number
+}
+
+/**
+ * The window the Gantt draws in.
+ *
+ * Section 3 asks for September to March with today marked. Today is in August,
+ * so the window opens at the start of the as-at month instead: a rule for today
+ * sitting outside the axis, or flush against its left edge, is not a mark a
+ * reader can see.
+ */
+export function ganttWindow(schedule: MachineScheduleT): GanttWindow {
+  const from = `${schedule.as_at.slice(0, 7)}-01`
+  const to = schedule.horizon_end
+  const start = dayNumber(from)
+  const days = dayNumber(to) - start + 1
+  const pct = (iso: string) => ((dayNumber(iso) - start) / days) * 100
+
+  const months: GanttWindow['months'] = []
+  for (
+    let period = from.slice(0, 7);
+    period <= to.slice(0, 7);
+    period = addMonths(period, 1)
+  ) {
+    const monthStart = `${period}-01`
+    months.push({
+      period,
+      startPct: pct(monthStart),
+      widthPct: pct(addDays(endOfMonth(period), 1)) - pct(monthStart),
+    })
+  }
+
+  return { from, to, days, months, todayPct: pct(schedule.as_at) }
+}
+
+/** Where a span sits in the window, as percentages, clipped to it. */
+export function spanIn(window: GanttWindow, from: string, to: string) {
+  const start = dayNumber(window.from)
+  const pct = (iso: string) => ((dayNumber(iso) - start) / window.days) * 100
+  // A run is inclusive of its last day, so it extends to the start of the next.
+  const left = Math.max(0, pct(from))
+  const right = Math.min(100, pct(addDays(to, 1)))
+  return { leftPct: left, widthPct: Math.max(0, right - left) }
+}
+
 export type ScheduledPo = {
   ref: string
   basis: 'confirmed' | 'derived'
@@ -149,6 +203,73 @@ export function scheduledPos(schedule: MachineScheduleT): ScheduledPo[] {
       })),
     ),
   )
+}
+
+export type CampaignOrder = {
+  ref: string
+  basis: 'confirmed' | 'derived'
+  note: string | null
+  /** The PO value from the ledger, or null where the ledger does not carry it. */
+  value: number | null
+  matchedOn: MatchKind | null
+  /** Other machines running the same purchase order. */
+  sharedWith: string[]
+}
+
+export type CampaignValue = {
+  orders: CampaignOrder[]
+  /** Total of the orders the ledger carries a value for. Never a total of all of them. */
+  valuedTotal: number
+  valued: number
+  count: number
+}
+
+/**
+ * The purchase orders on one campaign, with their value where the ledger has one.
+ *
+ * A campaign's total is the total of the orders that carry a value, and the count
+ * of those is returned beside it. Section 10 of the manufacturing-finance skill:
+ * always show the denominator. Four orders summing to the value of two is not a
+ * campaign value, and presenting it as one would understate the work on the
+ * machine without saying so.
+ */
+export function campaignOrders(
+  schedule: MachineScheduleT,
+  machineId: string,
+  run: MachineRunT,
+  ledger: LedgerT,
+): CampaignValue {
+  const ledgerIndex = indexBy(ledger.rows, (row) => row.po_number ?? '')
+  const everywhere = scheduledPos(schedule)
+
+  const orders = run.purchaseOrders.map((po) => {
+    const hit = lookup(ledgerIndex, po.ref)
+    return {
+      ref: po.ref,
+      basis: po.basis,
+      note: po.note,
+      value: hit?.hit.po_amount ?? null,
+      matchedOn: hit?.how ?? null,
+      sharedWith: [
+        ...new Set(
+          everywhere
+            .filter(
+              (other) =>
+                normalise(other.ref) === normalise(po.ref) && other.machineId !== machineId,
+            )
+            .map((other) => other.machineId),
+        ),
+      ],
+    }
+  })
+
+  const valued = orders.filter((order) => order.value !== null)
+  return {
+    orders,
+    valuedTotal: round2(valued.reduce((total, order) => total + (order.value ?? 0), 0)),
+    valued: valued.length,
+    count: orders.length,
+  }
 }
 
 export type OrderWithNoMachine = {

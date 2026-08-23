@@ -4,12 +4,15 @@ import scheduleRaw from '../../../../data/machine-schedule.json'
 import trackerRaw from '../../../../data/po-tracker.json'
 import { Ledger, MachineSchedule, PoTracker } from '../../schema'
 import {
+  campaignOrders,
   floorBreachMonth,
+  ganttWindow,
   machineCountSteps,
   machinesRunningAt,
   monthlyMachineCount,
   reconcileSchedule,
   scheduledPos,
+  spanIn,
 } from '../machines'
 
 const ledger = Ledger.parse(ledgerRaw)
@@ -179,5 +182,90 @@ describe('reconciling the schedule against the ledger and the tracker', () => {
         .filter((ref) => !listed.has(ref)),
     )
     expect(new Set([...listed, ...matched])).toEqual(refs)
+  })
+})
+
+describe('the Gantt window', () => {
+  const window = ganttWindow(schedule)
+
+  it('opens at the start of the as-at month so today is inside it', () => {
+    expect(window.from).toBe('2026-08-01')
+    expect(window.to).toBe('2027-03-31')
+    expect(window.todayPct).toBeGreaterThan(0)
+    expect(window.todayPct).toBeLessThan(100)
+  })
+
+  it('carries every month from August to March, and no more', () => {
+    expect(window.months.map((m) => m.period)).toEqual([
+      '2026-08', '2026-09', '2026-10', '2026-11',
+      '2026-12', '2027-01', '2027-02', '2027-03',
+    ])
+  })
+
+  it('lays the months end to end with no gap and no overlap', () => {
+    for (let i = 1; i < window.months.length; i++) {
+      const previous = window.months[i - 1]
+      expect(previous.startPct + previous.widthPct).toBeCloseTo(window.months[i].startPct, 6)
+    }
+    const last = window.months[window.months.length - 1]
+    expect(last.startPct + last.widthPct).toBeCloseTo(100, 6)
+  })
+
+  it('gives a longer month more width than a shorter one', () => {
+    const february = window.months.find((m) => m.period === '2027-02')!
+    const march = window.months.find((m) => m.period === '2027-03')!
+    expect(february.widthPct).toBeLessThan(march.widthPct)
+  })
+
+  it('includes the last day of a run in its bar', () => {
+    // A run ending 30 November covers November: ending the bar at the 30th would
+    // draw the machine as stopped a day before it stops.
+    const toThirtieth = spanIn(window, '2026-11-01', '2026-11-30')
+    const toFirstOfDecember = spanIn(window, '2026-11-01', '2026-12-01')
+    expect(toThirtieth.widthPct).toBeLessThan(toFirstOfDecember.widthPct)
+    expect(spanIn(window, '2026-11-30', '2026-11-30').widthPct).toBeGreaterThan(0)
+  })
+
+  it('ends a continuous bar at the right edge', () => {
+    const span = spanIn(window, '2026-08-23', schedule.horizon_end)
+    expect(span.leftPct + span.widthPct).toBeCloseTo(100, 6)
+  })
+
+  it('keeps every machine bar inside the window', () => {
+    for (const machine of schedule.machines) {
+      for (const run of machine.runs) {
+        const span = spanIn(window, run.from, run.to)
+        expect(span.leftPct).toBeGreaterThanOrEqual(0)
+        expect(span.leftPct + span.widthPct).toBeLessThanOrEqual(100.0001)
+        expect(span.widthPct).toBeGreaterThan(0)
+      }
+    }
+  })
+})
+
+describe('what a campaign is worth', () => {
+  it('totals only the orders the ledger carries, and counts them', () => {
+    const m5 = schedule.machines.find((m) => m.id === 'M5')!
+    const campaign = campaignOrders(schedule, 'M5', m5.runs[0], ledger)
+
+    expect(campaign.count).toBe(4)
+    expect(campaign.valued).toBe(2)
+    // 2678252-1 and 2678251-1. The other two are not in the ledger at all, and
+    // the total must not pretend they are worth nothing.
+    expect(campaign.valuedTotal).toBe(70790.4)
+  })
+
+  it('names the other machine a shared order also runs on', () => {
+    const m1 = schedule.machines.find((m) => m.id === 'M1')!
+    const platinum = campaignOrders(schedule, 'M1', m1.runs[1], ledger)
+    for (const order of platinum.orders) expect(order.sharedWith).toEqual(['M2'])
+  })
+
+  it('reports a campaign the ledger knows nothing about as nothing valued', () => {
+    const m1 = schedule.machines.find((m) => m.id === 'M1')!
+    const platinum = campaignOrders(schedule, 'M1', m1.runs[1], ledger)
+    expect(platinum.valued).toBe(0)
+    expect(platinum.valuedTotal).toBe(0)
+    for (const order of platinum.orders) expect(order.value).toBeNull()
   })
 })

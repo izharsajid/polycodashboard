@@ -1,5 +1,6 @@
-import type { LedgerT, StatementsT } from '../schema'
+import type { LedgerT, MachineScheduleT, StatementsT } from '../schema'
 import { fmt, uncoveredAdvance } from './index'
+import { floorBreachMonth, machineCountSteps, machinesRunningAt } from './machines'
 
 /**
  * The sentence at the top of each tab, assembled from the model.
@@ -86,5 +87,45 @@ export function settlementFinding(d: StatementsT): SettlementFinding | null {
     sentence:
       `Every statement since ${monthName(run[0].period)} has been matched to receipts, ` +
       `${run.length} months in a row. The largest gap in that run is $${fmt(largestGap)}.`,
+  }
+}
+
+export type MachineFinding = {
+  today: number
+  atYearStart: number
+  floor: number
+  breachMonth: string | null
+  sentence: string
+}
+
+/**
+ * The finding the machines tab exists to deliver: a scheduled glide path from
+ * eight machines to three, and three is below the floor.
+ *
+ * Assembled from the stop dates like everything else on the tab, so moving one
+ * date moves the sentence. The reason is stated because CAPACITY-SPEC section 2
+ * requires it: every machine here stops because its purchase orders run out, and
+ * a reader who assumes otherwise draws the wrong conclusion from the same chart.
+ */
+export function machineFinding(schedule: MachineScheduleT): MachineFinding {
+  const steps = machineCountSteps(schedule)
+  const today = steps[0].count
+  const last = steps[steps.length - 1]
+  const breachMonth = floorBreachMonth(schedule)
+  const atYearStart = machinesRunningAt(schedule, `${schedule.horizon_end.slice(0, 4)}-01-01`).length
+
+  const glide =
+    `${today} machines run today and ${last.count} from ${monthName(last.from.slice(0, 7))}, ` +
+    `every one of them stopping because its purchase orders run out.`
+
+  return {
+    today,
+    atYearStart,
+    floor: schedule.viable_floor,
+    breachMonth,
+    sentence: breachMonth
+      ? `${glide} The count falls below the ${schedule.viable_floor} machine floor in ` +
+        `${monthName(breachMonth)}.`
+      : `${glide} It stays at or above the ${schedule.viable_floor} machine floor throughout.`,
   }
 }

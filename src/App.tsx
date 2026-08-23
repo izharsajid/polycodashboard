@@ -27,6 +27,7 @@ import Tab2Funding from './tabs/Tab2Funding'
 import Tab3Statement from './tabs/Tab3Statement'
 import Tab4Orders from './tabs/Tab4Orders'
 import Tab5Forecast from './tabs/Tab5Forecast'
+import Tab6Machines from './tabs/Tab6Machines'
 
 const TABS = [
   { section: 'polyco-position', label: 'Where we stand', built: true },
@@ -34,9 +35,10 @@ const TABS = [
   // Next to Tab 1: Tab 1 states the position and this is the evidence for it.
   { section: 'statement', label: 'Statement', built: true },
   { section: 'order-book', label: 'Still to be made', built: true },
+  // The production half of the picture the forecast tab reads off the ledger.
+  { section: 'machines', label: 'Machines', built: true },
   // The question Polyco actually has: where is this going?
   { section: 'forecast', label: 'Next six months', built: true },
-  { section: 'capacity', label: 'Capacity', built: false },
   { section: 'configurations', label: 'Configurations', built: false },
   { section: 'roadmap', label: 'Path to 8', built: false },
   { section: 'scenarios', label: 'Scenarios', built: false },
@@ -150,7 +152,7 @@ function Dashboard({ user }: { user: PublicUser }) {
       <main
         className={
           // The statement and the order table are ledgers and need the room.
-          active === 'statement' || active === 'order-book'
+          active === 'statement' || active === 'order-book' || active === 'machines'
             ? 'px-[20px] py-6 sm:px-6'
             : 'mx-auto max-w-page px-[20px] py-6 sm:px-6'
         }
@@ -180,6 +182,13 @@ function Dashboard({ user }: { user: PublicUser }) {
                 tracker={figures.data.poTracker}
                 statements={figures.data.statements}
                 today={new Date().toISOString().slice(0, 10)}
+              />
+            )}
+            {active === 'machines' && (
+              <Tab6Machines
+                schedule={figures.data.machineSchedule}
+                ledger={figures.data.ledger}
+                tracker={figures.data.poTracker}
               />
             )}
             {active === 'order-book' && (

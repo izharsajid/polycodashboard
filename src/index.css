@@ -152,6 +152,16 @@
     position: static !important;
   }
 
+  /* A drawer is a screen affordance and has no meaning on paper. */
+  [role='dialog'] {
+    display: none !important;
+  }
+
+  /* Two colours print as two greys; a dashed context series stays legible. */
+  .recharts-wrapper {
+    filter: grayscale(1);
+  }
+
   @page {
     margin: 14mm;
   }

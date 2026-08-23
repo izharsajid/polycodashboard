@@ -25,9 +25,15 @@ function dayLong(iso: string | null) {
 
 
 export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: string }) {
-  const [state, setState] = useState<StatementUrlState>(() =>
-    readStatementUrl(window.location.search),
-  )
+  const [state, setState] = useState<StatementUrlState>(() => {
+    const fromUrl = readStatementUrl(window.location.search)
+    // Nobody reconciles thirteen columns on a phone, but Andy will look at it on
+    // one. A link that names its columns still wins. STATEMENT-SPEC section 6.
+    const phone = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+    return phone && !window.location.search.includes('cols=')
+      ? { ...fromUrl, columns: [...PRESETS.reconciliation.columns] }
+      : fromUrl
+  })
 
   const update = (next: Partial<StatementUrlState>) => {
     const merged = { ...state, ...next }

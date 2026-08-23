@@ -63,7 +63,7 @@ export default function InviteForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="rulebox px-2 py-1 text-body"
+          className="field w-full"
         />
       </label>
 
@@ -74,7 +74,7 @@ export default function InviteForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="rulebox px-2 py-1 text-body"
+          className="field w-full"
         />
         <span className="text-label text-ink-70">
           {isAdmin
@@ -89,7 +89,7 @@ export default function InviteForm({
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as PublicUser['role'])}
-            className="rulebox px-2 py-1 text-body"
+            className="field w-full"
           >
             <option value="member">Member</option>
             <option value="admin">Administrator</option>
@@ -111,7 +111,7 @@ export default function InviteForm({
       <button
         type="submit"
         disabled={busy}
-        className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
+        className="btn-primary mt-1 w-full disabled:opacity-50"
       >
         {busy ? 'Adding them' : 'Add them'}
       </button>

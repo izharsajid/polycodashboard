@@ -149,7 +149,7 @@ export default function Admin({ user }: { user: PublicUser }) {
         <button
           type="button"
           onClick={() => navigate(DASHBOARD)}
-          className="mt-6 text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+          className="mt-6 btn-text"
         >
           Back to the dashboard
         </button>

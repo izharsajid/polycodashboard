@@ -144,7 +144,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
                   key={preset.key}
                   type="button"
                   onClick={() => update(resolvePreset(preset.key as PresetKey, new Date()))}
-                  className="rounded border border-rule px-1 py-1 text-label text-accent hover:bg-accent-soft"
+                  className="btn-secondary"
                 >
                   {preset.label}
                 </button>
@@ -172,7 +172,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
               <button
                 type="button"
                 onClick={() => update({ columns: [...DEFAULT_STATE.columns] })}
-                className="rounded border border-rule px-1 py-1 text-label text-accent hover:bg-accent-soft"
+                className="btn-secondary"
               >
                 Default
               </button>
@@ -186,7 +186,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
                 type="button"
                 disabled={busy !== null}
                 onClick={() => void exportAs('csv')}
-                className="rounded border border-rule px-2 py-1 text-label font-semibold text-accent hover:bg-accent-soft disabled:opacity-50"
+                className="btn-secondary disabled:opacity-50"
               >
                 {busy === 'csv' ? 'Working' : 'CSV'}
               </button>
@@ -194,7 +194,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
                 type="button"
                 disabled={busy !== null}
                 onClick={() => void exportAs('xlsx')}
-                className="rounded bg-accent px-2 py-1 text-label font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                className="btn-primary disabled:opacity-50"
               >
                 {busy === 'xlsx' ? 'Working' : 'Excel'}
               </button>

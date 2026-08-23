@@ -9,44 +9,24 @@ import { CLEARED, readPoUrl, togglePill, writePoUrl } from '../lib/po-url'
 import { whenLocal } from '../lib/format'
 import { Finding, SectionHead } from '../components/ui'
 import OrderPanel from '../components/OrderPanel'
+import { StatusPill } from '../components/Pill'
 
-/** The state palette from DESIGN.md. No colour is invented for a status. */
-const STATUS_TONE: Record<string, string> = {
-  Dispatched: 'bg-accent-soft text-accent',
-  Booked: 'bg-rule-soft text-ink-70',
-  Processing: 'bg-rule-soft text-ink-70',
-  Cancelled: 'bg-rule-soft text-ink-50',
-}
-const DEFAULT_TONE = 'bg-watch-soft text-watch'
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 function monthLabel(month: string) {
   if (month === NOT_DISPATCHED) return 'Not dispatched'
   const [year, m] = month.split('-')
-  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${names[Number(m) - 1]} ${year}`
+  return `${MONTH_NAMES[Number(m) - 1]} ${year}`
 }
 
+/** One date format in tables throughout: 28 Jul 2026. Never numeric. */
 function dayLong(iso: string | null) {
   if (!iso) return ''
   const [y, m, d] = iso.split('-')
-  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${Number(d)} ${names[Number(m) - 1]} ${y}`
+  return `${Number(d)} ${MONTH_NAMES[Number(m) - 1]} ${y}`
 }
 
-export function StatusPill({ status }: { status: string }) {
-  if (!status) return <span className="text-ink-50">Not set</span>
-  return (
-    <span
-      className={`inline-block whitespace-nowrap rounded-full px-1 py-[3px] text-eyebrow font-semibold ${
-        STATUS_TONE[status] ?? DEFAULT_TONE
-      }`}
-    >
-      {status}
-    </span>
-  )
-}
-
-function Pill({
+function FilterPill({
   label, count, active, onClick,
 }: { label: string; count?: number; active: boolean; onClick: () => void }) {
   return (
@@ -54,7 +34,7 @@ function Pill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-2 py-1 text-label whitespace-nowrap ${
+      className={`rounded border px-2 py-1 text-label whitespace-nowrap ${
         active
           ? 'border-accent bg-accent-soft font-semibold text-accent'
           : 'border-rule text-ink-70 hover:text-ink hover:bg-rule'
@@ -123,9 +103,9 @@ export default function Tab4Orders({
       <div className="border-t border-rule pt-2 no-print">
         <div className="px-2 py-2 flex flex-col gap-2">
           <FilterRow label="Product">
-            <Pill label="All" active={filters.families.length === 0} onClick={() => update({ ...filters, families: [] })} />
+            <FilterPill label="All" active={filters.families.length === 0} onClick={() => update({ ...filters, families: [] })} />
             {[...PRODUCT_FAMILIES, 'Other' as const].map((family) => (
-              <Pill
+              <FilterPill
                 key={family}
                 label={family}
                 count={counts.families[family] ?? 0}
@@ -136,9 +116,9 @@ export default function Tab4Orders({
           </FilterRow>
 
           <FilterRow label="Dispatch month">
-            <Pill label="All" active={filters.months.length === 0} onClick={() => update({ ...filters, months: [] })} />
+            <FilterPill label="All" active={filters.months.length === 0} onClick={() => update({ ...filters, months: [] })} />
             {months.map((month) => (
-              <Pill
+              <FilterPill
                 key={month}
                 label={monthLabel(month)}
                 count={counts.months[month] ?? 0}
@@ -149,9 +129,9 @@ export default function Tab4Orders({
           </FilterRow>
 
           <FilterRow label="Order status">
-            <Pill label="All" active={filters.statuses.length === 0} onClick={() => update({ ...filters, statuses: [] })} />
+            <FilterPill label="All" active={filters.statuses.length === 0} onClick={() => update({ ...filters, statuses: [] })} />
             {statuses.map((status) => (
-              <Pill
+              <FilterPill
                 key={status}
                 label={status}
                 count={counts.statuses[status] ?? 0}
@@ -182,7 +162,7 @@ export default function Tab4Orders({
               value={filters.search}
               onChange={(e) => update({ ...filters, search: e.target.value })}
               placeholder="Search PO number or product"
-              className="rulebox rounded px-2 py-1 text-label w-full sm:w-72"
+              className="field w-full sm:w-72"
             />
           </div>
         </div>

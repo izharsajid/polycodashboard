@@ -4,7 +4,7 @@ import type { LedgerRowT, PoOrderT } from '../lib/schema'
 import { fmt } from '../lib/engine'
 import { api } from '../lib/api'
 import { whenLocal } from '../lib/format'
-import { StatusPill } from '../tabs/Tab4Orders'
+import { StatusPill } from './Pill'
 
 const GROUPS: { key: DocumentGroupT; label: string; lede: string }[] = [
   { key: 'purchase-order', label: 'Purchase order', lede: 'The order as issued, and any revision.' },
@@ -114,7 +114,7 @@ export default function OrderPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-rule px-2 py-1 text-label font-semibold text-accent hover:bg-accent-soft"
+            className="btn-secondary"
           >
             Close
           </button>
@@ -211,7 +211,7 @@ export default function OrderPanel({
                           {whenLocal(document.uploadedAt)}
                         </span>
                         {document.deletedAt && (
-                          <span className="rounded-full bg-critical-soft px-1 py-[2px] text-eyebrow font-semibold text-critical">
+                          <span className="rounded bg-critical-soft px-1 py-[2px] text-eyebrow font-semibold text-critical">
                             Deleted by {document.deletedByEmail}
                           </span>
                         )}

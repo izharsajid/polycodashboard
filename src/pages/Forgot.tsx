@@ -47,7 +47,7 @@ export default function Forgot() {
             <button
               type="button"
               onClick={() => navigate(LOGIN)}
-              className="text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+              className="btn-text"
             >
               Back to sign in
             </button>
@@ -69,7 +69,7 @@ export default function Forgot() {
                   autoComplete="email"
                   autoFocus
                   required
-                  className="rulebox px-2 py-1 text-body"
+                  className="field w-full"
                 />
               </label>
 
@@ -82,7 +82,7 @@ export default function Forgot() {
               <button
                 type="submit"
                 disabled={busy}
-                className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
+                className="btn-primary mt-1 w-full disabled:opacity-50"
               >
                 {busy ? 'Sending' : 'Send the link'}
               </button>
@@ -91,7 +91,7 @@ export default function Forgot() {
             <button
               type="button"
               onClick={() => navigate(LOGIN)}
-              className="mt-3 text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+              className="mt-3 btn-text"
             >
               Back to sign in
             </button>

@@ -54,7 +54,7 @@ export default function Login({ next }: { next: string }) {
               autoComplete="email"
               autoFocus
               required
-              className="rulebox px-2 py-1 text-body"
+              className="field w-full"
             />
           </label>
 
@@ -66,7 +66,7 @@ export default function Login({ next }: { next: string }) {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              className="rulebox px-2 py-1 text-body"
+              className="field w-full"
             />
           </label>
 
@@ -79,7 +79,7 @@ export default function Login({ next }: { next: string }) {
           <button
             type="submit"
             disabled={busy}
-            className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
+            className="btn-primary mt-1 w-full disabled:opacity-50"
           >
             {busy ? 'Signing in' : 'Sign in'}
           </button>
@@ -88,7 +88,7 @@ export default function Login({ next }: { next: string }) {
         <button
           type="button"
           onClick={() => navigate(FORGOT)}
-          className="mt-3 text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+          className="mt-3 btn-text"
         >
           Forgotten your password?
         </button>

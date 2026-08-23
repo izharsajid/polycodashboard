@@ -91,7 +91,7 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setCurrent(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="rulebox px-2 py-1 text-body"
+                className="field w-full"
               />
             </label>
 
@@ -103,7 +103,7 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setNext(e.target.value)}
                 autoComplete="new-password"
                 required
-                className="rulebox px-2 py-1 text-body"
+                className="field w-full"
               />
             </label>
 
@@ -115,7 +115,7 @@ export default function Account({ user }: { user: PublicUser }) {
                 onChange={(e) => setAgain(e.target.value)}
                 autoComplete="new-password"
                 required
-                className="rulebox px-2 py-1 text-body"
+                className="field w-full"
               />
             </label>
 
@@ -133,7 +133,7 @@ export default function Account({ user }: { user: PublicUser }) {
             <button
               type="submit"
               disabled={busy}
-              className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
+              className="btn-primary mt-1 w-full disabled:opacity-50"
             >
               {busy ? 'Changing it' : 'Change password'}
             </button>
@@ -152,7 +152,7 @@ export default function Account({ user }: { user: PublicUser }) {
         <button
           type="button"
           onClick={() => navigate(DASHBOARD)}
-          className="mt-6 text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+          className="mt-6 btn-text"
         >
           Back to the dashboard
         </button>

@@ -95,7 +95,7 @@ export default function Invite({ token }: { token: string | null }) {
             <button
               type="button"
               onClick={() => navigate(LOGIN)}
-              className="text-body text-ink-70 underline underline-offset-2 hover:text-ink"
+              className="btn-text"
             >
               Go to sign in
             </button>
@@ -121,7 +121,7 @@ export default function Invite({ token }: { token: string | null }) {
                   autoComplete="new-password"
                   autoFocus
                   required
-                  className="rulebox px-2 py-1 text-body"
+                  className="field w-full"
                 />
               </label>
 
@@ -133,7 +133,7 @@ export default function Invite({ token }: { token: string | null }) {
                   onChange={(e) => setAgain(e.target.value)}
                   autoComplete="new-password"
                   required
-                  className="rulebox px-2 py-1 text-body"
+                  className="field w-full"
                 />
               </label>
 
@@ -146,7 +146,7 @@ export default function Invite({ token }: { token: string | null }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="bg-accent text-white text-body font-semibold py-2 mt-1 disabled:opacity-50"
+                className="btn-primary mt-1 w-full disabled:opacity-50"
               >
                 {busy ? 'Setting it' : 'Set password and sign in'}
               </button>

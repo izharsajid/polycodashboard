@@ -2,63 +2,32 @@ import type { ReactNode } from 'react'
 import { fmt } from '../lib/engine'
 
 /**
- * A headline figure, in efdashboard's card: white surface, 14px corner, the soft
- * green shadow, and the 5px accent along the top that its section cards carry.
+ * A headline figure. No box.
  *
- * The accent is the tone. efdashboard marks state with colour on a rounded wash,
- * so the tones here are its status palette rather than a set of our own, and
- * `alert` is the only red, kept for shortfalls and exceptions.
+ * The eyebrow above, the figure, the descriptor beneath, separated from its
+ * neighbours by space and a vertical hairline. DESIGN-SYSTEM-SPEC section 5.
  *
- * The figure keeps this project's tabular numerals against efdashboard's
- * proportional ones, because these line up in a column and have to agree on the
- * decimal. It is set larger than efdashboard's inline stock number because
- * REDESIGN-SPEC section 4 asks for at most three figures a reader can remember,
- * which is a different job from a number inside a table.
- *
- * `asAt` is here because section 6 asks every screen to state its date, and a
- * figure carrying its own date cannot drift from the one in the heading.
+ * `tone` no longer draws a coloured bar. Section 3 forbids a coloured ground
+ * behind a figure, and four tones on three tiles was a fourth colour system.
+ * A figure that needs marking gets its mark in the descriptor, where it can say
+ * why.
  */
 export function Tile({
   label,
   value,
   sub,
-  asAt,
   tone = 'plain',
 }: {
   label: string
   value: string
   sub?: string
-  asAt?: string
-  tone?: 'plain' | 'leaf' | 'ember' | 'alert'
+  tone?: 'plain' | 'critical'
 }) {
-  /**
-   * Tone is carried by the accent's pattern as well as its colour, because these
-   * are printed for board packs and four mid-toned colours are one grey in
-   * greyscale. Solid pale, solid dark, dashed, dotted survive a monochrome
-   * printer; four hues do not.
-   */
-  const accent = {
-    plain: 'border-solid border-rule',
-    leaf: 'border-solid border-accent',
-    ember: 'border-dashed border-watch',
-    alert: 'border-dotted border-critical',
-  }[tone]
-
   return (
-    <div className={`card border-t-2 ${accent} flex flex-col`}>
-      <div className="px-2 pt-3 pb-2 flex flex-col gap-1">
-        <div className="eyebrow">{label}</div>
-
-        <div className="num text-figure-xl leading-none font-semibold text-ink">{value}</div>
-
-        {sub && <div className="text-label text-ink-70 mt-1">{sub}</div>}
-
-        {asAt && (
-          <div className="mt-2 self-start rounded border border-rule px-2 py-1 text-label font-semibold text-accent">
-            {asAt}
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col gap-1 border-rule sm:border-l sm:pl-3 sm:first:border-l-0 sm:first:pl-0">
+      <p className="eyebrow">{label}</p>
+      <p className={`figure-xl ${tone === 'critical' ? 'text-critical' : ''}`}>{value}</p>
+      {sub && <p className="text-label text-ink-50">{sub}</p>}
     </div>
   )
 }
@@ -140,7 +109,7 @@ export function Working({
   defaultOpen?: boolean
 }) {
   return (
-    <details open={defaultOpen} className="card mt-2 group print:!block">
+    <details open={defaultOpen} className="mt-6 border-t border-rule pt-2 group print:!block">
       <summary className="cursor-pointer list-none px-2 py-2 no-print">
         <span className="text-body font-semibold text-accent">{title}</span>
         <span className="ml-1 text-label text-ink-70 group-open:hidden">Show</span>

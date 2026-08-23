@@ -120,7 +120,7 @@ export default function Tab4Orders({
 
       <Finding>{finding}</Finding>
 
-      <div className="card no-print">
+      <div className="border-t border-rule pt-2 no-print">
         <div className="px-2 py-2 flex flex-col gap-2">
           <FilterRow label="Product">
             <Pill label="All" active={filters.families.length === 0} onClick={() => update({ ...filters, families: [] })} />
@@ -188,7 +188,7 @@ export default function Tab4Orders({
         </div>
       </div>
 
-      <div className="card mt-2 overflow-x-auto">
+      <div className="mt-2 overflow-x-auto">
         <table className="w-full min-w-[52rem] text-table">
           <thead>
             <tr className="text-left bg-rule-soft">

@@ -65,7 +65,6 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           label="Received from Polyco"
           value={fmt(finding.received)}
           sub="Cumulative, all periods"
-          tone="leaf"
         />
         <Tile
           label="Value delivered"
@@ -76,11 +75,11 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           label="Advance not yet covered"
           value={fmt(finding.uncovered)}
           sub="After every open order and ready container ships"
-          tone="alert"
+          tone="critical"
         />
       </div>
 
-      <div className="card mt-2">
+      <div className="mt-6">
         <div className="px-2 pt-2 pb-2">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>

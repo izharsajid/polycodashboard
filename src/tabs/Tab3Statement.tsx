@@ -110,12 +110,12 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
 
       <div className="grid gap-2 sm:grid-cols-3">
         <Tile label="Opening balance" value={money(headline.opening, 0)} sub={state.from ? `Carried into ${dayLong(state.from)}` : 'Nothing before the first transaction'} />
-        <Tile label="Movement in period" value={money(headline.movement, 0)} sub={`${rows.length} entries shown`} tone="leaf" />
-        <Tile label="Closing balance" value={money(headline.closing, 0)} sub="Value EcoFibre holds yet to deliver" tone="alert" />
+        <Tile label="Movement in period" value={money(headline.movement, 0)} sub={`${rows.length} entries shown`} />
+        <Tile label="Closing balance" value={money(headline.closing, 0)} sub="Value EcoFibre holds yet to deliver" tone="critical" />
       </div>
 
       {/* Controls in one bar, not scattered. Section 6. */}
-      <div className="card mt-2 no-print">
+      <div className="mt-6 border-t border-rule pt-2 no-print">
         <div className="px-2 py-2 flex flex-wrap items-end gap-x-3 gap-y-2">
           <label className="flex flex-col gap-1">
             <span className="eyebrow">From</span>
@@ -254,7 +254,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
         )}
       </div>
 
-      <div className="card mt-1 overflow-x-auto">
+      <div className="mt-2 overflow-x-auto">
         <table className="w-full min-w-[44rem] text-table">
           <thead className="sticky top-0 z-10">
             <tr className="text-left bg-rule-soft">
@@ -352,7 +352,7 @@ function Aside({
   columns: typeof COLUMNS
 }) {
   return (
-    <div className="card mt-2 border-t-2 border-dashed border-watch">
+    <div className="mt-3 border-t border-rule pt-3">
       <div className="px-2 pt-2 pb-1">
         <h3 className="text-body font-semibold text-accent">{title}</h3>
         <p className="lede mt-1 max-w-3xl">{lede}</p>

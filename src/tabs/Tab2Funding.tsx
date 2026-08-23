@@ -150,17 +150,16 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           label="Received against statements"
           value={fmt(lastPoint.receivedCumulative)}
           sub="Ledger receipts matched to statement periods"
-          tone="leaf"
         />
         <Tile
           label="Received less requested"
           value={`(${fmt(Math.abs(shortfall))})`}
-          tone="alert"
+          tone="critical"
           sub={`(${fmt(Math.abs(looseVariance))}) of it sits in the ${looseRows.length} periods with no or partial ledger match`}
         />
       </div>
 
-      <div className="card mt-2">
+      <div className="mt-6">
         <div className="px-2 pt-2 pb-2">
           <h3 className="text-subtitle font-semibold text-accent">
             The gap opens in the 2025 periods, not the recent ones
@@ -216,7 +215,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
 
       {/* A different question from settlement, so it gets its own block rather than
           a fourth tile competing with the three above. */}
-      <div className="card mt-2">
+      <div className="mt-6">
         <div className="px-2 pt-2 pb-2">
           <p className="eyebrow">Cost of holding the operation open</p>
           <h3 className="mt-1 text-subtitle font-semibold text-accent">
@@ -563,7 +562,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
       </Working>
 
       {/* Every open item in one place, rather than scattered across fourteen months. */}
-      <div className="card mt-2 border-t-2 border-dotted border-critical">
+      <div className="mt-6 border-t border-rule pt-3">
         <div className="px-2 pt-2 pb-2">
           <p className="eyebrow">Open items</p>
           <h3 className="mt-1 text-subtitle font-semibold text-accent">

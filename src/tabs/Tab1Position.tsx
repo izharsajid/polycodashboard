@@ -5,6 +5,7 @@ import {
 import type { LedgerT } from '../lib/schema'
 import { cumulativeSeries, orderCover, uncoveredAdvance, fmt } from '../lib/engine'
 import { positionFinding } from '../lib/engine/findings'
+import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { Finding, SectionHead, Tile, Working } from '../components/ui'
 
 function monthLabel(iso: string) {
@@ -106,39 +107,36 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
                   {/* Derived from `rule`, per DESIGN.md: efdashboard has no hatch,
                       and a hatch survives a monochrome printer where a tint does not. */}
                   <pattern id="gapFill" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                    <rect width="6" height="6" fill="#FFFFFF" />
-                    <line x1="0" y1="0" x2="0" y2="6" stroke="#DFE5DC" strokeWidth="1.6" />
+                    <rect width="6" height="6" fill={CHART.surface} />
+                    <line x1="0" y1="0" x2="0" y2="6" stroke={CHART.grid} strokeWidth="1.6" />
                   </pattern>
                 </defs>
-                <CartesianGrid stroke="#DFE5DC" vertical={false} />
+                <CartesianGrid stroke={CHART.grid} vertical={false} />
                 <XAxis
                   dataKey="date" tickFormatter={monthLabel} ticks={monthTicks} minTickGap={40}
-                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                  tick={AXIS_TICK} stroke={CHART.grid}
                 />
                 <YAxis
-                  tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} width={56}
-                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                  tickFormatter={axisMoney} width={56} tickCount={GRID_COUNT}
+                  tick={AXIS_TICK} stroke={CHART.grid}
                 />
                 <Tooltip
                   labelFormatter={(v) => monthLabel(String(v))}
                   formatter={(v: number, n: string) => [fmt(v), n]}
-                  contentStyle={{
-                    border: '1px solid #DFE5DC', borderRadius: 6, fontSize: 12,
-                    fontFamily: '"IBM Plex Mono", monospace',
-                  }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
                 {/* Solid against dashed, so the two series stay apart in greyscale. */}
                 <Area
                   type="stepAfter" dataKey="receivedCumulative" name="Received"
-                  stroke="#294525" strokeWidth={2} fill="url(#gapFill)" fillOpacity={1}
-                  isAnimationActive={false}
+                  stroke={CHART.accent} strokeWidth={2} fill="url(#gapFill)" fillOpacity={1}
+                  {...NO_ANIMATION}
                 />
                 <Area
                   type="stepAfter" dataKey="deliveredCumulative" name="Delivered"
-                  stroke="#507A48" strokeWidth={2} strokeDasharray="6 3" fill="#FFFFFF"
-                  fillOpacity={1} isAnimationActive={false}
+                  stroke={CHART.context} strokeWidth={2} strokeDasharray="6 3" fill={CHART.surface}
+                  fillOpacity={1} {...NO_ANIMATION}
                 />
-                <ReferenceLine y={0} stroke="#D8E5CE" />
+                <ReferenceLine y={0} stroke={CHART.grid} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -154,7 +152,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
             </span>
             <span className="flex items-center gap-1">
               <span className="h-3 w-5 inline-block border border-rule" style={{
-                backgroundImage: 'repeating-linear-gradient(45deg,#DFE5DC 0 1.6px,#FFF 1.6px 6px)',
+                backgroundImage: `repeating-linear-gradient(45deg,${CHART.grid} 0 1.6px,${CHART.surface} 1.6px 6px)`,
               }} /> Advance outstanding
             </span>
           </div>

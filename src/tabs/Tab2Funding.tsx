@@ -8,6 +8,7 @@ import {
   statementFoots, statementCoverage, round2, fmt,
 } from '../lib/engine'
 import { settlementFinding } from '../lib/engine/findings'
+import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { Finding, Flag, Money, Note, SectionHead, Tile, Working } from '../components/ui'
 
 const MONTHS = [
@@ -171,32 +172,29 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           <div className="mt-3 h-[280px] -ml-2 sm:h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-                <CartesianGrid stroke="#DFE5DC" vertical={false} />
+                <CartesianGrid stroke={CHART.grid} vertical={false} />
                 <XAxis
                   dataKey="period" tickFormatter={monthShort} minTickGap={32}
-                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                  tick={AXIS_TICK} stroke={CHART.grid}
                 />
                 <YAxis
-                  tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} width={56}
-                  tick={{ fill: '#6D7869', fontSize: 11 }} stroke="#D8E5CE"
+                  tickFormatter={axisMoney} width={56} tickCount={GRID_COUNT}
+                  tick={AXIS_TICK} stroke={CHART.grid}
                 />
                 <Tooltip
                   labelFormatter={(v) => monthName(String(v))}
                   formatter={(v: number, n: string) => [fmt(v), n]}
-                  contentStyle={{
-                    border: '1px solid #DFE5DC', borderRadius: 6, fontSize: 12,
-                    fontFamily: '"IBM Plex Mono", monospace',
-                  }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
                 {/* Dashed against solid, so they stay apart on a monochrome printer. */}
                 <Line
                   type="stepAfter" dataKey="requestedCumulative" name="Requested"
-                  stroke="#263D23" strokeWidth={2} strokeDasharray="6 4" dot={false}
-                  isAnimationActive={false}
+                  stroke={CHART.context} strokeWidth={2} strokeDasharray="6 4" dot={false}
+                  {...NO_ANIMATION}
                 />
                 <Line
                   type="stepAfter" dataKey="receivedCumulative" name="Received"
-                  stroke="#507A48" strokeWidth={2} dot={false} isAnimationActive={false}
+                  stroke={CHART.context} strokeWidth={2} dot={false} {...NO_ANIMATION}
                 />
               </LineChart>
             </ResponsiveContainer>

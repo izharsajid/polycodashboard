@@ -85,10 +85,12 @@ describe('the sheet', () => {
     const view = statementView(ledger)
     const sheet = buildExportSheet(view, view.entries, context())
 
+    // The workbook's own order, which is what Polyco reads.
     expect(sheet.columnLabels).toEqual([
-      'Date', 'Type', 'Reference', 'Received', 'Delivered value', 'Running balance',
+      'S. No.', 'PO no. and date', 'Received', 'Funds received date',
+      'Delivered value', 'Delivery date', 'Running balance',
     ])
-    expect(sheet.rows[0]).toHaveLength(6)
+    expect(sheet.rows[0]).toHaveLength(7)
   })
 
   it('exports figures as numbers, so a column sums', () => {
@@ -138,7 +140,7 @@ describe('the csv', () => {
     expect(lines[0]).toContain('Statement of account')
     const blank = lines.indexOf('')
     expect(blank).toBeGreaterThan(0)
-    expect(lines[blank + 1]).toBe('Date,Type,Reference,Received,Delivered value,Running balance')
+    expect(lines[blank + 1]).toBe('S. No.,PO no. and date,Received,Funds received date,Delivered value,Delivery date,Running balance')
   })
 
   it('quotes a field containing a comma, so the columns do not shift', () => {

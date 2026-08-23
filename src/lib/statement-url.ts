@@ -25,7 +25,7 @@ export const DEFAULT_STATE: StatementUrlState = {
   from: null,
   to: null,
   columns: DEFAULT_COLUMNS,
-  sort: 'date',
+  sort: 'serial',
   direction: 'asc',
 }
 

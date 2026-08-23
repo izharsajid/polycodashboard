@@ -1,5 +1,5 @@
 import { BookOpen } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import type { LedgerT } from '../lib/schema'
 import { round2 } from '../lib/engine'
 import {
@@ -12,7 +12,7 @@ import {
   DATE_PRESETS, DEFAULT_STATE, readStatementUrl, resolvePreset, writeStatementUrl,
   type PresetKey, type StatementUrlState,
 } from '../lib/statement-url'
-import { money, moneyWhole } from '../lib/format'
+import { money, moneyWhole, monthProse } from '../lib/format'
 import { Finding, SectionHead, Tile } from '../components/ui'
 
 function dayLong(iso: string | null) {
@@ -55,6 +55,33 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
     () => sortEntries(view.entries, state.sort, state.direction),
     [view.entries, state.sort, state.direction],
   )
+
+  /**
+   * Rows grouped by month with a subtotal, section 6, so a reader finds a period
+   * without reading every line. Undated entries keep their own group at the end,
+   * which is where the engine already sorts them.
+   */
+  const monthGroups = useMemo(() => {
+    const groups: { key: string; label: string; rows: typeof rows; received: number; delivered: number }[] = []
+    for (const row of rows) {
+      const key = row.date ? row.date.slice(0, 7) : 'undated'
+      let group = groups[groups.length - 1]
+      if (!group || group.key !== key) {
+        group = {
+          key,
+          label: key === 'undated' ? 'No usable date' : monthProse(key),
+          rows: [],
+          received: 0,
+          delivered: 0,
+        }
+        groups.push(group)
+      }
+      group.rows.push(row)
+      group.received = round2(group.received + row.received)
+      group.delivered = round2(group.delivered + row.delivered)
+    }
+    return groups
+  }, [rows])
 
   const [busy, setBusy] = useState<'csv' | 'xlsx' | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
@@ -249,7 +276,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
         )}
       </div>
 
-      <div className="mt-2 overflow-x-auto">
+      <div className="mt-2 overflow-x-auto -mx-[20px] px-[20px] sm:-mx-6 sm:px-6">
         <table className="w-full min-w-[44rem] text-table">
           <thead className="sticky top-0 z-10">
             <tr className="text-left bg-rule-soft">
@@ -293,8 +320,21 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
               </tr>
             )}
 
-            {rows.map((entry) => (
-              <Row key={entry.id} entry={entry} columns={columns} showBalance={showBalance} />
+            {monthGroups.map((group) => (
+              <Fragment key={group.key}>
+                <tr className="bg-rule-soft">
+                  <td colSpan={columns.length} className="px-2 py-1 text-eyebrow text-ink-50">
+                    {group.label}
+                    <span className="ml-2 normal-case tracking-normal">
+                      {group.rows.length} entries · received {money(group.received)} · delivered{' '}
+                      {money(group.delivered)}
+                    </span>
+                  </td>
+                </tr>
+                {group.rows.map((entry) => (
+                  <Row key={entry.id} entry={entry} columns={columns} showBalance={showBalance} />
+                ))}
+              </Fragment>
             ))}
 
             {rows.length === 0 && (
@@ -305,7 +345,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
               </tr>
             )}
           </tbody>
-          <tfoot>
+          <tfoot className="sticky bottom-0 bg-surface">
             <tr className="border-t border-rule bg-rule-soft">
               <td colSpan={columns.length} className="px-2 py-2 font-semibold text-ink">
                 Closing balance
@@ -388,7 +428,7 @@ function Row({
             key={column.key}
             className={`px-2 py-1 ${column.numeric ? 'text-right num whitespace-nowrap' : ''}`}
           >
-            {column.key === 'date' ? (
+            {column.key === 'receivedDate' || column.key === 'deliveryDate' ? (
               <span className="whitespace-nowrap">
                 {dayLong(entry.date) || <span className="text-ink-70">No date</span>}
                 {entry.dateUnconfirmed && (
@@ -402,7 +442,7 @@ function Row({
             ) : isBalance ? (
               showBalance && !Number.isNaN(entry.balance) ? money(entry.balance) : ''
             ) : typeof value === 'number' ? (
-              money(round2(value))
+              column.money ? money(round2(value)) : value
             ) : (
               (value ?? '')
             )}

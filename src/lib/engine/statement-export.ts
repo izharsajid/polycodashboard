@@ -104,7 +104,8 @@ export function buildExportSheet(
     header: exportHeader(view, context),
     columnLabels: chosen.map((c) => c.label),
     rows: entries.map(toRow),
-    numericColumns: chosen.flatMap((c, i) => (c.numeric ? [i] : [])),
+    // Money columns get a currency format in XLSX; a serial number does not.
+    numericColumns: chosen.flatMap((c, i) => (c.money ? [i] : [])),
     nearMissLabel:
       view.nearMisses.length > 0
         ? 'Excluded from the range on a corrected date, shown for completeness and not included in any total above'

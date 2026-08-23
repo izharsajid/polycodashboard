@@ -144,7 +144,14 @@ function Dashboard({ user }: { user: PublicUser }) {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-page px-[20px] py-6 sm:px-6">
+      <main
+        className={
+          // The statement and the order table are ledgers and need the room.
+          active === 'statement' || active === 'order-book'
+            ? 'px-[20px] py-6 sm:px-6'
+            : 'mx-auto max-w-page px-[20px] py-6 sm:px-6'
+        }
+      >
         {figures.status === 'loading' && (
           <p className="text-body text-ink-70" aria-busy="true">
             Loading the figures.

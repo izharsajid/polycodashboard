@@ -10,8 +10,8 @@ describe('carrying the view in the URL', () => {
     const state = {
       from: '2026-01-01',
       to: '2026-03-31',
-      columns: ['date', 'type', 'reference', 'received', 'delivered', 'balance'] as const,
-      sort: 'reference' as const,
+      columns: ['serial', 'poAndDate', 'received', 'delivered', 'balance'] as const,
+      sort: 'product' as const,
       direction: 'desc' as const,
     }
     expect(readStatementUrl(writeStatementUrl({ ...state, columns: [...state.columns] }))).toEqual({
@@ -31,17 +31,17 @@ describe('carrying the view in the URL', () => {
   })
 
   it('drops a column it does not recognise, so a stale link still opens', () => {
-    const state = readStatementUrl('?cols=date,invented,balance')
-    expect(state.columns).toEqual(['date', 'balance'])
+    const state = readStatementUrl('?cols=serial,invented,balance')
+    expect(state.columns).toEqual(['serial', 'balance'])
   })
 
   it('puts the running balance back if a link tries to drop it', () => {
     // Never removable, per section 3. A hand-edited link cannot take it away.
-    expect(readStatementUrl('?cols=date,reference').columns).toContain('balance')
+    expect(readStatementUrl('?cols=serial,product').columns).toContain('balance')
   })
 
   it('falls back to sorting by date when the sort key is unknown', () => {
-    expect(readStatementUrl('?sort=nonsense').sort).toBe('date')
+    expect(readStatementUrl('?sort=nonsense').sort).toBe('serial')
     expect(readStatementUrl('?dir=sideways').direction).toBe('asc')
   })
 })

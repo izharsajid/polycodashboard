@@ -29,6 +29,9 @@ export type StatementEntry = {
   product: string | null
   poAmount: number | null
   proformaRef: string | null
+  proformaAmount: number | null
+  /** An order placed and not yet delivered, which the workbook shows as pending. */
+  pendingValue: number | null
   delivered: number
   received: number
   /** received less delivered. The signed effect on the balance. */
@@ -66,6 +69,8 @@ function entryFor(row: LedgerRowT, kind: EntryKind): StatementEntry {
     product: row.product,
     poAmount: row.po_amount,
     proformaRef: row.proforma_ref,
+    proformaAmount: row.proforma_amount,
+    pendingValue: kind === 'order' ? row.po_amount : null,
     delivered,
     received,
     movement: round2(received - delivered),
@@ -211,32 +216,49 @@ export function statementView(ledger: LedgerT, range: StatementRange = {}): Stat
  * lands in Excel cannot drift apart.
  */
 export type ColumnKey =
-  | 'date' | 'type' | 'reference' | 'product' | 'poValue' | 'proformaRef'
-  | 'delivered' | 'received' | 'balance' | 'containerStatus' | 'deliveryDate'
-  | 'sourceRow' | 'flags'
+  | 'serial' | 'poAndDate' | 'product' | 'poValue' | 'proformaRef' | 'proformaAmount'
+  | 'delivered' | 'received' | 'receivedDate' | 'loaded' | 'pendingValue'
+  | 'deliveryDate' | 'balance' | 'type' | 'flags'
 
 export type ColumnDef = {
   key: ColumnKey
   label: string
+  /** Right-aligned. Not every right-aligned column is money. */
   numeric: boolean
+  /** Formatted with a currency symbol. A serial number is numeric and not money. */
+  money?: boolean
   isDefault: boolean
   /** A statement without a running balance is a list of rows. */
   locked?: boolean
 }
 
+/**
+ * The statement workbook's own columns, in its order.
+ *
+ * REDESIGN-2-SPEC section 6: this layout has gone to Polyco for years and their
+ * finance team reads it fluently. Replacing it with a ledger of our own design
+ * made them learn a new document to check a familiar one.
+ *
+ * The source row column is gone: it is our trace back to the workbook and means
+ * nothing to a reader. The running balance is an addition rather than a
+ * replacement, since the workbook has no equivalent, and it is what makes the
+ * page reconcilable, so it stays and stays on by default.
+ */
 export const COLUMNS: ColumnDef[] = [
-  { key: 'date', label: 'Date', numeric: false, isDefault: true },
-  { key: 'type', label: 'Type', numeric: false, isDefault: true },
-  { key: 'reference', label: 'Reference', numeric: false, isDefault: true },
-  { key: 'product', label: 'Product', numeric: false, isDefault: false },
-  { key: 'poValue', label: 'PO value', numeric: true, isDefault: false },
-  { key: 'proformaRef', label: 'Proforma reference', numeric: false, isDefault: false },
-  { key: 'delivered', label: 'Delivered value', numeric: true, isDefault: false },
-  { key: 'received', label: 'Received', numeric: true, isDefault: false },
-  { key: 'balance', label: 'Running balance', numeric: true, isDefault: true, locked: true },
-  { key: 'containerStatus', label: 'Container status', numeric: false, isDefault: false },
-  { key: 'deliveryDate', label: 'Delivery date', numeric: false, isDefault: false },
-  { key: 'sourceRow', label: 'Source row', numeric: true, isDefault: false },
+  { key: 'serial', label: 'S. No.', numeric: true, isDefault: true },
+  { key: 'poAndDate', label: 'PO no. and date', numeric: false, isDefault: true },
+  { key: 'product', label: 'Product', numeric: false, isDefault: true },
+  { key: 'poValue', label: 'PO amount', numeric: true, money: true, isDefault: true },
+  { key: 'proformaRef', label: 'Proforma inv. no. and date', numeric: false, isDefault: true },
+  { key: 'proformaAmount', label: 'Proforma inv. amount', numeric: true, money: true, isDefault: true },
+  { key: 'delivered', label: 'Delivered value', numeric: true, money: true, isDefault: true },
+  { key: 'received', label: 'Received', numeric: true, money: true, isDefault: true },
+  { key: 'receivedDate', label: 'Funds received date', numeric: false, isDefault: true },
+  { key: 'loaded', label: 'Loaded on container', numeric: false, isDefault: true },
+  { key: 'pendingValue', label: 'Pending value to deliver', numeric: true, money: true, isDefault: true },
+  { key: 'deliveryDate', label: 'Delivery date', numeric: false, isDefault: true },
+  { key: 'balance', label: 'Running balance', numeric: true, money: true, isDefault: true, locked: true },
+  { key: 'type', label: 'Type', numeric: false, isDefault: false },
   { key: 'flags', label: 'Flags', numeric: false, isDefault: false },
 ]
 
@@ -245,7 +267,7 @@ export const DEFAULT_COLUMNS: ColumnKey[] = COLUMNS.filter((c) => c.isDefault).m
 export const PRESETS: Record<string, { label: string; columns: ColumnKey[] }> = {
   reconciliation: {
     label: 'Reconciliation',
-    columns: ['date', 'type', 'reference', 'received', 'delivered', 'balance'],
+    columns: ['serial', 'poAndDate', 'received', 'receivedDate', 'delivered', 'deliveryDate', 'balance'],
   },
   full: { label: 'Full detail', columns: COLUMNS.map((c) => c.key) },
 }
@@ -274,18 +296,22 @@ export function entryTypeLabel(entry: StatementEntry): string {
  */
 export function cellValue(entry: BalancedEntry, key: ColumnKey): string | number | null {
   switch (key) {
-    case 'date': return entry.date
-    case 'type': return entryTypeLabel(entry)
-    case 'reference': return entry.reference
+    case 'serial': return entry.sourceRow
+    // The workbook carries the PO reference and its date in one cell, as `ref`
+    // already does.
+    case 'poAndDate': return entry.reference
     case 'product': return entry.product
     case 'poValue': return entry.poAmount
     case 'proformaRef': return entry.proformaRef
+    case 'proformaAmount': return entry.proformaAmount
     case 'delivered': return entry.delivered || null
     case 'received': return entry.received || null
-    case 'balance': return entry.balance
-    case 'containerStatus': return entry.loaded
+    case 'receivedDate': return entry.kind === 'receipt' ? entry.date : null
+    case 'loaded': return entry.loaded
+    case 'pendingValue': return entry.pendingValue
     case 'deliveryDate': return entry.kind === 'delivery' ? entry.date : null
-    case 'sourceRow': return entry.sourceRow
+    case 'balance': return entry.balance
+    case 'type': return entryTypeLabel(entry)
     case 'flags': return entry.flags.length ? entry.flags.join('; ') : null
   }
 }
@@ -302,7 +328,7 @@ export function sortEntries(
   key: SortKey,
   direction: SortDirection,
 ): BalancedEntry[] {
-  if (key === 'date') {
+  if (key === 'serial') {
     const sorted = [...entries]
     return direction === 'asc' ? sorted : sorted.reverse()
   }
@@ -321,7 +347,7 @@ export function sortEntries(
 
 /** A running balance out of date order is meaningless, so it is not offered. */
 export function balanceIsMeaningful(sort: SortKey): boolean {
-  return sort === 'date'
+  return sort === 'serial'
 }
 
 /**

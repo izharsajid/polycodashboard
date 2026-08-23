@@ -1,95 +1,110 @@
 /**
- * The visual system, from DESIGN-SYSTEM-SPEC.md.
+ * The visual system, from DESIGN-SYSTEM-V2-SPEC.md.
  *
- * An institutional financial document rendered on a screen, not a SaaS
- * dashboard. Typography carries the design; space and rules replace cards;
- * figures dominate. See DESIGN.md for what each token is for and where the two
- * contrast corrections came from.
+ * EcoFibre's house style, the same one efdashboard renders. The two should be
+ * indistinguishable. Cards on a tinted page, a tinted header block inside each
+ * card, a leaf bar across its top, and Montserrat throughout.
+ *
+ * See DESIGN.md for what each token is for.
+ *
+ * Two notes on what is deliberately NOT overridden here:
+ *
+ * - `spacing` keeps Tailwind's own scale. The previous config replaced it with a
+ *   sparse 8px scale, which meant `h-5` and `h-9` were not classes at all and
+ *   silently did nothing. A replaced scale turns a typo into an invisible
+ *   failure, and this file has no reason to take that risk.
+ * - `fontWeight` keeps its defaults, because section 1 asks for 800 on the
+ *   kicker and 700 on headings and figures.
  *
  * @type {import('tailwindcss').Config}
  */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
-    // Not `extend`. The old palette competed with this one, and leaving it in
-    // reach means it comes back one class at a time.
+    // Replaced, not extended. The near-monochrome palette this supersedes should
+    // not be reachable one class at a time.
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
       white: '#FFFFFF',
 
-      ink: {
-        DEFAULT: '#16181A',
-        70: '#4A4F55',
-        // Two points darker than the spec's #71777E, which measured 4.41:1 on
-        // paper and failed the 4.5 body minimum section 7 sets. 4.53:1 now.
-        50: '#6F757C',
-        30: '#A8ADB3',
-      },
-      rule: {
-        DEFAULT: '#E4E6E8',
-        soft: '#EFF1F2',
-      },
-      paper: '#FCFCFB',
+      /** Page background. Cards sit on this. */
+      page: '#FAFAFA',
+      /** Cards and table rows. */
       surface: '#FFFFFF',
+      /** The tinted block behind a section heading, inside the top of a card. */
+      tint: '#EFF5EA',
+      /** Table group bands. */
+      band: '#EDF3E8',
+      /** Table header row. */
+      thead: '#F4F8F1',
 
-      /** The one accent. Active nav, the series carrying a chart's message, a primary action. */
-      accent: {
-        DEFAULT: '#2D5F3F',
-        soft: '#EDF2EE',
+      rule: {
+        DEFAULT: '#DFE5DC',
+        /** Input borders, a shade greener than a hairline. */
+        field: '#D8E5CE',
       },
 
-      /** Status pills, negative figures and flags only. Never decoration. */
-      watch: {
-        // Four points darker than #A66A00, which measured 4.37:1 on paper.
-        DEFAULT: '#A26600',
-        soft: '#FBF3E4',
+      ink: {
+        DEFAULT: '#333333',
+        /** Headings and figures. */
+        strong: '#263D23',
+        /** Descriptions and secondary lines. */
+        muted: '#6D7869',
+        /** Table header text. */
+        table: '#687365',
       },
-      critical: {
-        DEFAULT: '#9B2C24',
-        soft: '#FAEDEC',
+
+      /** The accent: active pills, buttons, links, and the series carrying a chart. */
+      leaf: {
+        DEFAULT: '#507A48',
+        /** Heading green, and the bar across the top of a card. */
+        deep: '#294525',
+        /** Kicker text. */
+        kicker: '#71846B',
       },
+
+      // Status. Section 2: these appear in pills, and in a chart only where they
+      // mean there exactly what they mean in a pill. Never as decoration.
+      good: { DEFAULT: '#257443', wash: '#E6F5EB' },
+      info: { DEFAULT: '#345C8A', wash: '#E8F1FB' },
+      plan: { DEFAULT: '#70458A', wash: '#F1E8F7' },
+      watch: { DEFAULT: '#8A4A10', wash: '#FFF0D8' },
+      /** The only red in the system. */
+      critical: { DEFAULT: '#AD3029', wash: '#FDE8E6' },
+      off: { DEFAULT: '#625C5C', wash: '#ECE9E9' },
     },
 
     fontFamily: {
-      /** Findings, headings, section titles. Gravity, and reads as a document. */
-      serif: ['"Source Serif 4"', 'Georgia', 'serif'],
-      /** Interface, labels, body, tables, and every figure. */
-      sans: ['Inter', 'system-ui', 'sans-serif'],
-      /** The EcoFibre wordmark only. Retired everywhere else. */
-      wordmark: ['Montserrat', 'system-ui', 'sans-serif'],
+      /** Everything. Section 1: sans throughout, no serif, no monospace. */
+      sans: ['Montserrat', 'system-ui', 'sans-serif'],
     },
 
-    /** Fixed steps. No ad-hoc sizes. */
+    /**
+     * Fixed steps, from section 1. No key here may share a name with a colour
+     * key: Tailwind builds `text-*` utilities from both, and a collision means
+     * one of them silently loses.
+     */
     fontSize: {
-      eyebrow: ['11px', { lineHeight: '1', letterSpacing: '0.14em' }],
-      label: ['13px', { lineHeight: '1.4' }],
-      table: ['13px', { lineHeight: '1.5' }],
-      body: ['15px', { lineHeight: '1.6' }],
-      subtitle: ['17px', { lineHeight: '1.4' }],
-      figure: ['19px', { lineHeight: '1.2' }],
-      title: ['21px', { lineHeight: '1.3' }],
-      finding: ['30px', { lineHeight: '1.25' }],
-      'figure-xl': ['42px', { lineHeight: '1' }],
+      kicker: ['11.5px', { lineHeight: '1', letterSpacing: '0.09em' }],
+      title: ['23px', { lineHeight: '1.25' }],
+      lede: ['14px', { lineHeight: '1.6' }],
+      'figure-xl': ['30px', { lineHeight: '1' }],
+      figure: ['17px', { lineHeight: '1.3' }],
+      body: ['14px', { lineHeight: '1.6' }],
+      /** Table header. */
+      th: ['11px', { lineHeight: '1', letterSpacing: '0.055em' }],
+      table: ['13px', { lineHeight: '1.4' }],
+      /** The grey second line under a value. */
+      sub: ['11px', { lineHeight: '1.3' }],
     },
 
-    /** An 8px base: 8 · 16 · 24 · 32 · 48 · 64 · 96. Nothing between. */
-    spacing: {
-      0: '0px',
-      px: '1px',
-      1: '8px',
-      2: '16px',
-      3: '24px',
-      4: '32px',
-      6: '48px',
-      8: '64px',
-      12: '96px',
-    },
-
-    /** Pills, buttons and form fields. Containers have none. */
     borderRadius: {
       none: '0',
-      DEFAULT: '4px',
+      /** Buttons and fields. Section 4. */
+      DEFAULT: '6px',
+      /** The card. Section 3. */
+      card: '14px',
       full: '9999px',
     },
 
@@ -97,23 +112,19 @@ export default {
       DEFAULT: '1px',
       0: '0',
       2: '2px',
+      /** The leaf bar across the top of a card. */
+      5: '5px',
     },
 
-    /** Cards are retired, so there is nothing to raise. */
     boxShadow: {
       none: 'none',
+      card: '0 10px 30px rgba(59, 89, 54, 0.08)',
     },
 
     extend: {
       maxWidth: {
-        /** Standard tabs. The statement and the order table go full bleed. */
         page: '1280px',
         prose: '68ch',
-      },
-      fontWeight: {
-        normal: '400',
-        medium: '500',
-        semibold: '600',
       },
     },
   },

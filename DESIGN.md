@@ -1,120 +1,133 @@
 # Design tokens
 
-From `DESIGN-SYSTEM-SPEC.md`. This replaces the previous file, which recorded
-tokens read off efdashboard.com. That reference has been retired: efdashboard is
-an internal operations tool, and this is a document two boards read to make a
-decision together.
+From `DESIGN-SYSTEM-V2-SPEC.md`. This replaces the previous file, which recorded
+the near-monochrome system with serif headings and no cards. That system took the
+dashboard away from EcoFibre's house style. This one returns to it: the dashboard
+and efdashboard should be indistinguishable.
 
-The register is **an institutional financial document rendered on a screen**.
-Typography carries the design. Space and rules replace cards. Figures dominate.
+The register is **EcoFibre's own operations look**: cards on a tinted page, a
+tinted header block inside each card, a leaf bar across its top, green
+throughout, and figures in Montserrat.
+
+Every value below is a computed value already recorded in the first `DESIGN.md`
+extraction from efdashboard. Nothing was read off the live site again for this
+pass.
 
 ## Typography
 
-Two families loaded, plus the wordmark.
+One family. Montserrat is the EcoFibre brand face and it is close to what
+efdashboard renders.
 
-| Role | Family | Weights |
-|---|---|---|
-| Findings, headings, section titles | Source Serif 4 | 400, 600 |
-| Interface, labels, body, tables, every figure | Inter | 400, 500, 600 |
-| EcoFibre wordmark, header only | Montserrat | 700 |
+**No serif anywhere.** Source Serif 4 and Inter are retired, and there is no
+monospace: Montserrat's `tnum` figures align on the decimal without the
+typewriter texture.
 
-Montserrat is retired everywhere except the wordmark. No monospace anywhere:
-Inter's `tnum` figures align on the decimal without the typewriter texture.
-
-| Token | Size / line height | Family, weight | Use |
+| Token | Size / line height | Weight | Use |
 |---|---|---|---|
-| `finding` | 30px / 1.25 | Serif 400 | The one sentence at the top of a screen |
-| `title` | 21px / 1.3 | Serif 600 | Section heading |
-| `subtitle` | 17px / 1.4 | Serif 400 | Block heading inside a section |
-| `figure-xl` | 42px / 1 | Inter 600, tnum | Headline figures |
-| `figure` | 19px / 1.2 | Inter 600, tnum | Secondary figures |
-| `body` | 15px / 1.6 | Inter 400 | Prose |
-| `label` | 13px / 1.4 | Inter 400 | Descriptions, captions |
-| `eyebrow` | 11px / 1 | Inter 600, 0.14em, uppercase | Category labels, table headers |
-| `table` | 13px / 1.5 | Inter 400, tnum | Table cells |
+| `kicker` | 11.5px / 1, `0.09em`, uppercase | 800 | Category label above a heading |
+| `title` | 23px / 1.25 | 700 | Section heading |
+| `lede` | 14px / 1.6 | 400 | The line under a heading |
+| `figure-xl` | 30px / 1 | 700 | Headline figures |
+| `figure` | 17px / 1.3 | 700 | Values inside a table cell |
+| `body` | 14px / 1.6 | 400 | Prose |
+| `th` | 11px / 1, `0.055em`, uppercase | 600 | Table header |
+| `table` | 13px / 1.4 | 400 | Table cell |
+| `sub` | 11px / 1.3 | 400 | The grey second line under a value |
 
-Serif headings are set at 400 and 600 only. Never bolded further, never
-letterspaced, never uppercase.
+The spec calls the table-header token `table-head`. It is `th` in the config,
+because a `fontSize` key and a `colors` key sharing a name both generate the same
+`text-*` utility and one of them silently loses. The table header *background* is
+`thead` for the same reason.
+
+Tabular numerals are set on `body`, so every figure inherits them.
 
 ## Colour
 
-Near-monochrome with one accent.
+| Token | Value | Use |
+|---|---|---|
+| `page` | `#FAFAFA` | Page background |
+| `surface` | `#FFFFFF` | Cards, table rows |
+| `tint` | `#EFF5EA` | The tinted block behind a section heading |
+| `band` | `#EDF3E8` | Table group bands |
+| `thead` | `#F4F8F1` | Table header row |
+| `rule` | `#DFE5DC` | Hairlines |
+| `rule-field` | `#D8E5CE` | Input borders |
+| `ink` | `#333333` | Body text |
+| `ink-strong` | `#263D23` | Headings, figures |
+| `ink-muted` | `#6D7869` | Descriptions, secondary lines |
+| `ink-table` | `#687365` | Table header text |
+| `leaf` | `#507A48` | The accent: active pills, buttons, links |
+| `leaf-deep` | `#294525` | Heading green, the accent bar |
+| `leaf-kicker` | `#71846B` | Kicker text |
+
+### Status
+
+Used **only** in pills, and in a chart only where the colour means there exactly
+what it means in a pill.
+
+| Token | Text | Wash | Meaning |
+|---|---|---|---|
+| `good` | `#257443` | `#E6F5EB` | Dispatched, running |
+| `info` | `#345C8A` | `#E8F1FB` | Processing |
+| `plan` | `#70458A` | `#F1E8F7` | Booked |
+| `watch` | `#8A4A10` | `#FFF0D8` | PO pending |
+| `critical` | `#AD3029` | `#FDE8E6` | On hold, stopped, shortfalls, placeholders |
+| `off` | `#625C5C` | `#ECE9E9` | Cancelled |
+
+`critical` is the only red in the system and never appears as decoration.
+
+## Structure
+
+Four parts, the same on every tab.
+
+**The card.** White, `14px` radius, `0 10px 30px rgba(59,89,54,0.08)`, and a 5px
+`leaf` bar across the top. One card per section. Nothing sits loose on the page.
+
+The bar is a `border-top` rather than a pseudo-element, so it survives printing:
+a browser may drop a background but it will not drop a border.
+
+**The tinted header block.** `tint` background inside the top of the card,
+holding the kicker, the heading, a one-line lede, an as-at line in `leaf-deep`
+bold, and a right-aligned search field where the tab has search.
+
+**Filter pills.** Rows, each labelled above in `kicker`. Active is `leaf` fill
+with white text; inactive is white with a `rule` border. The count sits inside the
+pill in a lighter weight. An "All" pill starts each row. Grey summary pills sit
+below the rows.
+
+**The table.** Header row on `thead` in `th` style and `ink-table`. Group bands on
+`band` in small bold uppercase `leaf-deep` with a count. Body rows on `surface`
+with a `rule` hairline between. No vertical rules anywhere.
+
+Where a value has a qualifier, the cell is two lines: the value in `figure`, the
+qualifier beneath in `sub` `ink-muted`.
+
+## Spacing
+
+Tailwind's own scale, deliberately not replaced.
+
+The previous config replaced it with a sparse 8px scale of `1 2 3 4 6 8 12`,
+which meant `h-5` and `h-9` were not classes at all. They compiled to nothing and
+failed silently: the Gantt's month scale row collapsed to its one-pixel border
+and pushed its labels up out of the chart. A replaced scale turns a typo into an
+invisible failure, and there is no reason to carry that risk for a scale nobody
+asked to change.
+
+## Radius and shadow
 
 | Token | Value | Use |
 |---|---|---|
-| `ink` | `#16181A` | Primary text, headings, figures |
-| `ink-70` | `#4A4F55` | Body prose |
-| `ink-50` | `#6F757C` | Labels, captions, axis text |
-| `ink-30` | `#A8ADB3` | Disabled, placeholder |
-| `rule` | `#E4E6E8` | Hairline borders, table rules |
-| `rule-soft` | `#EFF1F2` | Banding, hover |
-| `paper` | `#FCFCFB` | Page background |
-| `surface` | `#FFFFFF` | Sticky headers, raised areas |
-| `accent` | `#2D5F3F` | The one accent |
-| `accent-soft` | `#EDF2EE` | Accent wash, used rarely |
-| `watch` | `#A26600` | Watch state |
-| `watch-soft` | `#FBF3E4` | Watch wash |
-| `critical` | `#9B2C24` | Shortfall, exception, placeholder |
-| `critical-soft` | `#FAEDEC` | Critical wash |
+| `rounded` | `6px` | Buttons, fields |
+| `rounded-card` | `14px` | Cards |
+| `rounded-full` | — | Pills |
+| `shadow-card` | `0 10px 30px rgba(59,89,54,0.08)` | Cards, and nothing else |
 
-### Two corrections to the specified palette
+## What carries over from REDESIGN-2
 
-Section 7 sets a 4.5:1 minimum for body text and asks for `ink-50` on `paper` to
-be checked and fixed rather than left. Measured on the specified values:
+`$` on every monetary figure; negatives in parentheses; lucide icons in headings,
+pills, document types and actions; Tab 1 plotting the balance as one series; Tab
+2's variance bars; the statement in the workbook column layout; the order drawer;
+one sentence of prose per screen.
 
-| Token | Specified | Ratio on paper | Corrected to | Ratio |
-|---|---|---|---|---|
-| `ink-50` | `#71777E` | 4.41 — fails | `#6F757C` | 4.53 |
-| `watch` | `#A66A00` | 4.37 — fails | `#A26600` | 4.61 |
-
-`watch` was corrected on the same grounds: it sets 11px pill text, which is body
-size. `ink-30` measures 2.20 and is left as specified, because it is used only
-for disabled controls and placeholder text, which the contrast minimum exempts.
-
-Everything else in the specified palette passes: `ink` 17.34, `ink-70` 8.05,
-`accent` 7.25, `critical` 7.36.
-
-### Rules
-
-- One accent. Active nav, the chart series carrying the message, a primary
-  action. Nothing else.
-- No coloured background behind a figure. Numbers sit on `paper` or `surface`.
-- Red only for a shortfall, an exception or a placeholder.
-- Charts are monochrome: the ink ramp for context, `accent` for the message. Two
-  colours maximum.
-- Every state survives greyscale. If removing colour loses the meaning, there is
-  a mark as well.
-
-## Layout
-
-The card is retired. No radius on containers, no shadow, no accent bars. Sections
-are separated by space, and by a 1px `rule` hairline where a division is genuinely
-needed.
-
-Radius survives in three places only, at 4px: pills, buttons, form fields.
-
-Spacing is an 8px base, exposed as the only steps available:
-
-| Class | Pixels |
-|---|---|
-| `1` | 8 |
-| `2` | 16 |
-| `3` | 24 |
-| `4` | 32 |
-| `6` | 48 |
-| `8` | 64 |
-| `12` | 96 |
-
-Page gutters 48px desktop and 20px phone; 64px between sections; 24px between a
-heading and its content; 8px between a figure and its label. Content is 1280px
-wide, except the statement and the order table which are full bleed.
-
-Everything is left-aligned except figures in tables, which are right-aligned.
-Nothing is centred.
-
-## What the tailwind config does with this
-
-`theme.colors`, `theme.fontFamily`, `theme.fontSize`, `theme.spacing`,
-`theme.borderRadius` and `theme.boxShadow` are **replaced**, not extended. The
-previous palette competed with this one, and leaving it within reach means it
-returns one class at a time.
+Charts use `leaf` for the series carrying the message and `ink-muted` at low
+opacity for context.

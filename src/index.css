@@ -8,56 +8,53 @@
   }
 
   body {
-    @apply bg-paper text-ink font-sans text-body antialiased;
+    @apply bg-page text-ink font-sans text-body antialiased;
     /* Tabular figures everywhere a number appears, so digits do not shift as
-       values change. DESIGN-SYSTEM-SPEC section 7. */
+       values change. DESIGN-SYSTEM-V2-SPEC section 1. */
     font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1, 'cv05' 1;
+    font-feature-settings: 'tnum' 1;
   }
 
-  /* Every focusable element, visible, in the accent. Section 7. */
+  /* Every focusable element, visible, in the accent. */
   :focus-visible {
-    @apply outline-none ring-2 ring-accent ring-offset-2;
-    --tw-ring-offset-color: #FCFCFB;
+    @apply outline-none ring-2 ring-leaf ring-offset-2;
+    --tw-ring-offset-color: #FAFAFA;
   }
 
   ::placeholder {
-    @apply text-ink-30;
+    @apply text-ink-muted;
   }
 }
 
 @layer components {
-  /* Category label above a section heading, and every table header. */
-  .eyebrow {
-    @apply font-sans text-eyebrow font-semibold uppercase text-ink-50;
-  }
+  /* ---- Typography, section 1 ---------------------------------------- */
 
-  /* The one line under a section heading saying what it shows. */
-  .lede {
-    @apply text-label text-ink-70;
-  }
-
-  /* The one sentence stating what the numbers mean. Serif, never bolded. */
-  .finding {
-    @apply font-serif text-finding font-normal text-ink;
+  /* Category label above a heading. */
+  .kicker {
+    @apply text-kicker font-extrabold uppercase text-leaf-kicker;
   }
 
   .title {
-    @apply font-serif text-title font-semibold text-ink;
+    @apply text-title font-bold text-leaf-deep;
   }
 
-  .subtitle {
-    @apply font-serif text-subtitle font-normal text-ink;
+  /* The one line under a heading. */
+  .lede {
+    @apply text-lede text-ink-muted;
   }
 
-  /* Figures. Inter, tabular, never in a box and never on a coloured ground. */
+  /* The grey second line under a value. */
+  .sub {
+    @apply text-sub text-ink-muted;
+  }
+
   .figure-xl {
-    @apply font-sans text-figure-xl font-semibold text-ink;
+    @apply text-figure-xl font-bold text-ink-strong;
     font-variant-numeric: tabular-nums;
   }
 
   .figure {
-    @apply font-sans text-figure font-semibold text-ink;
+    @apply text-figure font-bold text-ink-strong;
     font-variant-numeric: tabular-nums;
   }
 
@@ -65,25 +62,119 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* A hairline is the only division. There are no cards. */
-  .rule-top {
-    @apply border-t border-rule;
+  /* ---- The card, section 3 ------------------------------------------- */
+
+  /*
+    One card per section. White, 14px radius, a soft green shadow, and a 5px leaf
+    bar across the top. Content sits inside it, never loose on the page.
+
+    The bar is a border rather than a pseudo-element so it survives the print
+    stylesheet, where a background may be dropped by the browser but a border is
+    not.
+  */
+  .card {
+    @apply overflow-hidden rounded-card border-t-5 border-leaf bg-surface shadow-card;
   }
 
-  .field {
-    @apply rounded border border-rule bg-surface px-2 py-1 text-label text-ink;
+  /* The tinted header block inside the top of a card. */
+  .card-head {
+    @apply bg-tint px-4 py-4 sm:px-6;
   }
+
+  /* Everything below the header block. */
+  .card-body {
+    @apply px-4 py-4 sm:px-6 sm:py-6;
+  }
+
+  /* A card holding a full-bleed ledger: the table runs to the card's own edges. */
+  .card-body-flush {
+    @apply py-4;
+  }
+
+  /* The as-at or last-updated line under a card heading. */
+  .as-at {
+    @apply text-sub font-bold uppercase tracking-wide text-leaf-deep;
+  }
+
+  /* ---- Pills, section 3 and 4 ---------------------------------------- */
+
+  /* A filter pill. Inactive: white with a hairline. */
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-rule bg-surface px-3 py-1.5 text-sub font-semibold text-ink transition-colors;
+  }
+
+  .pill-active {
+    @apply border-leaf bg-leaf text-white;
+  }
+
+  /* The count inside a pill, always lighter than the label beside it. */
+  .pill-count {
+    @apply font-normal opacity-70;
+  }
+
+  /* Grey summary pills under the filter rows: "47 visible". */
+  .pill-summary {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-off-wash px-3 py-1 text-sub font-semibold text-off;
+  }
+
+  /* A status pill. Rounded full, wash background, coloured text, a dot before
+     the word. The dot doubles as the greyscale mark. */
+  .pill-status {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sub font-semibold;
+  }
+
+  /* ---- Buttons and fields, section 4 --------------------------------- */
 
   .btn-primary {
-    @apply rounded bg-accent px-2 py-1 text-label font-medium text-white;
+    @apply inline-flex items-center gap-1.5 rounded bg-leaf px-3 py-2 text-sub font-semibold text-white hover:bg-leaf-deep;
   }
 
   .btn-secondary {
-    @apply rounded border border-rule bg-surface px-2 py-1 text-label text-ink;
+    @apply inline-flex items-center gap-1.5 rounded border border-rule bg-surface px-3 py-2 text-sub font-semibold text-ink hover:border-rule-field;
   }
 
   .btn-text {
-    @apply text-label text-ink-70 underline underline-offset-2 hover:text-ink;
+    @apply text-sub font-semibold text-leaf hover:text-leaf-deep;
+  }
+
+  .field {
+    @apply w-full rounded border border-rule-field bg-surface px-3 py-2 text-table text-ink;
+  }
+
+  /* The search field in a card header, with room for its magnifier. */
+  .field-search {
+    @apply rounded-full pl-8;
+  }
+
+  /* ---- Tables, section 3 --------------------------------------------- */
+
+  .th {
+    @apply bg-thead px-3 py-2 text-th font-semibold uppercase text-ink-table;
+  }
+
+  .td {
+    @apply px-3 py-2.5 text-table text-ink;
+  }
+
+  /* A group band row: small bold uppercase leaf-deep text and a count. */
+  .band-row {
+    @apply bg-band px-3 py-1.5 text-th font-bold uppercase text-leaf-deep;
+  }
+
+  /* No vertical rules anywhere. Section 3. */
+  .table-rows > tr {
+    @apply border-b border-rule bg-surface;
+  }
+
+  /* ---- The tab strip, section 4 -------------------------------------- */
+
+  /* Small tabs above the card, the active one flush against it. */
+  .tab {
+    @apply -mb-px whitespace-nowrap rounded-t border border-transparent px-3 py-2 text-sub font-semibold text-ink-muted hover:text-ink;
+  }
+
+  .tab-active {
+    @apply border-rule border-b-surface bg-surface text-leaf-deep;
   }
 }
 
@@ -98,7 +189,6 @@
 
 @media print {
   body {
-    /* Paper becomes white. Section 7. */
     @apply bg-white;
   }
 
@@ -108,7 +198,15 @@
     color: inherit;
   }
 
-  /* A pill's wash prints as grey mush; the mark and the word carry it. */
+  /* A card's shadow prints as a grey smear. The rule and the leaf bar carry it. */
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #DFE5DC !important;
+    border-top: 5px solid #507A48 !important;
+    break-inside: avoid;
+  }
+
+  /* A pill's wash prints as grey mush; the dot and the word carry it. */
   .pill-print-plain {
     background: transparent !important;
   }
@@ -161,8 +259,7 @@
   .recharts-wrapper,
   /* The Gantt is hand-built rather than a recharts wrapper. Without this, a page
      carrying both charts prints one in colour and one in grey, which reads as a
-     mistake rather than a choice. Its two colours are an accent fill and a grey
-     hatch, so nothing is lost by it. */
+     mistake rather than a choice. */
   .chart-print-grey {
     filter: grayscale(1);
   }

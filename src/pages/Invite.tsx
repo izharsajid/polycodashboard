@@ -4,6 +4,7 @@ import { useSession } from '../auth/session'
 import { api } from '../lib/api'
 import { navigate } from '../lib/navigation'
 import { DASHBOARD, LOGIN } from '../lib/router'
+import AuthShell from '../components/AuthShell'
 
 /**
  * Accepting an invitation. The token comes from the fragment, which the browser
@@ -71,13 +72,7 @@ export default function Invite({ token }: { token: string | null }) {
   }
 
   return (
-    <main className="min-h-screen flex items-start justify-center px-3 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-muted">/</span>
-          <span className="text-body text-ink-muted">Polyco Healthline</span>
-        </div>
+    <AuthShell>
 
         {stage.at === 'checking' && (
           <p className="text-body text-ink-muted" aria-busy="true">
@@ -87,8 +82,8 @@ export default function Invite({ token }: { token: string | null }) {
 
         {stage.at === 'dead' && (
           <>
-            <h1 className="text-title font-semibold tracking-tight mb-1">That link has expired</h1>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <h1 className="title mb-2">That link has expired</h1>
+            <p className="lede mb-4">
               Invitations last seven days and work once. Ask whoever invited you for
               another, and this one stops working either way.
             </p>
@@ -104,15 +99,15 @@ export default function Invite({ token }: { token: string | null }) {
 
         {stage.at === 'ready' && (
           <>
-            <h1 className="text-title font-semibold tracking-tight mb-1">Choose a password</h1>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <h1 className="title mb-2">Choose a password</h1>
+            <p className="lede mb-4">
               For <span className="text-ink">{stage.email}</span>. At least 12 characters. A
               few words you will remember beat a short one with symbols in it, and nobody
               here can see what you choose.
             </p>
 
-            <form onSubmit={submit} className="flex flex-col gap-2">
-              <label className="flex flex-col gap-1">
+            <form onSubmit={submit} className="flex flex-col gap-4">
+              <label className="flex flex-col gap-1.5">
                 <span className="kicker">Password</span>
                 <input
                   type="password"
@@ -125,7 +120,7 @@ export default function Invite({ token }: { token: string | null }) {
                 />
               </label>
 
-              <label className="flex flex-col gap-1">
+              <label className="flex flex-col gap-1.5">
                 <span className="kicker">Again</span>
                 <input
                   type="password"
@@ -138,7 +133,7 @@ export default function Invite({ token }: { token: string | null }) {
               </label>
 
               {error && (
-                <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+                <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
                   {error}
                 </p>
               )}
@@ -146,14 +141,13 @@ export default function Invite({ token }: { token: string | null }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="btn-primary mt-1 w-full disabled:opacity-50"
+                className="btn-primary w-full justify-center disabled:opacity-50"
               >
                 {busy ? 'Setting it' : 'Set password and sign in'}
               </button>
             </form>
           </>
         )}
-      </div>
-    </main>
+    </AuthShell>
   )
 }

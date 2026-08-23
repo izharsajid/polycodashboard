@@ -20,7 +20,9 @@ export default function Header({ user }: { user: PublicUser }) {
           <span className="text-figure font-extrabold tracking-tight text-leaf-deep">
             ECOFIBRE
           </span>
-          <span className="text-ink-muted" aria-hidden>
+          {/* Hidden with the name it separates: a slash with nothing after it
+              reads as a truncation rather than a divider. */}
+          <span className="hidden text-ink-muted sm:inline" aria-hidden>
             /
           </span>
           <span className="hidden truncate text-table text-ink-muted sm:inline">

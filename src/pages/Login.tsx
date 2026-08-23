@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useSession } from '../auth/session'
 import { navigate } from '../lib/navigation'
 import { FORGOT } from '../lib/router'
+import AuthShell from '../components/AuthShell'
 
 /**
  * Email, password, a forgot-password link, nothing else.
@@ -31,21 +32,17 @@ export default function Login({ next }: { next: string }) {
   }
 
   return (
-    <main className="min-h-screen flex items-start justify-center px-3 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-muted">/</span>
-          <span className="text-body text-ink-muted">Polyco Healthline</span>
-        </div>
-
-        <h1 className="text-title font-semibold tracking-tight mb-1">Sign in</h1>
-        <p className="text-body text-ink-muted mb-4">
-          Position, capacity and configuration.
-        </p>
-
-        <form onSubmit={submit} className="flex flex-col gap-2">
-          <label className="flex flex-col gap-1">
+    <AuthShell
+      title="Sign in"
+      lede="Position, capacity and configuration."
+      footer={
+        <button type="button" onClick={() => navigate(FORGOT)} className="btn-text">
+          Forgotten your password?
+        </button>
+      }
+    >
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5">
             <span className="kicker">Email</span>
             <input
               type="email"
@@ -58,7 +55,7 @@ export default function Login({ next }: { next: string }) {
             />
           </label>
 
-          <label className="flex flex-col gap-1">
+          <label className="flex flex-col gap-1.5">
             <span className="kicker">Password</span>
             <input
               type="password"
@@ -71,7 +68,10 @@ export default function Login({ next }: { next: string }) {
           </label>
 
           {error && (
-            <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+            <p
+              role="alert"
+              className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink"
+            >
               {error}
             </p>
           )}
@@ -79,20 +79,11 @@ export default function Login({ next }: { next: string }) {
           <button
             type="submit"
             disabled={busy}
-            className="btn-primary mt-1 w-full disabled:opacity-50"
+            className="btn-primary w-full justify-center disabled:opacity-50"
           >
             {busy ? 'Signing in' : 'Sign in'}
           </button>
         </form>
-
-        <button
-          type="button"
-          onClick={() => navigate(FORGOT)}
-          className="mt-3 btn-text"
-        >
-          Forgotten your password?
-        </button>
-      </div>
-    </main>
+    </AuthShell>
   )
 }

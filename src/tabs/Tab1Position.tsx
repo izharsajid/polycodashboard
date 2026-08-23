@@ -190,7 +190,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
         defaultOpen
       >
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[22rem] text-table">
+        <table className="w-full min-w-[17rem] text-table">
           <tbody>
             <Row label="Received from Polyco" value={s.total_received} />
             <Row label="Less: value delivered" value={-s.total_delivered} />

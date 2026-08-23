@@ -71,14 +71,20 @@
     The bar is a border rather than a pseudo-element so it survives the print
     stylesheet, where a background may be dropped by the browser but a border is
     not.
+
+    No `overflow-hidden` to clip the corners. That would make the card a scroll
+    container, and the statement's sticky table header and totals row stick to
+    their nearest scrolling ancestor: inside a clipped card that is the card
+    itself, which does not scroll, so they would simply stop sticking. The header
+    block rounds its own top corners instead.
   */
   .card {
-    @apply overflow-hidden rounded-card border-t-5 border-leaf bg-surface shadow-card;
+    @apply rounded-card border-t-5 border-leaf bg-surface shadow-card;
   }
 
   /* The tinted header block inside the top of a card. */
   .card-head {
-    @apply bg-tint px-4 py-4 sm:px-6;
+    @apply rounded-t-[9px] bg-tint px-4 py-4 sm:px-6;
   }
 
   /* Everything below the header block. */
@@ -133,8 +139,10 @@
     @apply inline-flex items-center gap-1.5 rounded border border-rule bg-surface px-3 py-2 text-sub font-semibold text-ink hover:border-rule-field;
   }
 
+  /* inline-flex, not plain inline: these carry a lucide icon beside the label,
+     and without it the icon wraps onto its own line inside a narrow button. */
   .btn-text {
-    @apply text-sub font-semibold text-leaf hover:text-leaf-deep;
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sub font-semibold text-leaf hover:text-leaf-deep;
   }
 
   .field {
@@ -198,12 +206,30 @@
     color: inherit;
   }
 
-  /* A card's shadow prints as a grey smear. The rule and the leaf bar carry it. */
+  /*
+    A card's shadow prints as a grey smear. The rule and the leaf bar carry it.
+
+    No `break-inside: avoid` here. A card holding the statement is 174 rows long,
+    and asking a page not to break it either overflows the sheet or pushes the
+    whole thing to a page of its own and leaves the first one blank. Rows avoid
+    breaking; cards are allowed to run on, and the table header repeats.
+  */
   .card {
     box-shadow: none !important;
     border: 1px solid #DFE5DC !important;
     border-top: 5px solid #507A48 !important;
-    break-inside: avoid;
+  }
+
+  /* The tint may be dropped by a browser printing without backgrounds, so the
+     header block is delimited by a rule as well. */
+  .card-head {
+    border-bottom: 1px solid #DFE5DC !important;
+  }
+
+  /* A tinted band the same way: the group heading must not merge into its rows. */
+  .band-row {
+    border-top: 1px solid #DFE5DC !important;
+    border-bottom: 1px solid #DFE5DC !important;
   }
 
   /* A pill's wash prints as grey mush; the dot and the word carry it. */

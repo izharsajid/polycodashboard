@@ -59,12 +59,15 @@ export default function Account({ user }: { user: PublicUser }) {
     <div className="min-h-screen">
       <Header user={user} />
 
-      <main className="mx-auto max-w-2xl px-3 py-6">
-        <header className="mb-4 border-b border-rule pb-2">
-          <h1 className="text-title font-semibold tracking-tight">Your account</h1>
-        </header>
+      <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+        <div className="card">
+          <header className="card-head">
+            <p className="kicker">Your details</p>
+            <h1 className="title mt-1.5">Your account</h1>
+          </header>
+          <div className="card-body">
 
-        <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-body mb-6">
+        <dl className="mb-8 grid grid-cols-[9rem_1fr] gap-y-3 text-table">
           <dt className="kicker self-center">Name</dt>
           <dd>{user.name}</dd>
           <dt className="kicker self-center">Email</dt>
@@ -75,9 +78,9 @@ export default function Account({ user }: { user: PublicUser }) {
           <dd className="num text-table">{whenLocal(user.lastLoginAt)}</dd>
         </dl>
 
-        <section className="max-w-sm">
-          <h2 className="text-figure font-semibold tracking-tight mb-1">Change your password</h2>
-          <p className="text-body text-ink-muted leading-relaxed mb-3">
+        <section className="max-w-sm border-t border-rule pt-6">
+          <h2 className="text-figure font-bold text-leaf-deep mb-2">Change your password</h2>
+          <p className="lede mb-4">
             At least 12 characters. A few words you will remember beat a short one with
             symbols in it. Changing it signs you out everywhere else, but not here.
           </p>
@@ -120,12 +123,12 @@ export default function Account({ user }: { user: PublicUser }) {
             </label>
 
             {error && (
-              <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+              <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
                 {error}
               </p>
             )}
             {done && (
-              <p role="status" className="border-l-2 border-leaf pl-2 py-1 text-body text-ink">
+              <p role="status" className="rounded border-l-2 border-leaf bg-tint py-2 pl-3 pr-3 text-table text-ink">
                 {done}
               </p>
             )}
@@ -133,27 +136,25 @@ export default function Account({ user }: { user: PublicUser }) {
             <button
               type="submit"
               disabled={busy}
-              className="btn-primary mt-1 w-full disabled:opacity-50"
+              className="btn-primary w-full justify-center disabled:opacity-50"
             >
               {busy ? 'Changing it' : 'Change password'}
             </button>
           </form>
         </section>
 
-        <section className="mt-8 border-t border-rule pt-4">
-          <h2 className="text-figure font-semibold tracking-tight mb-1">Invite a colleague</h2>
-          <p className="text-body text-ink-muted leading-relaxed mb-3">
+        <section className="mt-8 border-t border-rule pt-6">
+          <h2 className="text-figure font-bold text-leaf-deep mb-2">Invite a colleague</h2>
+          <p className="lede mb-4">
             They choose their own password from a link that works once. Nothing is sent
             while sending is switched off, so adding someone now tells them nothing.
           </p>
           <InviteForm actor={user} />
         </section>
+          </div>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => navigate(DASHBOARD)}
-          className="mt-6 btn-text"
-        >
+        <button type="button" onClick={() => navigate(DASHBOARD)} className="mt-6 btn-text">
           Back to the dashboard
         </button>
       </main>

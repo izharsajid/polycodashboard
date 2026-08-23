@@ -95,6 +95,36 @@ unable to tell a new error from an old one.
       The only mode information in the table is the two Expeditors values above, sitting
       in the status column. Should mode become a column of its own?
 
+## Visual system v2, this run
+
+- [x] `DESIGN-SYSTEM-SPEC.md` is deleted and `DESIGN-SYSTEM-V2-SPEC.md` replaces it.
+      `DESIGN.md` is rewritten from it. Everything in `REDESIGN-2-SPEC.md` except its
+      visual instructions still stands and was preserved.
+- [x] The spacing scale is Tailwind's own again. The previous config replaced it with a
+      sparse 8px scale, which is why `h-5` and `h-9` compiled to nothing. Every class in
+      the source is now checked against a Tailwind build of a probe file containing only
+      the class-attribute tokens, so a class that generates no rule is caught rather than
+      discovered on screen months later.
+- [ ] **The statement's sticky table header and totals row do not stick, and did not
+      before this run either.** The table sits in an `overflow-x-auto` container so a
+      wide ledger scrolls without taking the page sideways with it. CSS then computes
+      `overflow-y` as `auto` rather than `visible`, which makes that container the
+      nearest scrollport, so `position: sticky` on the header sticks to a box that is as
+      tall as the table and never scrolls. Fixing it properly means choosing between the
+      page scrolling as one document and the ledger scrolling inside a fixed-height
+      region of its own, and that is a reading decision rather than a styling one. Left
+      as it is and raised here.
+- [ ] Section 4 asks for a small dot before the word on a status pill; section 5 keeps
+      lucide icons in pills as unchanged and still required. The icon takes the dot's
+      place: same position, same job in greyscale, and it says which state rather than
+      only that there is one. A pill with no icon falls back to a dot.
+- [ ] Two token names differ from the spec because Tailwind builds `text-*` utilities from
+      both `fontSize` and `colors`, and a key in both silently loses one. The spec's
+      `table-head` font token is `th`, and its `table-head` colour is `thead`.
+- [ ] The signed-out pages were not in the spec's list of four parts, but section 6 asks
+      for login, invite and account. They now sit in a card with the wordmark above it,
+      via a shared `AuthShell`.
+
 ## Machine schedule, this run
 
 - [ ] **Which purchase orders sit on which machine campaign.** `CAPACITY-SPEC.md` section 4

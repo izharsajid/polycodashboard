@@ -4,6 +4,7 @@ import { useSession } from '../auth/session'
 import { api } from '../lib/api'
 import { navigate } from '../lib/navigation'
 import { DASHBOARD, FORGOT } from '../lib/router'
+import AuthShell from '../components/AuthShell'
 
 /**
  * Setting a new password from a reset link. The token comes from the fragment, as
@@ -52,18 +53,12 @@ export default function Reset({ token }: { token: string | null }) {
   }
 
   return (
-    <main className="min-h-screen flex items-start justify-center px-3 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-muted">/</span>
-          <span className="text-body text-ink-muted">Polyco Healthline</span>
-        </div>
+    <AuthShell>
 
         {dead || !token ? (
           <>
-            <h1 className="text-title font-semibold tracking-tight mb-1">That link has expired</h1>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <h1 className="title mb-2">That link has expired</h1>
+            <p className="lede mb-4">
               Reset links last an hour and work once. Ask for another and this one stops
               working either way.
             </p>
@@ -77,14 +72,14 @@ export default function Reset({ token }: { token: string | null }) {
           </>
         ) : (
           <>
-            <h1 className="text-title font-semibold tracking-tight mb-1">Choose a new password</h1>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <h1 className="title mb-2">Choose a new password</h1>
+            <p className="lede mb-4">
               At least 12 characters. Setting it signs out every session on this account,
               including any you did not start.
             </p>
 
-            <form onSubmit={submit} className="flex flex-col gap-2">
-              <label className="flex flex-col gap-1">
+            <form onSubmit={submit} className="flex flex-col gap-4">
+              <label className="flex flex-col gap-1.5">
                 <span className="kicker">New password</span>
                 <input
                   type="password"
@@ -97,7 +92,7 @@ export default function Reset({ token }: { token: string | null }) {
                 />
               </label>
 
-              <label className="flex flex-col gap-1">
+              <label className="flex flex-col gap-1.5">
                 <span className="kicker">Again</span>
                 <input
                   type="password"
@@ -110,7 +105,7 @@ export default function Reset({ token }: { token: string | null }) {
               </label>
 
               {error && (
-                <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+                <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
                   {error}
                 </p>
               )}
@@ -118,14 +113,13 @@ export default function Reset({ token }: { token: string | null }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="btn-primary mt-1 w-full disabled:opacity-50"
+                className="btn-primary w-full justify-center disabled:opacity-50"
               >
                 {busy ? 'Setting it' : 'Set password and sign in'}
               </button>
             </form>
           </>
         )}
-      </div>
-    </main>
+    </AuthShell>
   )
 }

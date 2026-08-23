@@ -55,30 +55,36 @@ export default function Admin({ user }: { user: PublicUser }) {
     <div className="min-h-screen">
       <Header user={user} />
 
-      <main className="mx-auto max-w-5xl px-3 py-6">
-        <header className="mb-4 border-b border-rule pb-2">
-          <h1 className="text-title font-semibold tracking-tight">People and access</h1>
-          <p className="mt-1 max-w-2xl text-body text-ink-muted leading-relaxed">
-            Everyone here sees the same figures. The only thing role changes is who can
-            edit data, change roles and read the audit log.
-          </p>
-        </header>
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+        <div className="card">
+          <header className="card-head">
+            <p className="kicker">Access</p>
+            <h1 className="title mt-1.5">People and access</h1>
+            <p className="lede mt-1 max-w-prose">
+              Everyone here sees the same figures. The only thing role changes is who can
+              edit data, change roles and read the audit log.
+            </p>
+          </header>
 
+          <div className="card-body-flush">
         {error && (
-          <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink mb-3">
+          <p
+            role="alert"
+            className="mx-4 mb-4 rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink sm:mx-6"
+          >
             {error}
           </p>
         )}
 
         {users === null ? (
-          <p className="text-body text-ink-muted" aria-busy="true">
+          <p className="px-4 text-body text-ink-muted sm:px-6" aria-busy="true">
             Loading the list.
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-body border-collapse">
+            <table className="w-full text-table border-collapse">
               <thead>
-                <tr className="border-b border-rule text-left">
+                <tr className="text-left">
                   <th className="th">Name</th>
                   <th className="th">Email</th>
                   <th className="th">Role</th>
@@ -92,10 +98,10 @@ export default function Admin({ user }: { user: PublicUser }) {
                   const self = row.id === user.id
                   const busy = working === row.id
                   return (
-                    <tr key={row.id} className="border-b border-rule align-middle">
-                      <td className="py-2 pr-2">{row.name}</td>
-                      <td className="py-2 pr-2 text-ink-muted">{row.email}</td>
-                      <td className="py-2 pr-2">
+                    <tr key={row.id} className="border-b border-rule bg-surface align-middle">
+                      <td className="td font-semibold text-ink-strong">{row.name}</td>
+                      <td className="td text-ink-muted">{row.email}</td>
+                      <td className="td">
                         <select
                           value={row.role}
                           disabled={self || busy}
@@ -132,9 +138,9 @@ export default function Admin({ user }: { user: PublicUser }) {
           </div>
         )}
 
-        <section className="mt-8 border-t border-rule pt-4">
-          <h2 className="text-figure font-semibold tracking-tight mb-1">Add someone</h2>
-          <p className="text-body text-ink-muted leading-relaxed mb-3 max-w-2xl">
+        <section className="mt-8 border-t border-rule px-4 pt-6 sm:px-6">
+          <h2 className="text-figure font-bold text-leaf-deep">Add someone</h2>
+          <p className="lede mb-4 mt-1 max-w-prose">
             They go on the list straight away and choose their own password from a link
             that works once. Nothing is sent while sending is switched off, so adding
             someone now tells them nothing.
@@ -142,15 +148,13 @@ export default function Admin({ user }: { user: PublicUser }) {
           <InviteForm actor={user} onInvited={() => void load()} />
         </section>
 
-        <section className="mt-8 border-t border-rule pt-4">
+        <section className="mt-8 border-t border-rule px-4 pt-6 sm:px-6">
           <AuditLog users={users ?? []} />
         </section>
+          </div>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => navigate(DASHBOARD)}
-          className="mt-6 btn-text"
-        >
+        <button type="button" onClick={() => navigate(DASHBOARD)} className="mt-6 btn-text">
           Back to the dashboard
         </button>
       </main>

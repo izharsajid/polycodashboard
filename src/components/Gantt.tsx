@@ -141,7 +141,7 @@ export default function Gantt({
       <div className="relative min-w-[620px] pb-5">
       <div className="grid grid-cols-[68px_1fr_74px] sm:grid-cols-[92px_1fr_96px]">
         <div className="sticky left-0 z-40 border-b border-rule bg-surface" />
-        <div className="relative h-3 border-b border-rule">
+        <div className="relative h-6 border-b border-rule">
           {window.months.map((month) => (
             <span
               key={month.period}

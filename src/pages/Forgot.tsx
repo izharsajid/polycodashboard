@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { api } from '../lib/api'
 import { navigate } from '../lib/navigation'
 import { LOGIN } from '../lib/router'
+import AuthShell from '../components/AuthShell'
 
 /**
  * The server answers the same way whether or not the address has an account, so
@@ -28,19 +29,13 @@ export default function Forgot() {
   }
 
   return (
-    <main className="min-h-screen flex items-start justify-center px-3 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-muted">/</span>
-          <span className="text-body text-ink-muted">Polyco Healthline</span>
-        </div>
+    <AuthShell>
 
-        <h1 className="text-title font-semibold tracking-tight mb-1">Reset your password</h1>
+        <h1 className="title mb-2">Reset your password</h1>
 
         {asked ? (
           <>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <p className="lede mb-4">
               If that address has an account, a reset link is on its way. It works once
               and lasts an hour.
             </p>
@@ -54,13 +49,13 @@ export default function Forgot() {
           </>
         ) : (
           <>
-            <p className="text-body text-ink-muted leading-relaxed mb-4">
+            <p className="lede mb-4">
               Give us the address you sign in with and we will send a link to set a new
               password.
             </p>
 
-            <form onSubmit={submit} className="flex flex-col gap-2">
-              <label className="flex flex-col gap-1">
+            <form onSubmit={submit} className="flex flex-col gap-4">
+              <label className="flex flex-col gap-1.5">
                 <span className="kicker">Email</span>
                 <input
                   type="email"
@@ -74,7 +69,7 @@ export default function Forgot() {
               </label>
 
               {error && (
-                <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+                <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
                   {error}
                 </p>
               )}
@@ -82,7 +77,7 @@ export default function Forgot() {
               <button
                 type="submit"
                 disabled={busy}
-                className="btn-primary mt-1 w-full disabled:opacity-50"
+                className="btn-primary w-full justify-center disabled:opacity-50"
               >
                 {busy ? 'Sending' : 'Send the link'}
               </button>
@@ -97,7 +92,6 @@ export default function Forgot() {
             </button>
           </>
         )}
-      </div>
-    </main>
+    </AuthShell>
   )
 }

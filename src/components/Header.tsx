@@ -13,39 +13,29 @@ export default function Header({ user }: { user: PublicUser }) {
   const { signOut } = useSession()
 
   return (
-    <header className="border-b border-rule bg-surface">
-      <div className="mx-auto max-w-6xl px-3 py-2 flex flex-wrap items-baseline justify-between gap-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-body font-semibold tracking-tight text-accent">ECOFIBRE</span>
-          <span className="text-ink-50">/</span>
-          <span className="text-body text-ink-70">Polyco Healthline</span>
+    <header className="h-8 border-b border-rule bg-surface">
+      <div className="mx-auto flex h-full max-w-page items-center justify-between gap-2 px-6">
+        <div className="flex items-baseline gap-1">
+          <span className="font-wordmark text-body font-semibold tracking-tight text-ink">
+            ECOFIBRE
+          </span>
+          <span className="text-ink-30" aria-hidden>
+            /
+          </span>
+          <span className="text-body text-ink-50">Polyco Healthline</span>
         </div>
 
         <div className="flex items-baseline gap-2">
-          <span className="eyebrow hidden sm:inline">Position, capacity and configuration</span>
-          <span className="text-ink-50 no-print hidden sm:inline">|</span>
           {user.role === 'admin' && (
-            <button
-              type="button"
-              onClick={() => navigate(ADMIN)}
-              className="no-print text-body text-ink-70 underline underline-offset-2 hover:text-ink"
-            >
+            <button type="button" onClick={() => navigate(ADMIN)} className="btn-text no-print">
               People
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => navigate(ACCOUNT)}
-            className="text-body text-ink-70 hover:text-ink underline underline-offset-2 decoration-rule"
-          >
+          <button type="button" onClick={() => navigate(ACCOUNT)} className="btn-text">
             {user.name}
             <span className="text-ink-50"> · {ROLE_LABEL[user.role]}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => void signOut()}
-            className="no-print text-body text-ink-70 underline underline-offset-2 hover:text-ink"
-          >
+          <button type="button" onClick={() => void signOut()} className="btn-text no-print">
             Sign out
           </button>
         </div>

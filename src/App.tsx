@@ -112,20 +112,21 @@ function Dashboard({ user }: { user: PublicUser }) {
     <div className="min-h-screen">
       <Header user={user} />
 
-      {/* efdashboard's tab strip: active is a white tab lifted out of the page,
-          inactive sits flat on it. Under the header, as it is there. */}
+      {/* A single row of text items. Active is ink with a 2px accent underline;
+          inactive is ink-50. No pills, no boxes, no fills.
+          DESIGN-SYSTEM-SPEC section 5. */}
       <nav className="border-b border-rule bg-paper no-print">
-        <div className="mx-auto max-w-6xl px-3 flex gap-1 overflow-x-auto">
+        <div className="mx-auto flex max-w-page gap-3 overflow-x-auto px-6">
           {TABS.map((t) =>
             t.built ? (
               <button
                 key={t.section}
                 onClick={() => setActive(t.section)}
                 aria-current={active === t.section ? 'page' : undefined}
-                className={`whitespace-nowrap px-2 py-2 text-body rounded -mb-px border border-b-0 ${
+                className={`-mb-px whitespace-nowrap border-b-2 py-2 text-body ${
                   active === t.section
-                    ? 'bg-surface border-rule font-medium text-accent'
-                    : 'border-transparent text-ink-70 hover:text-ink'
+                    ? 'border-accent font-medium text-ink'
+                    : 'border-transparent text-ink-50 hover:text-ink'
                 }`}
               >
                 {t.label}
@@ -134,7 +135,7 @@ function Dashboard({ user }: { user: PublicUser }) {
               <span
                 key={t.section}
                 title="In preparation"
-                className="whitespace-nowrap px-2 py-2 text-body text-ink-50 cursor-default"
+                className="cursor-default whitespace-nowrap border-b-2 border-transparent py-2 text-body text-ink-30"
               >
                 {t.label}
               </span>
@@ -143,7 +144,7 @@ function Dashboard({ user }: { user: PublicUser }) {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-6xl px-3 py-6">
+      <main className="mx-auto max-w-page px-[20px] py-6 sm:px-6">
         {figures.status === 'loading' && (
           <p className="text-body text-ink-70" aria-busy="true">
             Loading the figures.

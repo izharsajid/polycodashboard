@@ -76,31 +76,37 @@ export function Flag({ children }: { children: ReactNode }) {
 }
 
 /**
- * efdashboard opens every section with three things: a category label, a heading,
- * and one plain line saying what the section shows. It orients a reader in about
- * a second and costs a line of text. REDESIGN-SPEC section 3.
+ * Eyebrow, serif title, one line of description, and the as-at date
+ * right-aligned on the title line. Then 24px of space.
+ * DESIGN-SYSTEM-SPEC section 5.
+ *
+ * The as-at date sits on the title line rather than in a pill beneath it. It is
+ * apparatus, not a figure, and boxing it gave it the weight of one.
  */
 export function SectionHead({
   kicker,
   title,
   lede,
   asAt,
+  icon,
 }: {
   kicker: string
   title: string
   lede?: string
   asAt?: string
+  icon?: ReactNode
 }) {
   return (
-    <header className="mb-4">
+    <header className="mb-3">
       <p className="eyebrow">{kicker}</p>
-      <h2 className="mt-1 text-title font-semibold text-accent">{title}</h2>
-      {lede && <p className="lede mt-1 max-w-3xl">{lede}</p>}
-      {asAt && (
-        <p className="mt-2 inline-block rounded border border-rule bg-surface px-2 py-1 text-label font-semibold text-accent">
-          {asAt}
-        </p>
-      )}
+      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="title flex items-center gap-1">
+          {icon}
+          {title}
+        </h2>
+        {asAt && <p className="text-label text-ink-50">{asAt}</p>}
+      </div>
+      {lede && <p className="lede mt-1 max-w-prose">{lede}</p>}
     </header>
   )
 }

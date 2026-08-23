@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react'
 import { useState } from 'react'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import type { StatementsT, StatementT, ReconRowT } from '../lib/schema'
 import {
@@ -82,6 +82,18 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
   const recurring = recurringMonthlyCost(latest)
   const coverage = statementCoverage(statements)
   const finding = settlementFinding(statements)
+
+  /**
+   * Fourteen discrete monthly events, not a continuous quantity. A cumulative
+   * line hid whether each individual month was paid in full; the variance shows
+   * it directly. `settled` marks a confirmed reconciliation, which is the data's
+   * own judgement rather than a threshold invented here.
+   */
+  const varianceByMonth = statements.reconciliation_to_ledger.map((row) => ({
+    period: row.period,
+    variance: row.variance,
+    settled: row.match_confidence === 'confirmed',
+  }))
 
   const [selected, setSelected] = useState(latest.id)
   const current = months.find((m) => m.id === selected) ?? months[months.length - 1]
@@ -164,53 +176,69 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
       </div>
 
       <div className="mt-6">
-        <div className="px-2 pt-2 pb-2">
-          <h3 className="text-subtitle font-semibold text-accent">
-            The gap opens in the 2025 periods, not the recent ones
-          </h3>
-          <p className="lede mt-1 max-w-2xl">
-            Cumulative funds requested against cumulative funds received, every statement period.
-          </p>
+        <h3 className="subtitle">Three months out of fourteen did not settle in full</h3>
+        <p className="lede mt-1 max-w-prose">
+          The gap between what was asked for and what arrived, month by month. A bar at
+          the line is a month that settled.
+        </p>
 
-          <div className="mt-3 h-[280px] -ml-2 sm:h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={series} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-                <CartesianGrid stroke={CHART.grid} vertical={false} />
-                <XAxis
-                  dataKey="period" tickFormatter={monthShort} minTickGap={32}
-                  tick={AXIS_TICK} stroke={CHART.grid}
-                />
-                <YAxis
-                  tickFormatter={axisMoney} width={56} tickCount={GRID_COUNT}
-                  tick={AXIS_TICK} stroke={CHART.grid}
-                />
-                <Tooltip
-                  labelFormatter={(v) => monthName(String(v))}
-                  formatter={(v: number, n: string) => [money(v), n]}
-                  contentStyle={TOOLTIP_STYLE}
-                />
-                {/* Dashed against solid, so they stay apart on a monochrome printer. */}
-                <Line
-                  type="stepAfter" dataKey="requestedCumulative" name="Requested"
-                  stroke={CHART.context} strokeWidth={2} strokeDasharray="6 4" dot={false}
-                  {...NO_ANIMATION}
-                />
-                <Line
-                  type="stepAfter" dataKey="receivedCumulative" name="Received"
-                  stroke={CHART.context} strokeWidth={2} dot={false} {...NO_ANIMATION}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+        {/* The run indicator: fourteen marks, one per month. A reader sees the
+            pattern in a glance and reads the bars only if something looks wrong. */}
+        <div className="mt-2 flex flex-wrap items-center gap-1">
+          {statements.reconciliation_to_ledger.map((row) => {
+            const tone =
+              row.match_confidence === 'confirmed'
+                ? 'bg-accent'
+                : row.match_confidence === 'probable'
+                  ? 'bg-ink-30'
+                  : 'bg-critical'
+            return (
+              <span
+                key={row.period}
+                title={`${monthName(row.period)}: ${row.match_confidence}`}
+                className="flex flex-col items-center gap-1"
+              >
+                <span className={`block h-2 w-3 ${tone}`} aria-hidden />
+                <span className="text-eyebrow text-ink-50">{monthShort(row.period).slice(0, 3)}</span>
+              </span>
+            )
+          })}
+          <span className="ml-2 text-label text-ink-50">
+            Settled · partial · unmatched
+          </span>
+        </div>
 
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-label text-ink-70">
-            <span className="flex items-center gap-1">
-              <span className="w-5 border-t-2 border-dashed border-ink inline-block" /> Requested, cumulative
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="h-[2px] w-5 bg-accent inline-block" /> Received, cumulative
-            </span>
-          </div>
+        <div className="mt-3 h-[280px] -ml-2 sm:h-[320px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={varianceByMonth} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+              <CartesianGrid stroke={CHART.grid} vertical={false} />
+              <XAxis
+                dataKey="period" tickFormatter={monthShort} tick={AXIS_TICK} stroke={CHART.grid}
+                interval={0} angle={-40} textAnchor="end" height={56}
+              />
+              <YAxis
+                tickFormatter={axisMoney} width={64} tickCount={GRID_COUNT}
+                tick={AXIS_TICK} stroke={CHART.grid}
+              />
+              <Tooltip
+                labelFormatter={(v) => monthName(String(v))}
+                formatter={(v: number) => [money(v), 'Received less requested']}
+                contentStyle={TOOLTIP_STYLE}
+              />
+              <ReferenceLine y={0} stroke={CHART.axis} />
+              <Bar dataKey="variance" {...NO_ANIMATION}>
+                {varianceByMonth.map((row) => (
+                  <Cell
+                    key={row.period}
+                    // Section 3 keeps red for a shortfall. A month that did not
+                    // settle is exactly that, and an accent-green bar for a
+                    // missed payment reads as approval.
+                    fill={row.settled ? CHART.context : CHART.critical}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

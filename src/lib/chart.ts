@@ -13,6 +13,8 @@ export const CHART = {
   context: '#A8ADB3',
   grid: '#E4E6E8',
   axis: '#6F757C',
+  /** A shortfall, an exception or a placeholder. Never decoration. */
+  critical: '#9B2C24',
   surface: '#FFFFFF',
 } as const
 

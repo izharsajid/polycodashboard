@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { LedgerT, MachineScheduleT, PoTrackerT } from '../lib/schema'
 import { reconcileSchedule, scheduledPos } from '../lib/engine/machines'
 import { dateProse, money } from '../lib/format'
+import { BlockHead } from './ui'
 
 /**
  * The schedule against the ledger and the tracker. CAPACITY-SPEC section 4.
@@ -29,33 +30,33 @@ export default function ScheduleReconciliation({
   const notInLedger = recon.foundInTracker.length + recon.foundInNeither.length
 
   return (
-    <div className="mt-6 page-break">
+    <div className="mt-8 border-t border-rule pt-6 page-break">
       {/* Both directions in one line. A heading that says only "every order on
           the schedule is accounted for" sits directly above a list of nine
           orders with no machine, and reads as a contradiction of it. */}
-      <h3 className="subtitle">
-        {recon.ordersWithNoMachine.length} pending orders have no machine
-        {recon.foundInNeither.length === 0
-          ? ', and every order on the schedule is in the ledger or the tracker'
-          : `, and ${recon.foundInNeither.length} on the schedule are in neither`}
-      </h3>
-      <p className="lede mt-1 max-w-prose">
-        Checked on every load, against both sources.{' '}
-        {derivedRefs.size > 0 && (
-          <>
-            {derivedRefs.size} of the purchase order assignments below were derived by matching
-            product rather than taken from the production schedule, and every one of them is
-            marked.
-          </>
-        )}
-      </p>
+      <BlockHead
+        title={
+          `${recon.ordersWithNoMachine.length} pending orders have no machine` +
+          (recon.foundInNeither.length === 0
+            ? ', and every order on the schedule is in the ledger or the tracker'
+            : `, and ${recon.foundInNeither.length} on the schedule are in neither`)
+        }
+        lede={
+          'Checked on every load, against both sources.' +
+          (derivedRefs.size > 0
+            ? ` ${derivedRefs.size} of the purchase order assignments below were derived by` +
+              ' matching product rather than taken from the production schedule, and every one' +
+              ' of them is marked.'
+            : '')
+        }
+      />
 
       <NoMachine recon={recon} />
       <NotInLedger recon={recon} count={notInLedger} asAt={ledger.summary.as_at} />
       <MultiMachine recon={recon} />
 
       {recon.matchedOnBaseNumber.length > 0 && (
-        <p className="mt-3 text-label text-ink-50">
+        <p className="mt-4 text-sub text-ink-muted">
           {recon.matchedOnBaseNumber.length} matched on the base number rather than the full
           reference:{' '}
           {recon.matchedOnBaseNumber.map((m) => `${m.ref} to ${m.ledgerRef}`).join(', ')}. The two
@@ -74,8 +75,8 @@ type Recon = ReturnType<typeof reconcileSchedule>
  */
 function NoMachine({ recon }: { recon: Recon }) {
   return (
-    <section className="mt-4">
-      <h4 className="text-body font-medium text-ink">
+    <section className="mt-6">
+      <h4 className="text-table font-bold uppercase tracking-wide text-leaf-deep">
         {recon.ordersWithNoMachine.length} pending orders sit on no machine, worth{' '}
         {money(recon.ordersWithNoMachineValue)}
       </h4>
@@ -85,31 +86,31 @@ function NoMachine({ recon }: { recon: Recon }) {
       </p>
 
       <div className="overflow-x-auto print:overflow-visible">
-      <table className="mt-2 w-full min-w-[520px] max-w-4xl text-table">
+      <table className="mt-3 w-full min-w-[520px] max-w-4xl text-table">
         <thead>
-          <tr className="border-b border-rule text-left">
-            <th className="eyebrow py-1 pr-2">Purchase order</th>
-            <th className="eyebrow py-1 pr-2">Product</th>
-            <th className="eyebrow py-1 pr-2 text-right">PO amount</th>
-            <th className="eyebrow py-1">Known reason</th>
+          <tr className="text-left">
+            <th className="th">Purchase order</th>
+            <th className="th">Product</th>
+            <th className="th text-right">PO amount</th>
+            <th className="th">Known reason</th>
           </tr>
         </thead>
         <tbody>
           {recon.ordersWithNoMachine.map((order) => (
-            <tr key={order.row.source_row} className="border-b border-rule-soft align-top">
-              <td className="py-1 pr-2 num whitespace-nowrap text-ink">{order.row.po_number}</td>
-              <td className="py-1 pr-2 text-ink-70">{product(order.row.product)}</td>
-              <td className="py-1 pr-2 text-right num whitespace-nowrap">{money(order.value)}</td>
-              <td className="py-1 text-label text-ink-70">{order.reason ?? ''}</td>
+            <tr key={order.row.source_row} className="border-b border-rule align-top">
+              <td className="px-3 py-2 num whitespace-nowrap text-ink">{order.row.po_number}</td>
+              <td className="px-3 py-2 text-ink">{product(order.row.product)}</td>
+              <td className="px-3 py-2 text-right num whitespace-nowrap font-semibold text-ink-strong">{money(order.value)}</td>
+              <td className="px-3 py-2 text-sub text-ink-muted">{order.reason ?? ''}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr className="border-t border-rule">
-            <td className="py-1 pr-2 text-label text-ink-70" colSpan={2}>
+            <td className="px-3 py-2 text-sub text-ink-muted" colSpan={2}>
               {recon.ordersWithNoMachine.length} orders
             </td>
-            <td className="py-1 pr-2 text-right num font-medium">
+            <td className="px-3 py-2 text-right num font-bold text-ink-strong">
               {money(recon.ordersWithNoMachineValue)}
             </td>
             <td />
@@ -130,8 +131,8 @@ function NotInLedger({ recon, count, asAt }: { recon: Recon; count: number; asAt
   const [open, setOpen] = useState(false)
 
   return (
-    <section className="mt-4">
-      <h4 className="text-body font-medium text-ink">
+    <section className="mt-6">
+      <h4 className="text-table font-bold uppercase tracking-wide text-leaf-deep">
         {count} orders on the schedule are not in the ledger
       </h4>
       <p className="lede">
@@ -139,34 +140,39 @@ function NotInLedger({ recon, count, asAt }: { recon: Recon; count: number; asAt
         against the tracker one by one before calling any of them missing.
       </p>
 
-      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
-        <p className="text-body text-ink">
-          <span className="num font-medium">{recon.foundInTracker.length}</span> found in the
-          tracker
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <p className="pill-summary">
+          <span className="num">{recon.foundInTracker.length}</span> found in the tracker
           {recon.foundInTracker.length > 0 && (
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              className="btn-text ml-1 no-print"
+              className="btn-text no-print"
             >
               {open ? 'Hide' : 'Show'}
             </button>
           )}
         </p>
-        <p className={`text-body ${recon.foundInNeither.length > 0 ? 'text-critical' : 'text-ink'}`}>
-          <span className="num font-medium">{recon.foundInNeither.length}</span> found in neither.
+        <p
+          className={
+            recon.foundInNeither.length > 0
+              ? 'pill-summary !bg-critical-wash !text-critical'
+              : 'pill-summary'
+          }
+        >
+          <span className="num">{recon.foundInNeither.length}</span> found in neither
           {recon.foundInNeither.length === 0 && (
-            <span className="text-ink-50"> Nothing unaccounted for.</span>
+            <span className="font-normal opacity-70">nothing unaccounted for</span>
           )}
         </p>
       </div>
 
       {recon.foundInNeither.length > 0 && (
-        <ul className="mt-2 flex flex-col gap-1 border-l-2 border-critical pl-2">
+        <ul className="mt-3 flex flex-col gap-2 rounded border-l-2 border-critical bg-critical-wash py-3 pl-4 pr-3">
           {recon.foundInNeither.map((entry) => (
-            <li key={entry.po.ref} className="text-body text-ink">
-              <span className="num">{entry.po.ref}</span> on {entry.po.machineId},{' '}
+            <li key={entry.po.ref} className="text-table text-ink">
+              <span className="num font-semibold">{entry.po.ref}</span> on {entry.po.machineId},{' '}
               {entry.po.product}. In no system but the schedule.
             </li>
           ))}
@@ -177,22 +183,22 @@ function NotInLedger({ recon, count, asAt }: { recon: Recon; count: number; asAt
           reconciliation never silently drops a row, and paper has no control to
           click. */}
       <div className={`overflow-x-auto print:overflow-visible ${open ? '' : 'hidden print:block'}`}>
-        <table className="mt-2 w-full min-w-[520px] max-w-4xl text-table">
+        <table className="mt-3 w-full min-w-[520px] max-w-4xl text-table">
           <thead>
-            <tr className="border-b border-rule text-left">
-              <th className="eyebrow py-1 pr-2">Purchase order</th>
-              <th className="eyebrow py-1 pr-2">Machine</th>
-              <th className="eyebrow py-1 pr-2">Campaign</th>
-              <th className="eyebrow py-1">What the tracker calls it</th>
+            <tr className="text-left">
+              <th className="th">Purchase order</th>
+              <th className="th">Machine</th>
+              <th className="th">Campaign</th>
+              <th className="th">What the tracker calls it</th>
             </tr>
           </thead>
           <tbody>
             {recon.foundInTracker.map((entry) => (
-              <tr key={entry.po.ref} className="border-b border-rule-soft align-top">
-                <td className="py-1 pr-2 num whitespace-nowrap text-ink">{entry.po.ref}</td>
-                <td className="py-1 pr-2 whitespace-nowrap text-ink-70">{entry.po.machineId}</td>
-                <td className="py-1 pr-2 text-ink-70">{entry.po.product}</td>
-                <td className="py-1 text-ink-70">{product(entry.trackerOrder!.product)}</td>
+              <tr key={entry.po.ref} className="border-b border-rule align-top">
+                <td className="px-3 py-2 num whitespace-nowrap text-ink">{entry.po.ref}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-ink">{entry.po.machineId}</td>
+                <td className="px-3 py-2 text-ink">{entry.po.product}</td>
+                <td className="px-3 py-2 text-ink">{product(entry.trackerOrder!.product)}</td>
               </tr>
             ))}
           </tbody>
@@ -211,8 +217,8 @@ function MultiMachine({ recon }: { recon: Recon }) {
   if (recon.multiMachine.length === 0) return null
 
   return (
-    <section className="mt-4">
-      <h4 className="text-body font-medium text-ink">
+    <section className="mt-6">
+      <h4 className="text-table font-bold uppercase tracking-wide text-leaf-deep">
         {recon.multiMachine.length} orders run on more than one machine
       </h4>
       <p className="lede">
@@ -221,18 +227,18 @@ function MultiMachine({ recon }: { recon: Recon }) {
       </p>
 
       <div className="overflow-x-auto print:overflow-visible">
-      <table className="mt-2 w-full min-w-[460px] max-w-4xl text-table">
+      <table className="mt-3 w-full min-w-[460px] max-w-4xl text-table">
         <thead>
-          <tr className="border-b border-rule text-left">
-            <th className="eyebrow py-1 pr-2">Purchase order</th>
-            <th className="eyebrow py-1">Runs on</th>
+          <tr className="text-left">
+            <th className="th">Purchase order</th>
+            <th className="th">Runs on</th>
           </tr>
         </thead>
         <tbody>
           {recon.multiMachine.map((entry) => (
-            <tr key={entry.ref} className="border-b border-rule-soft align-top">
-              <td className="py-1 pr-2 num whitespace-nowrap text-ink">{entry.ref}</td>
-              <td className="py-1 text-ink-70">
+            <tr key={entry.ref} className="border-b border-rule align-top">
+              <td className="px-3 py-2 num whitespace-nowrap text-ink">{entry.ref}</td>
+              <td className="px-3 py-2 text-ink">
                 {entry.machines.map((m) => `${m.id}, ${m.product}`).join('   ·   ')}
               </td>
             </tr>

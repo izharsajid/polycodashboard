@@ -117,8 +117,8 @@ export default function OrderPanel({
       >
         <div className="sticky top-0 border-b border-rule bg-surface px-2 py-2 flex items-start justify-between gap-2">
           <div>
-            <p className="eyebrow">Order</p>
-            <h2 className="mt-1 text-title font-semibold text-accent">{order.po_number}</h2>
+            <p className="kicker">Order</p>
+            <h2 className="mt-1 text-title font-semibold text-leaf">{order.po_number}</h2>
             <p className="lede mt-1">{order.product}</p>
           </div>
           <button
@@ -132,19 +132,19 @@ export default function OrderPanel({
 
         <div className="px-2 py-3">
           <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-table">
-            <dt className="eyebrow self-center">Status</dt>
+            <dt className="kicker self-center">Status</dt>
             <dd><StatusPill status={order.order_status} /></dd>
-            <dt className="eyebrow self-center">Cargo ready</dt>
+            <dt className="kicker self-center">Cargo ready</dt>
             <dd>{order.cargo_ready_date ? dayLong(order.cargo_ready_date) : order.cargo_ready || '—'}</dd>
-            <dt className="eyebrow self-center">Dispatched</dt>
+            <dt className="kicker self-center">Dispatched</dt>
             <dd>{order.dispatched_date ? dayLong(order.dispatched_date) : order.dispatched || 'Not dispatched'}</dd>
-            <dt className="eyebrow self-center">Film</dt>
+            <dt className="kicker self-center">Film</dt>
             <dd>{order.film || '—'}{order.rolls ? `, ${order.rolls}` : ''}</dd>
-            <dt className="eyebrow self-center">Quantity</dt>
+            <dt className="kicker self-center">Quantity</dt>
             <dd>{order.qty || '—'}</dd>
-            <dt className="eyebrow self-center">Remarks</dt>
-            <dd className="text-ink-70">{order.remarks || '—'}</dd>
-            <dt className="eyebrow self-center">Tracker row</dt>
+            <dt className="kicker self-center">Remarks</dt>
+            <dd className="text-ink-muted">{order.remarks || '—'}</dd>
+            <dt className="kicker self-center">Tracker row</dt>
             <dd className="num">{order.row_no}</dd>
           </dl>
 
@@ -167,13 +167,13 @@ export default function OrderPanel({
                   <tbody>
                     {ledger.rows.map((row) => (
                       <tr key={row.source_row} className="border-b border-rule align-top">
-                        <td className="py-1 pr-2 num text-ink-50">{row.source_row}</td>
+                        <td className="py-1 pr-2 num text-ink-muted">{row.source_row}</td>
                         <td className="py-1 pr-2">{row.type}</td>
-                        <td className="py-1 pr-2 text-ink-70">{row.po_number}</td>
+                        <td className="py-1 pr-2 text-ink-muted">{row.po_number}</td>
                         <td className="py-1 pr-2 text-right num whitespace-nowrap">
                           {row.delivered_value ? money(row.delivered_value) : ''}
                         </td>
-                        <td className="py-1 whitespace-nowrap text-ink-70">
+                        <td className="py-1 whitespace-nowrap text-ink-muted">
                           {row.delivery_date ?? ''}
                         </td>
                       </tr>
@@ -217,33 +217,33 @@ export default function OrderPanel({
                       return (
                       <li
                         key={document.id}
-                        className={`rulebox rounded px-2 py-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 ${
+                        className={`field rounded px-2 py-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 ${
                           document.deletedAt ? 'opacity-60' : ''
                         }`}
                       >
-                        <DocIcon size={13} aria-hidden className="shrink-0 text-ink-50" />
+                        <DocIcon size={13} aria-hidden className="shrink-0 text-ink-muted" />
                         <span className="font-semibold text-ink">{document.filename}</span>
                         <span className="lede">
                           {readableSize(document.size)} · {document.uploadedByEmail} ·{' '}
                           {whenLocal(document.uploadedAt)}
                         </span>
                         {document.deletedAt && (
-                          <span className="rounded bg-critical-soft px-1 py-[2px] text-eyebrow font-semibold text-critical">
+                          <span className="rounded bg-critical-wash px-1 py-[2px] text-sub font-semibold text-critical">
                             Deleted by {document.deletedByEmail}
                           </span>
                         )}
-                        <span className="ml-auto flex gap-2 text-label">
+                        <span className="ml-auto flex gap-2 text-table">
                           <a
                             href={`/api/documents/${document.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-accent underline underline-offset-2"
+                            className="inline-flex items-center gap-1 text-leaf underline underline-offset-2"
                           >
                             <Eye size={13} aria-hidden /> View
                           </a>
                           <a
                             href={`/api/documents/${document.id}?download=1`}
-                            className="inline-flex items-center gap-1 text-accent underline underline-offset-2"
+                            className="inline-flex items-center gap-1 text-leaf underline underline-offset-2"
                           >
                             <Download size={13} aria-hidden /> Download
                           </a>
@@ -275,17 +275,17 @@ export default function OrderPanel({
                     void upload(group.key, e.dataTransfer.files)
                   }}
                   className={`mt-2 rounded border border-dashed px-2 py-3 text-center ${
-                    dragging === group.key ? 'border-accent bg-accent-soft' : 'border-rule'
+                    dragging === group.key ? 'border-leaf bg-tint' : 'border-rule'
                   }`}
                 >
-                  <Upload size={19} aria-hidden className="mx-auto mb-1 text-ink-30" />
+                  <Upload size={19} aria-hidden className="mx-auto mb-1 text-ink-muted" />
                   <p className="lede">
                     Drop a file here, or{' '}
                     <button
                       type="button"
                       disabled={busy}
                       onClick={() => fileInputs.current[group.key]?.click()}
-                      className="text-accent underline underline-offset-2 disabled:opacity-50"
+                      className="text-leaf underline underline-offset-2 disabled:opacity-50"
                     >
                       choose one
                     </button>

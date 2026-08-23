@@ -9,9 +9,9 @@ import {
 import { api } from '../lib/api'
 import { CLEARED, readPoUrl, togglePill, writePoUrl } from '../lib/po-url'
 import { whenLocal } from '../lib/format'
-import { Finding, SectionHead } from '../components/ui'
+import { Card, CardBody, CardHead, Finding, SearchField } from '../components/ui'
 import OrderPanel from '../components/OrderPanel'
-import { StatusPill } from '../components/Pill'
+import { FilterPill, PillRow, StatusPill, SummaryPill } from '../components/Pill'
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -28,27 +28,7 @@ function dayLong(iso: string | null) {
   return `${Number(d)} ${MONTH_NAMES[Number(m) - 1]} ${y}`
 }
 
-function FilterPill({
-  label, count, active, onClick,
-}: { label: string; count?: number; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`rounded border px-2 py-1 text-label whitespace-nowrap ${
-        active
-          ? 'border-accent bg-accent-soft font-semibold text-accent'
-          : 'border-rule text-ink-70 hover:text-ink hover:bg-rule'
-      }`}
-    >
-      {label}
-      {count !== undefined && (
-        <span className={`ml-1 num ${active ? 'text-accent' : 'text-ink-50'}`}>{count}</span>
-      )}
-    </button>
-  )
-}
+const COLUMNS = ['#', 'PO and product', 'Status', 'Cargo ready', 'Dispatch', 'Film', 'Remarks', 'Docs', '']
 
 export default function Tab4Orders({
   tracker, ledger, isAdmin,
@@ -108,123 +88,137 @@ export default function Tab4Orders({
     `${summary.dispatched} dispatched.`
 
   return (
-    <section>
-      <SectionHead
-        icon={<Package size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<Package size={20} className="text-leaf" aria-hidden />}
         kicker="Order book"
         title="Still to be made"
         lede="Every Polyco order on the tracker, what stage it is at, and the documents against it."
         asAt={`Pulled from efdashboard ${whenLocal(tracker.pulled_at)}`}
+        search={
+          <SearchField
+            value={filters.search}
+            onChange={(search) => update({ ...filters, search })}
+            placeholder="PO number or product"
+            label="Search orders by PO number or product"
+          />
+        }
       />
 
-      <Finding>{finding}</Finding>
+      <CardBody flush>
+        <div className="px-4 sm:px-6">
+          <Finding>{finding}</Finding>
 
-      <div className="border-t border-rule pt-2 no-print">
-        <div className="px-2 py-2 flex flex-col gap-2">
-          <FilterRow label="Product">
-            <FilterPill label="All" active={filters.families.length === 0} onClick={() => update({ ...filters, families: [] })} />
-            {[...PRODUCT_FAMILIES, 'Other' as const].map((family) => (
+          <div className="flex flex-col gap-4">
+            <PillRow label="Product">
               <FilterPill
-                key={family}
-                label={family}
-                count={counts.families[family] ?? 0}
-                active={filters.families.includes(family)}
-                onClick={() => update({ ...filters, families: togglePill(filters.families, family) })}
+                label="All"
+                active={filters.families.length === 0}
+                onClick={() => update({ ...filters, families: [] })}
               />
-            ))}
-          </FilterRow>
+              {[...PRODUCT_FAMILIES, 'Other' as const].map((family) => (
+                <FilterPill
+                  key={family}
+                  label={family}
+                  count={counts.families[family] ?? 0}
+                  active={filters.families.includes(family)}
+                  onClick={() => update({ ...filters, families: togglePill(filters.families, family) })}
+                />
+              ))}
+            </PillRow>
 
-          <FilterRow label="Dispatch month">
-            <FilterPill label="All" active={filters.months.length === 0} onClick={() => update({ ...filters, months: [] })} />
-            {months.map((month) => (
+            <PillRow label="Dispatch month">
               <FilterPill
-                key={month}
-                label={monthLabel(month)}
-                count={counts.months[month] ?? 0}
-                active={filters.months.includes(month)}
-                onClick={() => update({ ...filters, months: togglePill(filters.months, month) })}
+                label="All"
+                active={filters.months.length === 0}
+                onClick={() => update({ ...filters, months: [] })}
               />
-            ))}
-          </FilterRow>
+              {months.map((month) => (
+                <FilterPill
+                  key={month}
+                  label={monthLabel(month)}
+                  count={counts.months[month] ?? 0}
+                  active={filters.months.includes(month)}
+                  onClick={() => update({ ...filters, months: togglePill(filters.months, month) })}
+                />
+              ))}
+            </PillRow>
 
-          <FilterRow label="Order status">
-            <FilterPill label="All" active={filters.statuses.length === 0} onClick={() => update({ ...filters, statuses: [] })} />
-            {statuses.map((status) => (
+            <PillRow label="Order status">
               <FilterPill
-                key={status}
-                label={status}
-                count={counts.statuses[status] ?? 0}
-                active={filters.statuses.includes(status)}
-                onClick={() => update({ ...filters, statuses: togglePill(filters.statuses, status) })}
+                label="All"
+                active={filters.statuses.length === 0}
+                onClick={() => update({ ...filters, statuses: [] })}
               />
-            ))}
-          </FilterRow>
+              {statuses.map((status) => (
+                <FilterPill
+                  key={status}
+                  label={status}
+                  count={counts.statuses[status] ?? 0}
+                  active={filters.statuses.includes(status)}
+                  onClick={() => update({ ...filters, statuses: togglePill(filters.statuses, status) })}
+                />
+              ))}
+            </PillRow>
 
-          {/* No shipping-mode row: po_data has no such column. See OPEN-QUESTIONS.md. */}
+            {/* No shipping-mode row: po_data has no such column. See OPEN-QUESTIONS.md. */}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-2">
-            <p className="lede">
-              {summary.visible} shown · {summary.notDispatched} not dispatched ·{' '}
-              {summary.dispatched} dispatched
+            <div className="flex flex-wrap items-center gap-2">
+              <SummaryPill>{summary.visible} visible</SummaryPill>
+              <SummaryPill>{summary.notDispatched} not dispatched</SummaryPill>
+              <SummaryPill>{summary.dispatched} dispatched</SummaryPill>
               {anyFilter && (
-                <button
-                  type="button"
-                  onClick={() => update(CLEARED)}
-                  className="ml-2 underline underline-offset-2 hover:text-ink"
-                >
+                <button type="button" onClick={() => update(CLEARED)} className="btn-text no-print">
                   Clear all
                 </button>
               )}
-            </p>
-            <input
-              type="search"
-              value={filters.search}
-              onChange={(e) => update({ ...filters, search: e.target.value })}
-              placeholder="Search PO number or product"
-              className="field w-full sm:w-72"
-            />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-2 overflow-x-auto">
-        <table className="w-full min-w-[52rem] text-table">
-          <thead>
-            <tr className="text-left bg-rule-soft">
-              {['#', 'PO and product', 'Status', 'Cargo ready', 'Dispatch', 'Film', 'Remarks', 'Docs', ''].map(
-                (label, i) => (
-                  <th
-                    key={i}
-                    scope="col"
-                    className="border-b border-rule px-2 py-2 text-eyebrow font-semibold uppercase text-ink-50 whitespace-nowrap"
-                  >
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full min-w-[56rem] text-table">
+            <thead>
+              <tr className="text-left">
+                {COLUMNS.map((label, i) => (
+                  <th key={i} scope="col" className="th whitespace-nowrap">
                     {label}
                   </th>
-                ),
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            <Band label="Open and awaiting dispatch" count={groups.open.length} />
-            {groups.open.map((order) => (
-              <OrderRow key={order.id} order={order} count={documentCounts[order.po_number] ?? 0} onOpen={() => setOpenOrder(order)} />
-            ))}
-
-            <Band label="Dispatched" count={groups.dispatched.length} />
-            {groups.dispatched.map((order) => (
-              <OrderRow key={order.id} order={order} count={documentCounts[order.po_number] ?? 0} onOpen={() => setOpenOrder(order)} />
-            ))}
-
-            {visible.length === 0 && (
-              <tr>
-                <td colSpan={9} className="px-2 py-4 text-center text-ink-70">
-                  No orders match that combination.
-                </td>
+                ))}
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              <Band label="Open and awaiting dispatch" count={groups.open.length} />
+              {groups.open.map((order) => (
+                <OrderRow
+                  key={order.id}
+                  order={order}
+                  count={documentCounts[order.po_number] ?? 0}
+                  onOpen={() => setOpenOrder(order)}
+                />
+              ))}
+
+              <Band label="Dispatched" count={groups.dispatched.length} />
+              {groups.dispatched.map((order) => (
+                <OrderRow
+                  key={order.id}
+                  order={order}
+                  count={documentCounts[order.po_number] ?? 0}
+                  onOpen={() => setOpenOrder(order)}
+                />
+              ))}
+
+              {visible.length === 0 && (
+                <tr>
+                  <td colSpan={COLUMNS.length} className="px-4 py-8 text-center text-ink-muted">
+                    No orders match that combination.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </CardBody>
 
       {openOrder && (
         <OrderPanel
@@ -234,25 +228,17 @@ export default function Tab4Orders({
           onClose={() => setOpenOrder(null)}
         />
       )}
-    </section>
+    </Card>
   )
 }
 
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-baseline gap-1">
-      <span className="eyebrow w-28 shrink-0">{label}</span>
-      <div className="flex flex-wrap gap-1">{children}</div>
-    </div>
-  )
-}
-
+/** A group band: small bold uppercase leaf-deep text and a count. Section 3. */
 function Band({ label, count }: { label: string; count: number }) {
   return (
-    <tr className="bg-rule-soft">
-      <td colSpan={9} className="border-y border-rule px-2 py-1 text-label font-semibold text-accent">
+    <tr>
+      <td colSpan={COLUMNS.length} className="band-row">
         {label}
-        <span className="ml-1 num font-normal text-ink-70">{count}</span>
+        <span className="ml-2 num font-semibold opacity-70">{count}</span>
       </td>
     </tr>
   )
@@ -262,39 +248,46 @@ function OrderRow({ order, count, onOpen }: { order: PoOrderT; count: number; on
   return (
     <tr
       onClick={onOpen}
-      className="cursor-pointer border-b border-rule align-top hover:bg-rule"
+      className="cursor-pointer border-b border-rule bg-surface align-top hover:bg-tint"
     >
-      <td className="px-2 py-2 num text-ink-50">{order.row_no}</td>
-      <td className="px-2 py-2">
-        <span className="font-semibold text-ink">{order.po_number}</span>
-        <span className="block text-ink-70">{order.product}</span>
-        <span className="mt-1 flex flex-wrap gap-1">
+      <td className="td num text-ink-muted">{order.row_no}</td>
+      <td className="td">
+        <span className="font-bold text-ink-strong">{order.po_number}</span>
+        <span className="block text-ink">{order.product}</span>
+        {/* A tiny grey uppercase tag beneath the product name for its family. */}
+        <span className="mt-1 flex flex-wrap gap-2">
           {familiesFor(order.product).map((family) => (
-            <span key={family} className="text-eyebrow font-semibold uppercase text-ink-50">
+            <span key={family} className="text-sub font-semibold uppercase tracking-wide text-ink-muted">
               {family}
             </span>
           ))}
         </span>
       </td>
-      <td className="px-2 py-2"><StatusPill status={order.order_status} /></td>
-      <td className="px-2 py-2 whitespace-nowrap">
-        {order.cargo_ready_date ? dayLong(order.cargo_ready_date) : (
-          <span className="text-ink-70">{order.cargo_ready || ''}</span>
+      <td className="td">
+        <StatusPill status={order.order_status} />
+      </td>
+      <td className="td whitespace-nowrap">
+        {order.cargo_ready_date ? (
+          dayLong(order.cargo_ready_date)
+        ) : (
+          <span className="text-ink-muted">{order.cargo_ready || ''}</span>
         )}
       </td>
-      <td className="px-2 py-2 whitespace-nowrap">
-        {order.dispatched_date ? dayLong(order.dispatched_date) : (
-          <span className="text-ink-50">{order.dispatched || 'Not dispatched'}</span>
+      <td className="td whitespace-nowrap">
+        {order.dispatched_date ? (
+          dayLong(order.dispatched_date)
+        ) : (
+          <span className="text-ink-muted">{order.dispatched || 'Not dispatched'}</span>
         )}
       </td>
-      <td className="px-2 py-2">
+      <td className="td">
         {order.film}
-        {order.rolls && <span className="block text-ink-70">{order.rolls}</span>}
+        {order.rolls && <span className="sub block">{order.rolls}</span>}
       </td>
-      <td className="px-2 py-2 text-ink-70 max-w-[16rem]">{order.remarks}</td>
-      <td className="px-2 py-2 whitespace-nowrap text-label text-ink-50">
+      <td className="td max-w-[16rem] text-ink-muted">{order.remarks}</td>
+      <td className="td whitespace-nowrap text-ink-muted">
         {count > 0 ? (
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1.5">
             <Paperclip size={13} aria-hidden />
             {count}
           </span>
@@ -302,7 +295,7 @@ function OrderRow({ order, count, onOpen }: { order: PoOrderT; count: number; on
           ''
         )}
       </td>
-      <td className="px-2 py-2 whitespace-nowrap text-accent underline underline-offset-2">Open</td>
+      <td className="td whitespace-nowrap font-semibold text-leaf">Open</td>
     </tr>
   )
 }

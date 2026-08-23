@@ -7,7 +7,7 @@ import type { LedgerT, PoTrackerT, StatementsT } from '../lib/schema'
 import { forecast, type ScenarioKey } from '../lib/engine/forecast'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { money, moneyWhole, monthProse, monthTable } from '../lib/format'
-import { Finding, SectionHead, Tile } from '../components/ui'
+import { BlockHead, Card, CardBody, CardHead, Figures, Finding, Tile } from '../components/ui'
 
 const SCENARIOS: { key: ScenarioKey; label: string; sentence: string }[] = [
   {
@@ -63,18 +63,19 @@ export default function Tab5Forecast({
     : undefined
 
   return (
-    <section>
-      <SectionHead
-        icon={<TrendingDown size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<TrendingDown size={20} className="text-leaf" aria-hidden />}
         kicker="Next six months"
         title="Where this goes"
         lede="The advance worked off against the cost of staying open. US dollars."
         asAt={`Projected from ${monthProse(today.slice(0, 7))}`}
       />
 
+      <CardBody>
       <Finding>{finding}</Finding>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Figures>
         <Tile
           label="Open book runs out"
           value={result.bookRunsOutIn ? monthProse(result.bookRunsOutIn) : 'Not within six months'}
@@ -91,9 +92,9 @@ export default function Tab5Forecast({
           value={moneyWhole(result.costToThatPoint)}
           sub={`${moneyWhole(result.monthlyCost)} a month`}
         />
-      </div>
+      </Figures>
 
-      <div className="mt-6 flex flex-wrap items-center gap-1 no-print">
+      <div className="mt-8 border-t border-rule pt-6 flex flex-wrap items-center gap-2 no-print">
         {SCENARIOS.map((option) => (
           <button
             key={option.key}
@@ -102,15 +103,15 @@ export default function Tab5Forecast({
             aria-pressed={scenario === option.key}
             className={
               scenario === option.key
-                ? 'rounded border border-accent bg-accent-soft px-2 py-1 text-label font-medium text-accent'
-                : 'rounded border border-rule px-2 py-1 text-label text-ink-50 hover:text-ink'
+                ? 'pill pill-active'
+                : 'pill'
             }
           >
             {option.label}
           </button>
         ))}
         {scenario === 'order-by-order' && (
-          <label className="ml-2 flex items-center gap-1 text-label text-ink-50">
+          <label className="ml-2 flex items-center gap-2 text-sub text-ink-muted">
             New orders a month
             <input
               type="number"
@@ -121,13 +122,13 @@ export default function Tab5Forecast({
               onChange={(e) =>
                 setMonthlyOrderValue(e.target.value === '' ? undefined : Number(e.target.value))
               }
-              className="field w-32"
+              className="field w-32 py-1.5"
             />
           </label>
         )}
       </div>
 
-      <p className="lede mt-1 max-w-prose">{chosen.sentence}</p>
+      <p className="lede mt-2 max-w-prose">{chosen.sentence}</p>
 
       <div className="mt-3 h-[320px] -ml-2 sm:h-[360px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -183,31 +184,31 @@ export default function Tab5Forecast({
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-label text-ink-50">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sub text-ink-muted">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-[2px] w-5 bg-accent" /> Advance balance
+          <span className="inline-block h-[2px] w-5 bg-leaf" /> Advance balance
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-5 border-t-2 border-dashed border-ink-30" /> Cost of
+          <span className="inline-block w-5 border-t-2 border-dashed border-ink-muted" /> Cost of
           staying open, cumulative
         </span>
       </div>
 
-      <div className="mt-6 border-t border-rule pt-2">
-        <h3 className="subtitle">What this rests on</h3>
-        <table className="mt-2 w-full max-w-prose text-table">
+      <div className="mt-8 border-t border-rule pt-6">
+        <BlockHead title="What this rests on" />
+        <table className="w-full max-w-prose text-table">
           <tbody>
             {result.assumptions.map((assumption) => (
               <tr key={assumption.label} className="border-b border-rule align-top">
-                <td className="py-1 pr-2 text-ink">{assumption.label}</td>
-                <td className="py-1 pr-2 text-right num whitespace-nowrap">
+                <td className="py-2 pr-3 text-ink">{assumption.label}</td>
+                <td className="py-2 pr-3 text-right num whitespace-nowrap font-semibold text-ink-strong">
                   {/^[\d.]+$/.test(assumption.value)
                     ? money(Number(assumption.value))
                     : assumption.value}
                 </td>
                 <td
-                  className={`py-1 text-label ${
-                    /assumption/i.test(assumption.source) ? 'text-critical' : 'text-ink-50'
+                  className={`py-2 text-sub ${
+                    /assumption/i.test(assumption.source) ? 'text-critical' : 'text-ink-muted'
                   }`}
                 >
                   {assumption.source}
@@ -216,11 +217,12 @@ export default function Tab5Forecast({
             ))}
           </tbody>
         </table>
-        <p className="lede mt-2 max-w-prose">
+        <p className="lede mt-3 max-w-prose">
           This tab needs no machine data. When that arrives it gains configuration
           scenarios.
         </p>
       </div>
-    </section>
+      </CardBody>
+    </Card>
   )
 }

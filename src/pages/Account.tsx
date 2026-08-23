@@ -65,26 +65,26 @@ export default function Account({ user }: { user: PublicUser }) {
         </header>
 
         <dl className="grid grid-cols-[9rem_1fr] gap-y-2 text-body mb-6">
-          <dt className="eyebrow self-center">Name</dt>
+          <dt className="kicker self-center">Name</dt>
           <dd>{user.name}</dd>
-          <dt className="eyebrow self-center">Email</dt>
+          <dt className="kicker self-center">Email</dt>
           <dd>{user.email}</dd>
-          <dt className="eyebrow self-center">Role</dt>
+          <dt className="kicker self-center">Role</dt>
           <dd>{ROLE_LABEL[user.role]}</dd>
-          <dt className="eyebrow self-center">Signed in</dt>
-          <dd className="num text-label">{whenLocal(user.lastLoginAt)}</dd>
+          <dt className="kicker self-center">Signed in</dt>
+          <dd className="num text-table">{whenLocal(user.lastLoginAt)}</dd>
         </dl>
 
         <section className="max-w-sm">
-          <h2 className="text-subtitle font-semibold tracking-tight mb-1">Change your password</h2>
-          <p className="text-body text-ink-70 leading-relaxed mb-3">
+          <h2 className="text-figure font-semibold tracking-tight mb-1">Change your password</h2>
+          <p className="text-body text-ink-muted leading-relaxed mb-3">
             At least 12 characters. A few words you will remember beat a short one with
             symbols in it. Changing it signs you out everywhere else, but not here.
           </p>
 
           <form onSubmit={submit} className="flex flex-col gap-2">
             <label className="flex flex-col gap-1">
-              <span className="eyebrow">Current password</span>
+              <span className="kicker">Current password</span>
               <input
                 type="password"
                 value={current}
@@ -96,7 +96,7 @@ export default function Account({ user }: { user: PublicUser }) {
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="eyebrow">New password</span>
+              <span className="kicker">New password</span>
               <input
                 type="password"
                 value={next}
@@ -108,7 +108,7 @@ export default function Account({ user }: { user: PublicUser }) {
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="eyebrow">New password again</span>
+              <span className="kicker">New password again</span>
               <input
                 type="password"
                 value={again}
@@ -125,7 +125,7 @@ export default function Account({ user }: { user: PublicUser }) {
               </p>
             )}
             {done && (
-              <p role="status" className="border-l-2 border-accent pl-2 py-1 text-body text-ink">
+              <p role="status" className="border-l-2 border-leaf pl-2 py-1 text-body text-ink">
                 {done}
               </p>
             )}
@@ -141,8 +141,8 @@ export default function Account({ user }: { user: PublicUser }) {
         </section>
 
         <section className="mt-8 border-t border-rule pt-4">
-          <h2 className="text-subtitle font-semibold tracking-tight mb-1">Invite a colleague</h2>
-          <p className="text-body text-ink-70 leading-relaxed mb-3">
+          <h2 className="text-figure font-semibold tracking-tight mb-1">Invite a colleague</h2>
+          <p className="text-body text-ink-muted leading-relaxed mb-3">
             They choose their own password from a link that works once. Nothing is sent
             while sending is switched off, so adding someone now tells them nothing.
           </p>

@@ -10,7 +10,7 @@ import { dateTable, money, monthTable } from '../lib/format'
  * stacked bar chart pretending to be one. Position is a percentage of the window
  * so the whole thing reflows on a narrow screen without recomputing anything.
  *
- * Two colours only: accent for a scheduled run, ink-30 for a mould change. A stop
+ * Two colours only: leaf for a scheduled run, ink-muted for a mould change. A stop
  * is a terminus mark rather than a third colour.
  */
 const MOULD_CHANGE_PX = 7
@@ -32,8 +32,8 @@ function MouldChange({ leftPct, date }: { leftPct: number; date: string }) {
         // Hatched, so it reads as apparatus rather than as production, and stays
         // distinct from the run in greyscale.
         backgroundImage:
-          'repeating-linear-gradient(45deg, #A8ADB3 0 2px, transparent 2px 4px)',
-        backgroundColor: '#EFF1F2',
+          'repeating-linear-gradient(45deg, #6D7869 0 2px, transparent 2px 4px)',
+        backgroundColor: '#EFF5EA',
       }}
       title={`Mould change, ${dateTable(date)}. Hours, not days.`}
       aria-hidden
@@ -82,11 +82,11 @@ function RunBar({
             continuous
               ? // Section 3: an unbounded run drawn as a bounded bar is a lie, so
                 // it fades out rather than ending in a terminus.
-                { background: 'linear-gradient(to right, #2D5F3F 55%, rgba(45,95,63,0.08) 100%)' }
-              : { background: '#2D5F3F' }
+                { background: 'linear-gradient(to right, #507A48 55%, rgba(80,122,72,0.08) 100%)' }
+              : { background: '#507A48' }
           }
         />
-        <span className="relative truncate text-eyebrow font-medium text-white">
+        <span className="relative truncate text-sub font-semibold text-white">
           {run.product}
         </span>
       </button>
@@ -94,7 +94,7 @@ function RunBar({
       {/* A stop is a hard terminus. Not a colour, and not a fade. */}
       {!continuous && run.to === machine.stopDate && (
         <span
-          className="absolute inset-y-0 z-20 w-[2px] bg-ink"
+          className="absolute inset-y-0 z-20 w-[2px] bg-ink-strong"
           style={{ left: `calc(${leftPct + widthPct}% - 1px)` }}
           aria-hidden
         />
@@ -138,14 +138,14 @@ export default function Gantt({
         scrolls sideways and the time axis is never compressed to nothing.
       */}
       <div className="overflow-x-auto print:overflow-visible chart-print-grey">
-      <div className="relative min-w-[620px] pb-4">
+      <div className="relative min-w-[620px] pb-5">
       <div className="grid grid-cols-[68px_1fr_74px] sm:grid-cols-[92px_1fr_96px]">
-        <div className="sticky left-0 z-40 border-b border-rule bg-paper" />
+        <div className="sticky left-0 z-40 border-b border-rule bg-surface" />
         <div className="relative h-3 border-b border-rule">
           {window.months.map((month) => (
             <span
               key={month.period}
-              className="absolute bottom-1 eyebrow"
+              className="absolute bottom-1 kicker"
               style={{ left: `${month.startPct}%` }}
             >
               {monthTable(month.period).slice(0, 3)}
@@ -159,21 +159,21 @@ export default function Gantt({
             {/* Sticky inside the scroller: scrolling to February must not take
                 the machine names with it, or the reader is looking at eight
                 anonymous rows. */}
-            <div className="sticky left-0 z-40 flex flex-col justify-center border-b border-rule-soft bg-paper py-1 pr-1">
-              <span className="text-label font-medium text-ink">{machine.id}</span>
-              <span className="truncate text-eyebrow text-ink-50">
+            <div className="sticky left-0 z-40 flex flex-col justify-center border-b border-rule bg-surface py-2 pr-2">
+              <span className="text-table font-bold text-ink-strong">{machine.id}</span>
+              <span className="truncate text-sub text-ink-muted">
                 {machine.status === 'mould_changing' ? 'Mould change' : 'Running'}
               </span>
             </div>
 
-            <div className="relative h-4 border-b border-rule-soft print:break-inside-avoid">
+            <div className="relative h-9 border-b border-rule print:break-inside-avoid">
               {/* Month gridlines. A vertical rule is the time axis on a Gantt
                   rather than decoration, which is why section 6's no-vertical-
                   gridlines rule does not apply here. */}
               {window.months.map((month) => (
                 <span
                   key={month.period}
-                  className="absolute inset-y-0 w-px bg-rule-soft"
+                  className="absolute inset-y-0 w-px bg-rule"
                   style={{ left: `${month.startPct}%` }}
                   aria-hidden
                 />
@@ -196,11 +196,11 @@ export default function Gantt({
             </div>
 
             {/* The stop date, or what a continuous machine is doing instead. */}
-            <div className="flex items-center border-b border-rule-soft py-1 pl-1">
+            <div className="flex items-center border-b border-rule py-2 pl-2">
               {machine.continuous ? (
-                <span className="text-eyebrow text-ink-50">One order a month</span>
+                <span className="text-sub text-ink-muted">One order a month</span>
               ) : (
-                <span className="text-eyebrow font-medium text-ink">
+                <span className="text-sub font-bold text-ink-strong">
                   {dateTable(machine.stopDate!)}
                 </span>
               )}
@@ -224,11 +224,11 @@ export default function Gantt({
           <div />
           <div className="relative">
             <span
-              className="absolute inset-y-0 bottom-4 z-30 w-px bg-ink"
+              className="absolute inset-y-0 bottom-5 z-30 w-px bg-ink-strong"
               style={{ left: `${window.todayPct}%` }}
             />
             <span
-              className="absolute bottom-0 z-30 -translate-x-1/2 text-eyebrow font-semibold text-ink"
+              className="absolute bottom-0 z-30 -translate-x-1/2 text-sub font-bold text-ink-strong"
               style={{ left: `${window.todayPct}%` }}
             >
               Today
@@ -239,23 +239,23 @@ export default function Gantt({
       </div>
       </div>
 
-      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-label text-ink-50">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sub text-ink-muted">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2 w-4 bg-accent" /> Scheduled run
+          <span className="inline-block h-2.5 w-6 bg-leaf" /> Scheduled run
         </span>
         <span className="flex items-center gap-1">
           <span
-            className="inline-block h-2 w-4"
+            className="inline-block h-2.5 w-6"
             style={{
               backgroundImage:
-                'repeating-linear-gradient(45deg, #A8ADB3 0 2px, transparent 2px 4px)',
-              backgroundColor: '#EFF1F2',
+                'repeating-linear-gradient(45deg, #6D7869 0 2px, transparent 2px 4px)',
+              backgroundColor: '#EFF5EA',
             }}
           />
           Mould change, hours not days
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-[2px] bg-ink" /> Stops, and today
+          <span className="inline-block h-4 w-[2px] bg-ink-strong" /> Stops, and today
         </span>
       </div>
 
@@ -290,9 +290,9 @@ function CampaignDetail({
   const campaign = campaignOrders(schedule, machine.id, run, ledger)
 
   return (
-    <div className="mt-3 border-l-2 border-accent pl-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-1">
-        <p className="text-body font-medium text-ink">
+    <div className="mt-4 rounded border-l-2 border-leaf bg-page py-3 pl-4 pr-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-figure font-bold text-leaf-deep">
           {machine.name}, {run.product}
         </p>
         <button type="button" onClick={onClose} className="btn-text no-print">
@@ -308,41 +308,41 @@ function CampaignDetail({
         {run.mouldChangeBefore && `, after a mould change on ${dateTable(run.mouldChangeBefore)}`}
       </p>
 
-      <table className="mt-2 w-full max-w-2xl text-table">
+      <table className="mt-3 w-full max-w-2xl text-table">
         <thead>
-          <tr className="border-b border-rule text-left">
-            <th className="eyebrow py-1 pr-2">Purchase order</th>
-            <th className="eyebrow py-1 pr-2 text-right">PO amount</th>
-            <th className="eyebrow py-1">Basis</th>
+          <tr className="text-left">
+            <th className="th rounded-l">Purchase order</th>
+            <th className="th text-right">PO amount</th>
+            <th className="th rounded-r">Basis</th>
           </tr>
         </thead>
         <tbody>
           {campaign.orders.map((order) => (
-            <tr key={order.ref} className="border-b border-rule-soft align-top">
-              <td className="py-1 pr-2 num text-ink">
+            <tr key={order.ref} className="border-b border-rule align-top">
+              <td className="px-3 py-2 num text-ink">
                 {order.ref}
                 {order.sharedWith.length > 0 && (
-                  <span className="text-label text-ink-50">
+                  <span className="text-sub text-ink-muted">
                     {' '}
                     also on {order.sharedWith.join(', ')}
                   </span>
                 )}
               </td>
-              <td className="py-1 pr-2 text-right num whitespace-nowrap">
+              <td className="px-3 py-2 text-right num whitespace-nowrap">
                 {order.value === null ? (
-                  <span className="text-label text-ink-50">Not in the ledger</span>
+                  <span className="text-sub text-ink-muted">Not in the ledger</span>
                 ) : (
                   <>
                     {money(order.value)}
                     {order.matchedOn === 'base' && (
-                      <span className="text-label text-ink-50"> on base no.</span>
+                      <span className="text-sub text-ink-muted"> on base no.</span>
                     )}
                   </>
                 )}
               </td>
               <td
-                className={`py-1 text-label ${
-                  order.basis === 'derived' ? 'text-critical' : 'text-ink-50'
+                className={`px-3 py-2 text-sub font-semibold ${
+                  order.basis === 'derived' ? 'text-critical' : 'text-ink-muted'
                 }`}
               >
                 {order.basis === 'derived' ? 'Derived' : 'Confirmed'}
@@ -352,17 +352,17 @@ function CampaignDetail({
         </tbody>
         <tfoot>
           <tr className="border-t border-rule">
-            <td className="py-1 pr-2 text-label text-ink-70">
+            <td className="px-3 py-2 text-sub text-ink-muted">
               {campaign.valued === 0
                 ? `The ledger carries no value for any of these ${campaign.count}`
                 : `${campaign.valued} of ${campaign.count} carry a value in the ledger`}
             </td>
-            <td className="py-1 pr-2 text-right num font-medium">
+            <td className="px-3 py-2 text-right num font-bold text-ink-strong">
               {/* Not $0.00. A campaign of four real orders totalling zero reads as
                   work worth nothing, when what it means is that the ledger does
                   not carry these orders yet. */}
               {campaign.valued === 0 ? (
-                <span className="text-label font-normal text-ink-50">Not known</span>
+                <span className="text-sub font-normal text-ink-muted">Not known</span>
               ) : (
                 money(campaign.valuedTotal)
               )}

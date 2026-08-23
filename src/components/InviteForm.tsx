@@ -57,7 +57,7 @@ export default function InviteForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-2 max-w-sm">
       <label className="flex flex-col gap-1">
-        <span className="eyebrow">Their name</span>
+        <span className="kicker">Their name</span>
         <input
           type="text"
           value={name}
@@ -68,7 +68,7 @@ export default function InviteForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="eyebrow">Their email</span>
+        <span className="kicker">Their email</span>
         <input
           type="email"
           value={email}
@@ -76,7 +76,7 @@ export default function InviteForm({
           required
           className="field w-full"
         />
-        <span className="text-label text-ink-70">
+        <span className="text-table text-ink-muted">
           {isAdmin
             ? 'Either polycohealthline.com or ecofibre.bh.'
             : `Colleagues at ${ownDomain}. Ask an administrator for anyone else.`}
@@ -85,7 +85,7 @@ export default function InviteForm({
 
       {isAdmin && (
         <label className="flex flex-col gap-1">
-          <span className="eyebrow">Role</span>
+          <span className="kicker">Role</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as PublicUser['role'])}
@@ -103,7 +103,7 @@ export default function InviteForm({
         </p>
       )}
       {done && (
-        <p role="status" className="border-l-2 border-accent pl-2 py-1 text-body text-ink">
+        <p role="status" className="border-l-2 border-leaf pl-2 py-1 text-body text-ink">
           {done}
         </p>
       )}

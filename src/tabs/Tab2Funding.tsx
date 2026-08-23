@@ -12,7 +12,9 @@ import { settlementFinding } from '../lib/engine/findings'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { money, moneyWhole } from '../lib/format'
 import { Exceptions } from '../components/Exceptions'
-import { Finding, Flag, Money, Note, SectionHead, Tile, Working } from '../components/ui'
+import {
+  BlockHead, Card, CardBody, CardHead, Figures, Finding, Flag, Money, Note, Tile, Working,
+} from '../components/ui'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -53,16 +55,16 @@ const KIND_SHORT: Record<StatementT['kind'], string> = {
 
 /** efdashboard's .po-state: text on a wash, pill-shaped, at weight 800. */
 const CONFIDENCE: Record<ReconRowT['match_confidence'], { label: string; cls: string }> = {
-  confirmed: { label: 'Matched', cls: 'bg-accent-soft text-accent' },
-  probable: { label: 'Probable match', cls: 'bg-rule-soft text-ink-70' },
-  partial: { label: 'Partially funded', cls: 'bg-watch-soft text-watch' },
-  unmatched: { label: 'No matched receipt', cls: 'bg-critical-soft text-critical' },
+  confirmed: { label: 'Matched', cls: 'bg-good-wash text-good' },
+  probable: { label: 'Probable match', cls: 'bg-info-wash text-info' },
+  partial: { label: 'Partially funded', cls: 'bg-watch-wash text-watch' },
+  unmatched: { label: 'No matched receipt', cls: 'bg-critical-wash text-critical' },
 }
 
 function Confidence({ c }: { c: ReconRowT['match_confidence'] }) {
   const { label, cls } = CONFIDENCE[c]
   return (
-    <span className={`inline-block whitespace-nowrap rounded-full px-1 py-[3px] text-eyebrow font-semibold ${cls}`}>
+    <span className={`pill-status pill-print-plain whitespace-nowrap ${cls}`}>
       {label}
     </span>
   )
@@ -138,18 +140,19 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
   ]
 
   return (
-    <section>
-      <SectionHead
-        icon={<CalendarDays size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<CalendarDays size={20} className="text-leaf" aria-hidden />}
         kicker="Funding and settlement"
         title="Monthly funding statements"
         lede={`What was asked for each month, what arrived, and the gap. US dollars.`}
         asAt={`Latest statement covers to ${dateLong(latest.period_end)}`}
       />
 
+      <CardBody>
       {finding && <Finding>{finding.sentence}</Finding>}
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <Figures>
         <Tile
           label="Funds requested"
           value={moneyWhole(lastPoint.requestedCumulative)}
@@ -166,11 +169,11 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           tone="critical"
           sub={`${moneyWhole(looseVariance)} of it sits in the ${looseRows.length} periods with no or partial ledger match`}
         />
-      </div>
+      </Figures>
 
-      <div className="mt-6">
-        <h3 className="subtitle">Three months out of fourteen did not settle in full</h3>
-        <p className="lede mt-1 max-w-prose">
+      <div className="mt-8 border-t border-rule pt-6">
+        <BlockHead title="Three months out of fourteen did not settle in full" />
+        <p className="lede -mt-2 mb-3 max-w-prose">
           The gap between what was asked for and what arrived, month by month. A bar at
           the line is a month that settled.
         </p>
@@ -181,9 +184,9 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           {statements.reconciliation_to_ledger.map((row) => {
             const tone =
               row.match_confidence === 'confirmed'
-                ? 'bg-accent'
+                ? 'bg-leaf'
                 : row.match_confidence === 'probable'
-                  ? 'bg-ink-30'
+                  ? 'bg-ink-muted'
                   : 'bg-critical'
             return (
               <span
@@ -192,11 +195,11 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 className="flex flex-col items-center gap-1"
               >
                 <span className={`block h-2 w-3 ${tone}`} aria-hidden />
-                <span className="text-eyebrow text-ink-50">{monthShort(row.period).slice(0, 3)}</span>
+                <span className="text-sub text-ink-muted">{monthShort(row.period).slice(0, 3)}</span>
               </span>
             )
           })}
-          <span className="ml-2 text-label text-ink-50">
+          <span className="ml-2 text-sub text-ink-muted">
             Settled · partial · unmatched
           </span>
         </div>
@@ -224,7 +227,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   <Cell
                     key={row.period}
                     // Section 3 keeps red for a shortfall. A month that did not
-                    // settle is exactly that, and an accent-green bar for a
+                    // settle is exactly that, and a leaf-green bar for a
                     // missed payment reads as approval.
                     fill={row.settled ? CHART.context : CHART.critical}
                   />
@@ -239,8 +242,8 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           a fourth tile competing with the three above. */}
       <div className="mt-6">
         <div className="px-2 pt-2 pb-2">
-          <p className="eyebrow">Cost of holding the operation open</p>
-          <h3 className="mt-1 text-subtitle font-semibold text-accent">
+          <p className="kicker">Cost of holding the operation open</p>
+          <h3 className="mt-1.5 text-figure font-bold text-leaf-deep">
             {moneyWhole(recurring.total)} a month at the current configuration
           </h3>
           <p className="lede mt-1 max-w-3xl">
@@ -254,7 +257,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           <Working title="How that figure is derived" lede="Recurring lines, and the bridge back to the stated total.">
             <div className="grid gap-2 lg:grid-cols-2">
               <div>
-                <h4 className="eyebrow mb-1">Recurring lines</h4>
+                <h4 className="kicker mb-2">Recurring lines</h4>
                 <div className="overflow-x-auto">
                 <table className="w-full min-w-[20rem] text-table">
                   <tbody>
@@ -277,7 +280,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 </div>
               </div>
               <div>
-                <h4 className="eyebrow mb-1">How it is derived</h4>
+                <h4 className="kicker mb-2">How it is derived</h4>
                 <div className="overflow-x-auto">
                 <table className="w-full min-w-[20rem] text-table">
                   <tbody>
@@ -328,13 +331,13 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
         <div className="overflow-x-auto">
           <table className="w-full text-table">
             <thead>
-              <tr className="text-left border-b border-rule bg-rule-soft">
-                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Month</th>
-                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Statement</th>
-                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Requested US$</th>
-                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Received US$</th>
-                <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">Variance</th>
-                <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Ledger match</th>
+              <tr className="text-left">
+                <th className="th">Month</th>
+                <th className="th">Statement</th>
+                <th className="th text-right">Requested US$</th>
+                <th className="th text-right">Received US$</th>
+                <th className="th text-right">Variance</th>
+                <th className="th">Ledger match</th>
               </tr>
             </thead>
             <tbody>
@@ -347,7 +350,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                     key={m.id}
                     onClick={() => setSelected(m.id)}
                     className={`cursor-pointer border-b border-rule ${
-                      m.id === current.id ? 'bg-rule-soft' : 'hover:bg-rule'
+                      m.id === current.id ? 'bg-tint' : 'hover:bg-tint'
                     }`}
                   >
                     <td className="py-2 px-2 whitespace-nowrap">{monthName(m.id)}</td>
@@ -411,11 +414,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                   role="tab"
                   aria-selected={active}
                   onClick={() => setSelected(m.id)}
-                  className={`px-2 py-1 text-label whitespace-nowrap rounded -mb-px border border-b-0 flex items-center gap-1 ${
-                    active
-                      ? 'bg-surface border-rule font-medium text-accent'
-                      : 'border-transparent text-ink-70 hover:text-ink'
-                  }`}
+                  className={`tab flex items-center gap-1.5 ${active ? 'tab-active' : ''}`}
                 >
                   {monthShort(m.id)}
                   {!m.statement && <span className="h-1.5 w-1.5 rounded-full bg-critical inline-block" aria-hidden />}
@@ -436,8 +435,8 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
             {st ? (
               <>
                 <div className="flex flex-wrap items-baseline justify-between gap-1 mb-1">
-                  <h4 className="text-body font-semibold text-ink">{monthName(st.id)}</h4>
-                  <span className="eyebrow">{KIND_LABEL[st.kind]}</span>
+                  <h4 className="text-figure font-bold text-leaf-deep">{monthName(st.id)}</h4>
+                  <span className="kicker">{KIND_LABEL[st.kind]}</span>
                 </div>
                 <p className="lede mb-2">
                   Covers {dateLong(st.period_start)} to {dateLong(st.period_end)}
@@ -449,17 +448,17 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 <div className="overflow-x-auto">
                   <table className="w-full text-table">
                     <thead>
-                      <tr className="text-left border-b border-rule bg-rule-soft">
-                        <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Line as issued</th>
-                        <th className="py-2 px-2 text-eyebrow font-semibold uppercase text-ink-50">Remarks</th>
-                        <th className="py-2 px-2 text-right text-eyebrow font-semibold uppercase text-ink-50">US$</th>
+                      <tr className="text-left">
+                        <th className="th">Line as issued</th>
+                        <th className="th">Remarks</th>
+                        <th className="th text-right">US$</th>
                       </tr>
                     </thead>
                     <tbody>
                       {st.lines.map((l, i) => (
                         <tr key={i} className="align-top border-b border-rule">
                           <td className="py-2 px-2">{l.description}</td>
-                          <td className="py-2 px-2 text-ink-70 max-w-[18rem]">{l.remarks ?? ''}</td>
+                          <td className="td max-w-[18rem] text-ink-muted">{l.remarks ?? ''}</td>
                           <td className="py-2 px-2 text-right whitespace-nowrap">
                             <Money n={l.amount} dp={2} />
                           </td>
@@ -501,7 +500,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
             ) : (
               <>
                 <div className="flex flex-wrap items-baseline justify-between gap-1 mb-2">
-                  <h4 className="text-body font-semibold text-ink">{monthName(current.id)}</h4>
+                  <h4 className="text-figure font-bold text-leaf-deep">{monthName(current.id)}</h4>
                   <Flag>No statement</Flag>
                 </div>
                 <Note tone="alert">
@@ -514,7 +513,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
           </div>
 
           <div>
-            <h4 className="text-body font-semibold text-ink mb-1">Matched receipts</h4>
+            <h4 className="kicker mb-2">Matched receipts</h4>
             <p className="lede mb-2">From the Polyco ledger, for this period.</p>
             {rec ? (
               <>
@@ -543,7 +542,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                     ))}
                     {rec.receipts.length === 0 && (
                       <tr>
-                        <td className="py-1 pr-2 text-ink-70" colSpan={2}>
+                        <td className="py-1.5 pr-3 text-ink-muted" colSpan={2}>
                           No receipt in the ledger has been matched to this request.
                         </td>
                       </tr>
@@ -574,7 +573,7 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
                 )}
               </>
             ) : (
-              <p className="text-table text-ink-70">
+              <p className="text-table text-ink-muted">
                 No funding request exists for {monthName(current.id)}, so there is nothing to
                 reconcile yet.
               </p>
@@ -584,14 +583,14 @@ export default function Tab2Funding({ statements }: { statements: StatementsT })
       </Working>
 
       {/* One count, opening on demand. Section 9: delete every stacked note panel. */}
-      <div className="mt-6 border-t border-rule pt-2">
+      <div className="mt-8 border-t border-rule pt-6">
         <Exceptions items={exceptions} label="open items on the statements" />
         <Exceptions
           items={capacityNotes.map((c) => `${c.months.map(monthName).join(', ')}: ${c.text}`)}
           label="capacity notes carried on the statements, all estimates"
         />
       </div>
-
-    </section>
+      </CardBody>
+    </Card>
   )
 }

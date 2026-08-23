@@ -32,15 +32,15 @@ export default function Forgot() {
       <div className="w-full max-w-sm">
         <div className="flex items-baseline gap-2 mb-4">
           <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-50">/</span>
-          <span className="text-body text-ink-70">Polyco Healthline</span>
+          <span className="text-ink-muted">/</span>
+          <span className="text-body text-ink-muted">Polyco Healthline</span>
         </div>
 
         <h1 className="text-title font-semibold tracking-tight mb-1">Reset your password</h1>
 
         {asked ? (
           <>
-            <p className="text-body text-ink-70 leading-relaxed mb-4">
+            <p className="text-body text-ink-muted leading-relaxed mb-4">
               If that address has an account, a reset link is on its way. It works once
               and lasts an hour.
             </p>
@@ -54,14 +54,14 @@ export default function Forgot() {
           </>
         ) : (
           <>
-            <p className="text-body text-ink-70 leading-relaxed mb-4">
+            <p className="text-body text-ink-muted leading-relaxed mb-4">
               Give us the address you sign in with and we will send a link to set a new
               password.
             </p>
 
             <form onSubmit={submit} className="flex flex-col gap-2">
               <label className="flex flex-col gap-1">
-                <span className="eyebrow">Email</span>
+                <span className="kicker">Email</span>
                 <input
                   type="email"
                   value={email}

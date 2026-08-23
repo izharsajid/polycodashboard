@@ -10,7 +10,7 @@ import { advanceBalanceSeries } from '../lib/engine/statement'
 import { positionFinding } from '../lib/engine/findings'
 import { AXIS_TICK, CHART, GRID_COUNT, NO_ANIMATION, TOOLTIP_STYLE, axisMoney } from '../lib/chart'
 import { money, moneyWhole } from '../lib/format'
-import { Finding, SectionHead, Tile, Working } from '../components/ui'
+import { BlockHead, Card, CardBody, CardHead, Figures, Finding, Tile, Working } from '../components/ui'
 
 function monthLabel(iso: string) {
   const [y, m] = iso.split('-')
@@ -68,18 +68,19 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
   const coverPct = Math.round((cover / advance) * 100)
 
   return (
-    <section>
-      <SectionHead
-        icon={<Scale size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<Scale size={20} className="text-leaf" aria-hidden />}
         kicker="Polyco position"
         title="Where we stand"
         lede="What Polyco has paid, what has shipped against it, and what is left. US dollars."
         asAt={`As at ${asAt}`}
       />
 
+      <CardBody>
       <Finding>{finding.sentence}</Finding>
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <Figures>
         <Tile
           label="Received from Polyco"
           value={moneyWhole(finding.received)}
@@ -96,30 +97,25 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           sub="After every open order and ready container ships"
           tone="critical"
         />
-      </div>
+      </Figures>
 
-      <div className="mt-6">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h3 className="subtitle">
-              The advance has grown because payment ran ahead of shipping
-            </h3>
-            <p className="lede mt-1 max-w-prose">
-              What Polyco is holding with us, day by day. It rises when they pay and falls
-              when goods ship. The band is where it lands once the open book has shipped.
-            </p>
-          </div>
-          <div className="flex gap-1 no-print">
-            <button type="button" onClick={() => setShowComponents((v) => !v)} className="btn-secondary">
-              {showComponents ? 'Hide components' : 'Show components'}
-            </button>
-            <button type="button" onClick={() => setShowAll((v) => !v)} className="btn-secondary">
-              {showAll ? 'Last 12 months' : 'Full history'}
-            </button>
-          </div>
-        </div>
+      <div className="mt-8 border-t border-rule pt-6">
+        <BlockHead
+          title="The advance has grown because payment ran ahead of shipping"
+          lede="What Polyco is holding with us, day by day. It rises when they pay and falls when goods ship. The band is where it lands once the open book has shipped."
+          actions={
+            <>
+              <button type="button" onClick={() => setShowComponents((v) => !v)} className="btn-secondary">
+                {showComponents ? 'Hide components' : 'Show components'}
+              </button>
+              <button type="button" onClick={() => setShowAll((v) => !v)} className="btn-secondary">
+                {showAll ? 'Last 12 months' : 'Full history'}
+              </button>
+            </>
+          }
+        />
 
-        <div className="mt-3 h-[300px] -ml-2 sm:h-[360px]">
+        <div className="h-[300px] -ml-2 sm:h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 16, right: 132, bottom: 8, left: 8 }}>
               <CartesianGrid stroke={CHART.grid} vertical={false} />
@@ -183,7 +179,7 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           </ResponsiveContainer>
         </div>
 
-        <p className="lede mt-2">
+        <p className="lede mt-3">
           Open orders and finished containers cover {coverPct}% of the advance.
         </p>
       </div>
@@ -211,7 +207,8 @@ export default function Tab1Position({ ledger }: { ledger: LedgerT }) {
           delivered value and are not deducted twice.
         </p>
       </Working>
-    </section>
+      </CardBody>
+    </Card>
   )
 }
 
@@ -220,8 +217,14 @@ function Row({
 }: { label: string; value: number; rule?: boolean; strong?: boolean }) {
   return (
     <tr className={rule ? 'border-t border-rule' : undefined}>
-      <td className={`py-1 pr-2 ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>{label}</td>
-      <td className={`py-1 text-right num ${strong ? 'font-semibold text-ink' : 'text-ink'}`}>
+      <td className={`py-1.5 pr-3 ${strong ? 'font-semibold text-ink-strong' : 'text-ink'}`}>
+        {label}
+      </td>
+      <td
+        className={`py-1.5 text-right num ${
+          strong ? 'font-semibold text-ink-strong' : 'text-ink'
+        }`}
+      >
         {money(value)}
       </td>
     </tr>

@@ -13,7 +13,7 @@ import {
   type PresetKey, type StatementUrlState,
 } from '../lib/statement-url'
 import { money, moneyWhole, monthProse } from '../lib/format'
-import { Finding, SectionHead, Tile } from '../components/ui'
+import { Card, CardBody, CardHead, Figures, Finding, Tile } from '../components/ui'
 
 function dayLong(iso: string | null) {
   if (!iso) return ''
@@ -125,48 +125,50 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
       : `, being ${moneyWhole(ledger.summary.total_received)} received against ${moneyWhole(ledger.summary.total_delivered)} delivered.`)
 
   return (
-    <section>
-      <SectionHead
-        icon={<BookOpen size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<BookOpen size={20} className="text-leaf" aria-hidden />}
         kicker="Account"
         title="Statement"
         lede="Every transaction between the two companies, in date order. US dollars."
         asAt={`Ledger as at ${dayLong(ledger.summary.as_at)}`}
       />
 
+      <CardBody flush>
+      <div className="px-4 sm:px-6">
       <Finding>{finding}</Finding>
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <Figures>
         <Tile label="Opening balance" value={moneyWhole(headline.opening)} sub={state.from ? `Carried into ${dayLong(state.from)}` : 'Nothing before the first transaction'} />
         <Tile label="Movement in period" value={moneyWhole(headline.movement)} sub={`${rows.length} entries shown`} />
         <Tile label="Closing balance" value={moneyWhole(headline.closing)} sub="Receipts raise it, deliveries reduce it. Positive means value yet to deliver." tone="critical" />
-      </div>
+      </Figures>
 
       {/* Controls in one bar, not scattered. Section 6. */}
-      <div className="mt-6 border-t border-rule pt-2 no-print">
-        <div className="px-2 py-2 flex flex-wrap items-end gap-x-3 gap-y-2">
-          <label className="flex flex-col gap-1">
-            <span className="eyebrow">From</span>
+      <div className="mt-6 border-t border-rule pt-4 no-print">
+        <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+          <label className="flex flex-col gap-2">
+            <span className="kicker">From</span>
             <input
               type="date"
               value={state.from ?? ''}
               onChange={(e) => update({ from: e.target.value || null })}
-              className="rulebox rounded px-1 py-1 text-label"
+              className="field w-auto py-1.5"
             />
           </label>
-          <label className="flex flex-col gap-1">
-            <span className="eyebrow">To</span>
+          <label className="flex flex-col gap-2">
+            <span className="kicker">To</span>
             <input
               type="date"
               value={state.to ?? ''}
               onChange={(e) => update({ to: e.target.value || null })}
-              className="rulebox rounded px-1 py-1 text-label"
+              className="field w-auto py-1.5"
             />
           </label>
 
-          <div className="flex flex-col gap-1">
-            <span className="eyebrow">Period</span>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex flex-col gap-2">
+            <span className="kicker">Period</span>
+            <div className="flex flex-wrap gap-2">
               {DATE_PRESETS.map((preset) => (
                 <button
                   key={preset.key}
@@ -180,19 +182,15 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <span className="eyebrow">Columns</span>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex flex-col gap-2">
+            <span className="kicker">Columns</span>
+            <div className="flex flex-wrap gap-2">
               {Object.entries(PRESETS).map(([key, preset]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => update({ columns: [...preset.columns] })}
-                  className={`rounded border px-1 py-1 text-label ${
-                    activePreset === key
-                      ? 'border-accent bg-accent-soft font-semibold text-accent'
-                      : 'border-rule text-accent hover:bg-accent-soft'
-                  }`}
+                  className={`pill ${activePreset === key ? 'pill-active' : ''}`}
                 >
                   {preset.label}
                 </button>
@@ -207,9 +205,9 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
             </div>
           </div>
 
-          <div className="flex flex-col gap-1 ml-auto">
-            <span className="eyebrow">Export</span>
-            <div className="flex gap-1">
+          <div className="flex flex-col gap-2 ml-auto">
+            <span className="kicker">Export</span>
+            <div className="flex gap-2">
               <button
                 type="button"
                 disabled={busy !== null}
@@ -230,13 +228,13 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
           </div>
         </div>
 
-        <details className="border-t border-rule px-2 py-2">
-          <summary className="cursor-pointer text-label font-semibold text-accent">
+        <details className="mt-4 border-t border-rule pt-3">
+          <summary className="cursor-pointer text-sub font-semibold text-leaf">
             Choose columns
           </summary>
-          <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
             {COLUMNS.map((column) => (
-              <label key={column.key} className="flex items-center gap-1 text-label">
+              <label key={column.key} className="flex items-center gap-1.5 text-table">
                 <input
                   type="checkbox"
                   checked={state.columns.includes(column.key)}
@@ -251,48 +249,47 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
                     })
                   }
                 />
-                <span className={column.locked ? 'text-ink-70' : ''}>{column.label}</span>
+                <span className={column.locked ? 'text-ink-muted' : ''}>{column.label}</span>
               </label>
             ))}
           </div>
-          <p className="lede mt-1">The running balance is always shown and cannot be removed.</p>
+          <p className="lede mt-2">The running balance is always shown and cannot be removed.</p>
         </details>
       </div>
 
       {exportError && (
-        <p role="alert" className="mt-2 border-l-2 border-critical pl-2 py-1 text-label text-ink">
+        <p role="alert" className="mt-4 rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
           {exportError}
         </p>
       )}
 
-      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <p className="lede">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <p className="pill-summary">
           {rows.length} entries shown
           {view.filtered && `, ${dayLong(state.from) || 'the beginning'} to ${dayLong(state.to) || 'the latest entry'}`}
         </p>
         {view.unconfirmedDates > 0 && (
-          <p className="text-label font-semibold text-watch">
+          <p className="pill-summary !bg-watch-wash !text-watch">
             {view.unconfirmedDates} carry a date not yet confirmed
           </p>
         )}
         {!showBalance && (
-          <p className="text-label font-semibold text-watch">
+          <p className="pill-summary !bg-watch-wash !text-watch">
             Running balance hidden: it only means anything in date order
           </p>
         )}
       </div>
+      </div>
 
-      <div className="mt-2 overflow-x-auto -mx-[20px] px-[20px] sm:-mx-6 sm:px-6">
+      <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[44rem] text-table">
           <thead className="sticky top-0 z-10">
-            <tr className="text-left bg-rule-soft">
+            <tr className="text-left">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   scope="col"
-                  className={`border-b border-rule px-2 py-2 text-eyebrow font-semibold uppercase text-ink-50 whitespace-nowrap ${
-                    column.numeric ? 'text-right' : ''
-                  }`}
+                  className={`th whitespace-nowrap ${column.numeric ? 'text-right' : ''}`}
                 >
                   <button
                     type="button"
@@ -303,7 +300,7 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
                           state.sort === column.key && state.direction === 'asc' ? 'desc' : 'asc',
                       })
                     }
-                    className="no-print hover:text-accent"
+                    className="no-print hover:text-leaf"
                   >
                     {column.label}
                     {state.sort === column.key && (state.direction === 'asc' ? ' ▲' : ' ▼')}
@@ -315,10 +312,10 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
           </thead>
           <tbody>
             {view.filtered && (
-              <tr className="bg-rule-soft">
+              <tr>
                 <td
                   colSpan={columns.length}
-                  className="border-b border-rule px-2 py-1 font-semibold text-ink"
+                  className="border-b border-rule bg-tint px-3 py-2 font-bold text-ink-strong"
                 >
                   Opening balance carried in
                   <span className="float-right num">{money(view.opening)}</span>
@@ -328,10 +325,10 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
 
             {monthGroups.map((group) => (
               <Fragment key={group.key}>
-                <tr className="bg-rule-soft">
-                  <td colSpan={columns.length} className="px-2 py-1 text-eyebrow text-ink-50">
+                <tr>
+                  <td colSpan={columns.length} className="band-row">
                     {group.label}
-                    <span className="ml-2 normal-case tracking-normal">
+                    <span className="ml-2 font-semibold normal-case tracking-normal opacity-70">
                       {group.rows.length} entries · received {money(group.received)} · delivered{' '}
                       {money(group.delivered)}
                     </span>
@@ -345,15 +342,15 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
 
             {rows.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-2 py-3 text-center text-ink-70">
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-ink-muted">
                   No transactions fall in that range.
                 </td>
               </tr>
             )}
           </tbody>
           <tfoot className="sticky bottom-0 bg-surface">
-            <tr className="border-t border-rule bg-rule-soft">
-              <td colSpan={columns.length} className="px-2 py-2 font-semibold text-ink">
+            <tr className="border-t-2 border-rule bg-tint">
+              <td colSpan={columns.length} className="px-3 py-3 font-bold text-ink-strong">
                 Closing balance
                 <span className="float-right num">{money(view.closing)}</span>
               </td>
@@ -380,7 +377,8 @@ export default function Tab3Statement({ ledger, who }: { ledger: LedgerT; who: s
           columns={columns}
         />
       )}
-    </section>
+      </CardBody>
+    </Card>
   )
 }
 
@@ -393,10 +391,10 @@ function Aside({
   columns: typeof COLUMNS
 }) {
   return (
-    <div className="mt-3 border-t border-rule pt-3">
-      <div className="px-2 pt-2 pb-1">
-        <h3 className="text-body font-semibold text-accent">{title}</h3>
-        <p className="lede mt-1 max-w-3xl">{lede}</p>
+    <div className="mt-6 border-t border-rule pt-5">
+      <div className="px-4 pb-3 sm:px-6">
+        <h3 className="text-figure font-bold text-leaf-deep">{title}</h3>
+        <p className="lede mt-1 max-w-prose">{lede}</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem] text-table">
@@ -424,7 +422,7 @@ function Row({
   showBalance: boolean
 }) {
   return (
-    <tr className="border-b border-rule align-top">
+    <tr className="border-b border-rule bg-surface align-top">
       {columns.map((column) => {
         const value = cellValue(entry, column.key)
         const isBalance = column.key === 'balance'
@@ -432,13 +430,13 @@ function Row({
         return (
           <td
             key={column.key}
-            className={`px-2 py-1 ${column.numeric ? 'text-right num whitespace-nowrap' : ''}`}
+            className={`td ${column.numeric ? 'text-right num whitespace-nowrap' : ''}`}
           >
             {column.key === 'receivedDate' || column.key === 'deliveryDate' ? (
               <span className="whitespace-nowrap">
-                {dayLong(entry.date) || <span className="text-ink-70">No date</span>}
+                {dayLong(entry.date) || <span className="text-ink-muted">No date</span>}
                 {entry.dateUnconfirmed && (
-                  <span className="ml-1 whitespace-nowrap rounded-full bg-watch-soft px-1 py-[1px] text-eyebrow font-semibold text-watch">
+                  <span className="ml-1.5 whitespace-nowrap rounded-full bg-watch-wash px-2 py-0.5 text-sub font-semibold text-watch">
                     was {dayLong(entry.originalDate) || 'unreadable'}
                   </span>
                 )}

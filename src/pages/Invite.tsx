@@ -75,12 +75,12 @@ export default function Invite({ token }: { token: string | null }) {
       <div className="w-full max-w-sm">
         <div className="flex items-baseline gap-2 mb-4">
           <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-50">/</span>
-          <span className="text-body text-ink-70">Polyco Healthline</span>
+          <span className="text-ink-muted">/</span>
+          <span className="text-body text-ink-muted">Polyco Healthline</span>
         </div>
 
         {stage.at === 'checking' && (
-          <p className="text-body text-ink-70" aria-busy="true">
+          <p className="text-body text-ink-muted" aria-busy="true">
             Checking that link.
           </p>
         )}
@@ -88,7 +88,7 @@ export default function Invite({ token }: { token: string | null }) {
         {stage.at === 'dead' && (
           <>
             <h1 className="text-title font-semibold tracking-tight mb-1">That link has expired</h1>
-            <p className="text-body text-ink-70 leading-relaxed mb-4">
+            <p className="text-body text-ink-muted leading-relaxed mb-4">
               Invitations last seven days and work once. Ask whoever invited you for
               another, and this one stops working either way.
             </p>
@@ -105,7 +105,7 @@ export default function Invite({ token }: { token: string | null }) {
         {stage.at === 'ready' && (
           <>
             <h1 className="text-title font-semibold tracking-tight mb-1">Choose a password</h1>
-            <p className="text-body text-ink-70 leading-relaxed mb-4">
+            <p className="text-body text-ink-muted leading-relaxed mb-4">
               For <span className="text-ink">{stage.email}</span>. At least 12 characters. A
               few words you will remember beat a short one with symbols in it, and nobody
               here can see what you choose.
@@ -113,7 +113,7 @@ export default function Invite({ token }: { token: string | null }) {
 
             <form onSubmit={submit} className="flex flex-col gap-2">
               <label className="flex flex-col gap-1">
-                <span className="eyebrow">Password</span>
+                <span className="kicker">Password</span>
                 <input
                   type="password"
                   value={password}
@@ -126,7 +126,7 @@ export default function Invite({ token }: { token: string | null }) {
               </label>
 
               <label className="flex flex-col gap-1">
-                <span className="eyebrow">Again</span>
+                <span className="kicker">Again</span>
                 <input
                   type="password"
                   value={again}

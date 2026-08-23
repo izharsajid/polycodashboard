@@ -10,7 +10,7 @@ import { floorBreachMonth, monthlyMachineCount } from '../lib/engine/machines'
 import type { LedgerT, MachineScheduleT, PoTrackerT } from '../lib/schema'
 import { AXIS_TICK, CHART, NO_ANIMATION, TOOLTIP_STYLE } from '../lib/chart'
 import { dateProse, monthProse, monthTable } from '../lib/format'
-import { Finding, SectionHead, Tile } from '../components/ui'
+import { BlockHead, Card, CardBody, CardHead, Figures, Finding, Tile } from '../components/ui'
 
 /**
  * What each machine is running, when it stops, and what that leaves.
@@ -40,18 +40,19 @@ export default function Tab6Machines({
   const atFloor = months.find((month) => month.count === schedule.viable_floor)
 
   return (
-    <section>
-      <SectionHead
-        icon={<Factory size={19} className="text-ink-50" aria-hidden />}
+    <Card>
+      <CardHead
+        icon={<Factory size={20} className="text-leaf" aria-hidden />}
         kicker="Machine schedule"
         title="What runs, and when it stops"
         lede="Every machine here comes off because its purchase orders run out, not because a mould comes off or a decision has been taken."
         asAt={`Schedule as at ${dateProse(schedule.as_at)}`}
       />
 
+      <CardBody>
       <Finding>{finding.sentence}</Finding>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Figures>
         <Tile
           label="Machines running today"
           value={String(finding.today)}
@@ -72,39 +73,35 @@ export default function Tab6Machines({
           }
           tone={breach ? 'critical' : 'plain'}
         />
-      </div>
+      </Figures>
 
-      <div className="mt-6">
+      <div className="mt-8 border-t border-rule pt-6">
         {/* Every heading here states what the data says rather than naming the
             variable, and is assembled from the schedule so it cannot go stale. */}
-        <h3 className="subtitle">
-          {stopping} of {schedule.machines.length} machines have a last day inside the schedule
-        </h3>
-        <p className="lede mt-1 max-w-prose">
-          Each bar is a campaign. Pick one for the purchase orders behind it.{' '}
-          {schedule.horizon_note}
-        </p>
-        <div className="mt-3">
-          <Gantt schedule={schedule} ledger={ledger} />
-        </div>
+        <BlockHead
+          title={`${stopping} of ${schedule.machines.length} machines have a last day inside the schedule`}
+          lede={`Each bar is a campaign. Pick one for the purchase orders behind it. ${schedule.horizon_note}`}
+        />
+        <Gantt schedule={schedule} ledger={ledger} />
       </div>
 
-      <div className="mt-6">
-        <h3 className="subtitle">
-          {breach
-            ? `${schedule.viable_floor} machines from ${monthProse(
-                atFloor?.period ?? breach,
-              )}, and ${months[months.length - 1].count} from ${monthProse(breach)}`
-            : `The count holds at or above ${schedule.viable_floor}`}
-        </h3>
-        <p className="lede mt-1 max-w-prose">
-          Machines still running at the end of each month.
-          {breach &&
-            ' The six month forecast puts the order book running out in the same month, from the' +
-              ' ledger and the tracker rather than from the schedule. Two sources, different data.'}
-        </p>
+      <div className="mt-8 border-t border-rule pt-6">
+        <BlockHead
+          title={
+            breach
+              ? `${schedule.viable_floor} machines from ${monthProse(
+                  atFloor?.period ?? breach,
+                )}, and ${months[months.length - 1].count} from ${monthProse(breach)}`
+              : `The count holds at or above ${schedule.viable_floor}`
+          }
+          lede={
+            breach
+              ? 'Machines still running at the end of each month. The six month forecast puts the order book running out in the same month, from the ledger and the tracker rather than from the schedule. Two sources, different data.'
+              : 'Machines still running at the end of each month.'
+          }
+        />
 
-        <div className="mt-3 h-[260px] -ml-2 sm:h-[300px]">
+        <div className="h-[260px] -ml-2 sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={months}
@@ -179,6 +176,7 @@ export default function Tab6Machines({
       </div>
 
       <ScheduleReconciliation schedule={schedule} ledger={ledger} tracker={tracker} />
-    </section>
+      </CardBody>
+    </Card>
   )
 }

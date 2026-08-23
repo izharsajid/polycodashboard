@@ -35,18 +35,18 @@ export default function Login({ next }: { next: string }) {
       <div className="w-full max-w-sm">
         <div className="flex items-baseline gap-2 mb-4">
           <span className="text-body font-semibold tracking-tight">ECOFIBRE</span>
-          <span className="text-ink-50">/</span>
-          <span className="text-body text-ink-70">Polyco Healthline</span>
+          <span className="text-ink-muted">/</span>
+          <span className="text-body text-ink-muted">Polyco Healthline</span>
         </div>
 
         <h1 className="text-title font-semibold tracking-tight mb-1">Sign in</h1>
-        <p className="text-body text-ink-70 mb-4">
+        <p className="text-body text-ink-muted mb-4">
           Position, capacity and configuration.
         </p>
 
         <form onSubmit={submit} className="flex flex-col gap-2">
           <label className="flex flex-col gap-1">
-            <span className="eyebrow">Email</span>
+            <span className="kicker">Email</span>
             <input
               type="email"
               value={email}
@@ -59,7 +59,7 @@ export default function Login({ next }: { next: string }) {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="eyebrow">Password</span>
+            <span className="kicker">Password</span>
             <input
               type="password"
               value={password}

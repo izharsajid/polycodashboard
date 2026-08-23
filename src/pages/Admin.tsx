@@ -58,7 +58,7 @@ export default function Admin({ user }: { user: PublicUser }) {
       <main className="mx-auto max-w-5xl px-3 py-6">
         <header className="mb-4 border-b border-rule pb-2">
           <h1 className="text-title font-semibold tracking-tight">People and access</h1>
-          <p className="mt-1 max-w-2xl text-body text-ink-70 leading-relaxed">
+          <p className="mt-1 max-w-2xl text-body text-ink-muted leading-relaxed">
             Everyone here sees the same figures. The only thing role changes is who can
             edit data, change roles and read the audit log.
           </p>
@@ -71,7 +71,7 @@ export default function Admin({ user }: { user: PublicUser }) {
         )}
 
         {users === null ? (
-          <p className="text-body text-ink-70" aria-busy="true">
+          <p className="text-body text-ink-muted" aria-busy="true">
             Loading the list.
           </p>
         ) : (
@@ -79,12 +79,12 @@ export default function Admin({ user }: { user: PublicUser }) {
             <table className="w-full text-body border-collapse">
               <thead>
                 <tr className="border-b border-rule text-left">
-                  <th className="eyebrow py-1 pr-2 font-semibold">Name</th>
-                  <th className="eyebrow py-1 pr-2 font-semibold">Email</th>
-                  <th className="eyebrow py-1 pr-2 font-semibold">Role</th>
-                  <th className="eyebrow py-1 pr-2 font-semibold">Status</th>
-                  <th className="eyebrow py-1 pr-2 font-semibold">Last signed in</th>
-                  <th className="eyebrow py-1 font-semibold">Access</th>
+                  <th className="th">Name</th>
+                  <th className="th">Email</th>
+                  <th className="th">Role</th>
+                  <th className="th">Status</th>
+                  <th className="th">Last signed in</th>
+                  <th className="th">Access</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,21 +94,21 @@ export default function Admin({ user }: { user: PublicUser }) {
                   return (
                     <tr key={row.id} className="border-b border-rule align-middle">
                       <td className="py-2 pr-2">{row.name}</td>
-                      <td className="py-2 pr-2 text-ink-70">{row.email}</td>
+                      <td className="py-2 pr-2 text-ink-muted">{row.email}</td>
                       <td className="py-2 pr-2">
                         <select
                           value={row.role}
                           disabled={self || busy}
                           title={self ? 'You cannot change your own role.' : undefined}
                           onChange={(e) => void change(row, { role: e.target.value })}
-                          className="rulebox px-1 py-1 text-body disabled:opacity-50"
+                          className="field disabled:opacity-50"
                         >
                           <option value="member">Member</option>
                           <option value="admin">Administrator</option>
                         </select>
                       </td>
-                      <td className="py-2 pr-2 text-ink-70">{STATUS_LABEL[row.status]}</td>
-                      <td className="py-2 pr-2 num text-label text-ink-70">
+                      <td className="py-2 pr-2 text-ink-muted">{STATUS_LABEL[row.status]}</td>
+                      <td className="py-2 pr-2 num text-table text-ink-muted">
                         {whenLocal(row.lastLoginAt)}
                       </td>
                       <td className="py-2">
@@ -119,7 +119,7 @@ export default function Admin({ user }: { user: PublicUser }) {
                           onClick={() =>
                             void change(row, { deactivated: row.status !== 'deactivated' })
                           }
-                          className="text-body underline underline-offset-2 text-ink-70 hover:text-ink disabled:opacity-40 disabled:no-underline"
+                          className="text-body underline underline-offset-2 text-ink-muted hover:text-ink disabled:opacity-40 disabled:no-underline"
                         >
                           {row.status === 'deactivated' ? 'Reactivate' : 'Deactivate'}
                         </button>
@@ -133,8 +133,8 @@ export default function Admin({ user }: { user: PublicUser }) {
         )}
 
         <section className="mt-8 border-t border-rule pt-4">
-          <h2 className="text-subtitle font-semibold tracking-tight mb-1">Add someone</h2>
-          <p className="text-body text-ink-70 leading-relaxed mb-3 max-w-2xl">
+          <h2 className="text-figure font-semibold tracking-tight mb-1">Add someone</h2>
+          <p className="text-body text-ink-muted leading-relaxed mb-3 max-w-2xl">
             They go on the list straight away and choose their own password from a link
             that works once. Nothing is sent while sending is switched off, so adding
             someone now tells them nothing.

@@ -388,3 +388,36 @@ export function statementTie(ledger: LedgerT): StatementTie {
     tiesToTab1: round2(closing - cover) === uncoveredAdvance(ledger),
   }
 }
+
+export type BalancePoint = { date: string; balance: number }
+
+/**
+ * The advance balance over time, as one series.
+ *
+ * REDESIGN-2-SPEC section 5: the old chart drew cumulative receipts and
+ * cumulative deliveries and shaded the space between them, which asks a reader
+ * to subtract two lines by eye to find the answer. This *is* that space,
+ * computed, so no arithmetic is required. It rises when Polyco pays and falls
+ * when goods ship.
+ *
+ * No new figure: the last point equals the closing balance the statement already
+ * reports, and there is a test holding the two together.
+ */
+export function advanceBalanceSeries(ledger: LedgerT): BalancePoint[] {
+  const dated = statementEntries(ledger).filter(
+    (entry): entry is StatementEntry & { date: string } => entry.date !== null,
+  )
+
+  const points: BalancePoint[] = []
+  let balance = 0
+
+  for (const entry of dated) {
+    balance = round2(balance + entry.movement)
+    const last = points[points.length - 1]
+    // One point per day: a day with three movements is one step on the line.
+    if (last && last.date === entry.date) last.balance = balance
+    else points.push({ date: entry.date, balance })
+  }
+
+  return points
+}

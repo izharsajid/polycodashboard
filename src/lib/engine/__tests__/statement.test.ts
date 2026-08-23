@@ -3,7 +3,7 @@ import ledgerRaw from '../../../../data/polyco-ledger.json'
 import { Ledger } from '../../schema'
 import { round2 } from '../index'
 import {
-  entryTypeLabel, statementEntries, statementTie, statementView, wholeDollars,
+  advanceBalanceSeries, entryTypeLabel, statementEntries, statementTie, statementView, wholeDollars,
 } from '../statement'
 
 const ledger = Ledger.parse(ledgerRaw)
@@ -250,5 +250,34 @@ describe('the headline figures', () => {
     expect(headline.opening).toBe(0)
     expect(headline.opening + headline.movement).toBe(headline.closing)
     expect(headline.closing).toBe(2113293)
+  })
+})
+
+describe('the advance balance as one series', () => {
+  it('ends where the dated statement ends, so the chart and the figures agree', () => {
+    const series = advanceBalanceSeries(ledger)
+    const dated = statementView(ledger).entries.filter((e) => e.date !== null)
+    const closingOfDated = dated[dated.length - 1].balance
+
+    expect(series[series.length - 1].balance).toBe(closingOfDated)
+  })
+
+  it('is the gap the old chart asked the reader to measure', () => {
+    // Cumulative received less cumulative delivered, at the end of the dated run.
+    const series = advanceBalanceSeries(ledger)
+    const undatedTotal = statementView(ledger).undatedTotal
+    expect(round2(series[series.length - 1].balance + undatedTotal)).toBe(2113292.74)
+  })
+
+  it('rises on a receipt and falls on a delivery', () => {
+    const series = advanceBalanceSeries(ledger)
+    expect(series.length).toBeGreaterThan(50)
+    expect(series.some((p, i) => i > 0 && p.balance > series[i - 1].balance)).toBe(true)
+    expect(series.some((p, i) => i > 0 && p.balance < series[i - 1].balance)).toBe(true)
+  })
+
+  it('carries one point per day, not one per movement', () => {
+    const series = advanceBalanceSeries(ledger)
+    expect(new Set(series.map((p) => p.date)).size).toBe(series.length)
   })
 })

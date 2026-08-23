@@ -113,26 +113,31 @@ function Dashboard({ user }: { user: PublicUser }) {
   const [active, setActive] = useState<string>('polyco-position')
   const figures = useDashboardData()
 
+  // The statement, the order table and the machine schedule are ledgers and need
+  // the room. The tab strip has to widen with them, or the active tab stops
+  // sitting flush against the card below it.
+  const wide = active === 'statement' || active === 'order-book' || active === 'machines'
+
   return (
     <div className="min-h-screen">
       <Header user={user} />
 
-      {/* A single row of text items. Active is ink with a 2px accent underline;
-          inactive is ink-50. No pills, no boxes, no fills.
-          DESIGN-SYSTEM-SPEC section 5. */}
-      <nav className="border-b border-rule bg-paper no-print">
-        <div className="mx-auto flex max-w-page gap-3 overflow-x-auto px-6">
+      {/* Small tabs above the card, the active one white with a border and
+          rounded top corners sitting flush against it. This is efdashboard's
+          exact pattern. DESIGN-SYSTEM-V2-SPEC section 4. */}
+      <nav className="no-print">
+        <div
+          className={`mx-auto flex gap-1 overflow-x-auto px-4 pt-4 sm:px-6 ${
+            wide ? '' : 'max-w-page'
+          }`}
+        >
           {TABS.map((t) =>
             t.built ? (
               <button
                 key={t.section}
                 onClick={() => setActive(t.section)}
                 aria-current={active === t.section ? 'page' : undefined}
-                className={`-mb-px whitespace-nowrap border-b-2 py-2 text-body ${
-                  active === t.section
-                    ? 'border-accent font-medium text-ink'
-                    : 'border-transparent text-ink-50 hover:text-ink'
-                }`}
+                className={`tab ${active === t.section ? 'tab-active' : ''}`}
               >
                 {t.label}
               </button>
@@ -140,7 +145,7 @@ function Dashboard({ user }: { user: PublicUser }) {
               <span
                 key={t.section}
                 title="In preparation"
-                className="cursor-default whitespace-nowrap border-b-2 border-transparent py-2 text-body text-ink-30"
+                className="tab cursor-default text-ink-muted opacity-50"
               >
                 {t.label}
               </span>
@@ -150,21 +155,16 @@ function Dashboard({ user }: { user: PublicUser }) {
       </nav>
 
       <main
-        className={
-          // The statement and the order table are ledgers and need the room.
-          active === 'statement' || active === 'order-book' || active === 'machines'
-            ? 'px-[20px] py-6 sm:px-6'
-            : 'mx-auto max-w-page px-[20px] py-6 sm:px-6'
-        }
+        className={`px-4 pb-8 sm:px-6 ${wide ? '' : 'mx-auto max-w-page'}`}
       >
         {figures.status === 'loading' && (
-          <p className="text-body text-ink-70" aria-busy="true">
+          <p className="card card-body text-body text-ink-muted" aria-busy="true">
             Loading the figures.
           </p>
         )}
 
         {figures.status === 'failed' && (
-          <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink max-w-2xl">
+          <p role="alert" className="card card-body max-w-prose text-body text-critical">
             {figures.error}
           </p>
         )}

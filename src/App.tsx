@@ -26,6 +26,7 @@ import Tab1Position from './tabs/Tab1Position'
 import Tab2Funding from './tabs/Tab2Funding'
 import Tab3Statement from './tabs/Tab3Statement'
 import Tab4Orders from './tabs/Tab4Orders'
+import Tab5Forecast from './tabs/Tab5Forecast'
 
 const TABS = [
   { section: 'polyco-position', label: 'Where we stand', built: true },
@@ -33,6 +34,8 @@ const TABS = [
   // Next to Tab 1: Tab 1 states the position and this is the evidence for it.
   { section: 'statement', label: 'Statement', built: true },
   { section: 'order-book', label: 'Still to be made', built: true },
+  // The question Polyco actually has: where is this going?
+  { section: 'forecast', label: 'Next six months', built: true },
   { section: 'capacity', label: 'Capacity', built: false },
   { section: 'configurations', label: 'Configurations', built: false },
   { section: 'roadmap', label: 'Path to 8', built: false },
@@ -170,6 +173,14 @@ function Dashboard({ user }: { user: PublicUser }) {
             {active === 'funding-statements' && <Tab2Funding statements={figures.data.statements} />}
             {active === 'statement' && (
               <Tab3Statement ledger={figures.data.ledger} who={user.email} />
+            )}
+            {active === 'forecast' && (
+              <Tab5Forecast
+                ledger={figures.data.ledger}
+                tracker={figures.data.poTracker}
+                statements={figures.data.statements}
+                today={new Date().toISOString().slice(0, 10)}
+              />
             )}
             {active === 'order-book' && (
               <Tab4Orders

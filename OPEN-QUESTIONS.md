@@ -14,6 +14,18 @@ Blocking Phase B. Nothing here blocks Tabs 1 to 3.
 - [x] Two palette values were darkened to meet the 4.5:1 body minimum section 7 sets:
       `ink-50` and `watch`. Measurements are in `DESIGN.md`.
 
+- [ ] **The forecast converts a rate of orders into a value, and `po_data` carries no
+      order value.** The tracker records how many orders dispatch and when, but not what
+      any of them is worth, so the two scenarios that assume Polyco keeps ordering need a
+      value per order. The forecast uses the open book divided by the number of open
+      orders. That is the only figure available and it is named on the page in red as an
+      assumption, but it treats every order as average-sized, which the mix of Platinum
+      trays and medical clamshells suggests they are not. An order value in `po_data`, or
+      a stated average from Polyco, would replace it.
+- [ ] The forecast ships the open book at the tracker's observed dispatch rate over the
+      last twelve months, spread evenly. Real dispatch is lumpy, so the month the book runs
+      out is a central estimate rather than a date to plan against.
+
 ## Access and disclosure
 
 - [x] Resolved 22 August 2026, by Izhar. The staff cost lines in

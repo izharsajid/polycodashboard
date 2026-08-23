@@ -112,6 +112,98 @@ export const PoTracker = z.object({
   orders: z.array(PoOrder),
 })
 
+/**
+ * The machine schedule. CAPACITY-SPEC section 2.
+ *
+ * Hand-entered from the production schedule rather than pulled from a system, so
+ * every date carries how it was established and every purchase order carries
+ * whether the assignment was confirmed or derived. Section 6: an estimate is
+ * labelled as an estimate everywhere it flows through, not only where it was
+ * entered.
+ */
+export const DateBasis = z.enum(['confirmed', 'estimated'])
+
+/**
+ * `in_progress` is a run that was already going at the as-at date, so its start
+ * is not a scheduled date and must not be drawn as one. `horizon` is the edge of
+ * the schedule rather than a stop, which is what a continuous machine's bar ends
+ * at.
+ */
+export const EdgeBasis = z.enum(['confirmed', 'estimated', 'in_progress', 'horizon'])
+
+export const SchedulePo = z.object({
+  ref: z.string().min(1),
+  /** `confirmed` where the spec names the machines; `derived` where matched by product. */
+  basis: z.enum(['confirmed', 'derived']),
+  note: z.string().nullable(),
+})
+
+export const MachineRun = z.object({
+  product: z.string().min(1),
+  from: z.string(),
+  fromBasis: EdgeBasis,
+  to: z.string(),
+  toBasis: EdgeBasis,
+  /**
+   * The day the mould went on, where one did. Hours, not days: this is a marker
+   * on the timeline and never a segment that consumes calendar. Section 2.
+   */
+  mouldChangeBefore: z.string().nullable(),
+  note: z.string().nullable(),
+  purchaseOrders: z.array(SchedulePo),
+})
+
+export const Machine = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  status: z.enum(['running', 'mould_changing', 'stopped']),
+  currentProduct: z.string().min(1),
+  /** True where the machine runs on repeat monthly orders and has no stop date. */
+  continuous: z.boolean(),
+  stopDate: z.string().nullable(),
+  stopDateBasis: DateBasis.nullable(),
+  /** Every machine here stops for one reason, and the tab has to say so. Section 2. */
+  stopReason: z.enum(['purchase_orders_run_out']).nullable(),
+  note: z.string().nullable(),
+  runs: z.array(MachineRun).min(1),
+})
+
+export const MachineSchedule = z
+  .object({
+    source: z.string(),
+    as_at: z.string(),
+    horizon_end: z.string(),
+    horizon_note: z.string(),
+    /** The minimum viable configuration. A business number, so it lives here. */
+    viable_floor: z.number().int().positive(),
+    viable_floor_source: z.string(),
+    assignment_basis: z.string(),
+    machines: z.array(Machine).min(1),
+    unscheduled_reasons: z.array(
+      z.object({ ref: z.string().min(1), reason: z.string().min(1), basis: DateBasis }),
+    ),
+  })
+  .superRefine((schedule, ctx) => {
+    for (const machine of schedule.machines) {
+      // A continuous machine with a stop date, or a stopping machine without one,
+      // would drive the count chart off a claim the schedule does not make.
+      if (machine.continuous && machine.stopDate !== null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `${machine.id} is continuous and carries a stop date.`,
+          path: ['machines'],
+        })
+      }
+      if (!machine.continuous && machine.stopDate === null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `${machine.id} is not continuous and carries no stop date.`,
+          path: ['machines'],
+        })
+      }
+    }
+  })
+
 export type LedgerT = z.infer<typeof Ledger>
 export type LedgerRowT = z.infer<typeof LedgerRow>
 export type StatementsT = z.infer<typeof Statements>
@@ -119,3 +211,7 @@ export type StatementT = z.infer<typeof Statement>
 export type ReconRowT = z.infer<typeof ReconRow>
 export type PoOrderT = z.infer<typeof PoOrder>
 export type PoTrackerT = z.infer<typeof PoTracker>
+export type MachineScheduleT = z.infer<typeof MachineSchedule>
+export type MachineT = z.infer<typeof Machine>
+export type MachineRunT = z.infer<typeof MachineRun>
+export type SchedulePoT = z.infer<typeof SchedulePo>

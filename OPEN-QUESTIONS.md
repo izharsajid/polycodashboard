@@ -95,6 +95,49 @@ unable to tell a new error from an old one.
       The only mode information in the table is the two Expeditors values above, sitting
       in the status column. Should mode become a column of its own?
 
+## Machine schedule, this run
+
+- [ ] **Which purchase orders sit on which machine campaign.** `CAPACITY-SPEC.md` section 4
+      names seven: the Platinum orders `2678303`, `2678304` and `2676085` on M1 and M2,
+      `2679868-1` on the large and medium medical trays, and `2678252-1`, `2679683` and
+      `2679682` on a tray and its lid. It gives no list for the rest, so the remaining
+      assignments were derived on 23 August 2026 by matching each campaign's product to an
+      open order in the PO tracker, and every one of them is marked `derived` in
+      `data/machine-schedule.json` and rendered as such. The real production schedule would
+      replace them. Until it does, the assignment drives all three reconciliation lists,
+      so an error there is an error in the finding.
+- [ ] **The reconciliation does not reproduce the figures section 4 states, and cannot.**
+      Section 4 says ten pending POs sit on no machine, worth $362,469. Computed from this
+      ledger it is nine, worth $344,969.80. The arithmetic is decisive rather than close:
+      exactly one ten-order subset of the ledger's fifteen pending POs sums to $362,468.80,
+      and it excludes `2679131-1`, the Northwest order that the same section places in the
+      list and gives a reason for. Both statements cannot hold against this ledger. The tab
+      computes and shows what the data gives, per section 2's instruction that the count is
+      computed rather than taken from the spec. Which of the two is right needs settling
+      against the schedule the $362,469 was taken from.
+- [ ] **Section 4 expects fifteen schedule POs the ledger does not carry; nine come out**,
+      and the tracker explains all nine, so "found in neither" is empty. Section 4 warns
+      against assuming the tracker explains all of them, and that warning stands: the list
+      is empty here **by construction**, because the assignments were derived from the
+      tracker in the first place. It only becomes a real test once the production
+      schedule's own PO list replaces the derivation.
+- [ ] Section 2 marks every date `confirmed`; section 6 says most of what is there starts
+      as `estimated`. Taken as: the dates in the section 2 table are confirmed, since that
+      section says so explicitly and names who confirmed them and when, and the PO
+      assignments, which section 2 does not cover, are derived. Worth confirming.
+- [ ] `2573712-1` names an EVOH lined triangle and rectangle. No campaign on the schedule
+      runs that SKU, so it is left on no machine rather than placed on the Platinum C1
+      machine, which runs a different product. If EVOH triangles do run on M2, it belongs
+      there and the no-machine total falls by $30,803.20.
+- [ ] `2467665-1`, a large tray worth $38,016, is pending in the ledger but has no open row
+      in the tracker: only `2467665-2`, dispatched in November 2024. M1 runs large medical
+      trays, so it may belong on that campaign, but nothing in the tracker says the order
+      is still live. Left on no machine.
+- [ ] The six Platinum orders marked `ON HOLD (Miami)` and the Northwest order on hold at
+      the customer's request are not assigned to any campaign, on the basis that held work
+      is not scheduled work. That is the same treatment section 4 gives the Northwest
+      order. If any of them are in fact scheduled, the no-machine list is overstated.
+
 ## Machines and capacity
 - [ ] How many machines exist on site, how many running, how many installed but idle?
 - [ ] Practical output per machine in units and kg per hour; cycle time; cavities; uptime %

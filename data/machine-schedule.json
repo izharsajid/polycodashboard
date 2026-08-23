@@ -1,0 +1,352 @@
+{
+  "source": "Production schedule, Hidd plant. Machine, status, product, changeover and stop confirmed by Izhar on 23 August 2026 (CAPACITY-SPEC section 2).",
+  "as_at": "2026-08-23",
+  "horizon_end": "2027-03-31",
+  "horizon_note": "The schedule does not extend past March 2027. Nothing beyond that date is implied.",
+  "viable_floor": 4,
+  "viable_floor_source": "The minimum viable configuration EcoFibre has stated. CAPACITY-SPEC section 2.",
+  "assignment_basis": "A purchase order is marked `confirmed` where CAPACITY-SPEC section 4 names the machines it runs on. Everything else is `derived`: matched on 23 August 2026 to an open order in the PO tracker whose product names the same SKU the campaign runs. An order the tracker shows as cancelled, or on hold, is not assigned to a campaign, because held work is not scheduled work. An order naming a SKU no campaign covers is left unassigned rather than placed on the nearest machine, so it surfaces as a gap a reader can correct instead of a guess nobody can see.",
+  "machines": [
+    {
+      "id": "M1",
+      "name": "Machine 1",
+      "status": "mould_changing",
+      "currentProduct": "Large Medical Tray",
+      "continuous": false,
+      "stopDate": "2026-11-30",
+      "stopDateBasis": "confirmed",
+      "stopReason": "purchase_orders_run_out",
+      "note": null,
+      "runs": [
+        {
+          "product": "Large Medical Tray",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2026-09-09",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": "2026-08-23",
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2679868",
+              "basis": "confirmed",
+              "note": "Carries a medium and a large medical tray. The medium runs on M6."
+            }
+          ]
+        },
+        {
+          "product": "Platinum C3",
+          "from": "2026-09-10",
+          "fromBasis": "confirmed",
+          "to": "2026-11-30",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": "2026-09-10",
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2678303",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C1 runs on M2."
+            },
+            {
+              "ref": "2678304",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C1 runs on M2."
+            },
+            {
+              "ref": "2676085",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C1 runs on M2."
+            },
+            {
+              "ref": "2678302",
+              "basis": "derived",
+              "note": "Same product and series as the three confirmed Platinum orders."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Machine 2",
+      "status": "running",
+      "currentProduct": "Platinum C1",
+      "continuous": false,
+      "stopDate": "2027-01-31",
+      "stopDateBasis": "confirmed",
+      "stopReason": "purchase_orders_run_out",
+      "note": null,
+      "runs": [
+        {
+          "product": "Platinum C1",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2027-01-31",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": null,
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2678303",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C3 runs on M1."
+            },
+            {
+              "ref": "2678304",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C3 runs on M1."
+            },
+            {
+              "ref": "2676085",
+              "basis": "confirmed",
+              "note": "Carries both C1 and C3 lines. The C3 runs on M1."
+            },
+            {
+              "ref": "2678302",
+              "basis": "derived",
+              "note": "Same product and series as the three confirmed Platinum orders."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Machine 3",
+      "status": "running",
+      "currentProduct": "Oasis Tray #1",
+      "continuous": true,
+      "stopDate": null,
+      "stopDateBasis": null,
+      "stopReason": null,
+      "note": "One order a month, forecast to March 2027. The schedule does not extend further.",
+      "runs": [
+        {
+          "product": "Oasis Tray #1",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2027-03-31",
+          "toBasis": "horizon",
+          "mouldChangeBefore": null,
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2679449",
+              "basis": "derived",
+              "note": "Oasis Tray OT1230, cargo ready in the tracker."
+            },
+            {
+              "ref": "2679713",
+              "basis": "derived",
+              "note": "Aspen Oasis Endoscopy Tray, same OT1230 code."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Machine 4",
+      "status": "running",
+      "currentProduct": "Oasis Tray #2",
+      "continuous": true,
+      "stopDate": null,
+      "stopDateBasis": null,
+      "stopReason": null,
+      "note": "One order a month, forecast to March 2027. The schedule does not extend further.",
+      "runs": [
+        {
+          "product": "Oasis Tray #2",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2027-03-31",
+          "toBasis": "horizon",
+          "mouldChangeBefore": null,
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2679867",
+              "basis": "derived",
+              "note": "Aspen Oasis Endoscopy Tray, same OT1230 code."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "Machine 5",
+      "status": "mould_changing",
+      "currentProduct": "Point Five ET Tray",
+      "continuous": false,
+      "stopDate": "2026-11-30",
+      "stopDateBasis": "confirmed",
+      "stopReason": "purchase_orders_run_out",
+      "note": null,
+      "runs": [
+        {
+          "product": "Point Five ET Tray",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2026-11-30",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": "2026-08-23",
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2678252-1",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The lid runs on M8."
+            },
+            {
+              "ref": "2679683",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The lid runs on M8."
+            },
+            {
+              "ref": "2679682",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The lid runs on M8."
+            },
+            {
+              "ref": "2678251-1",
+              "basis": "derived",
+              "note": "Same PointFive ET #3 Tray + Lid product as the confirmed orders."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "Machine 6",
+      "status": "running",
+      "currentProduct": "Oasis Plus Tray",
+      "continuous": false,
+      "stopDate": "2026-09-20",
+      "stopDateBasis": "confirmed",
+      "stopReason": "purchase_orders_run_out",
+      "note": null,
+      "runs": [
+        {
+          "product": "Oasis Plus Tray",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2026-09-04",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": null,
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2679302",
+              "basis": "derived",
+              "note": "Cygnus Oasis Plus White Tray."
+            },
+            {
+              "ref": "2679711",
+              "basis": "derived",
+              "note": "Aspen Oasis Plus White Tray OT1530."
+            }
+          ]
+        },
+        {
+          "product": "Medium Medical Tray",
+          "from": "2026-09-05",
+          "fromBasis": "confirmed",
+          "to": "2026-09-20",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": "2026-09-05",
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2679868",
+              "basis": "confirmed",
+              "note": "Carries a medium and a large medical tray. The large runs on M1."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "Machine 7",
+      "status": "running",
+      "currentProduct": "7x7 Tray",
+      "continuous": true,
+      "stopDate": null,
+      "stopDateBasis": null,
+      "stopReason": null,
+      "note": "One order a month, forecast to March 2027. The schedule does not extend further.",
+      "runs": [
+        {
+          "product": "7x7 Tray",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2027-03-31",
+          "toBasis": "horizon",
+          "mouldChangeBefore": null,
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2466123-3",
+              "basis": "derived",
+              "note": "Destiny 7x7 Tray, open in the tracker."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M8",
+      "name": "Machine 8",
+      "status": "mould_changing",
+      "currentProduct": "Point Five ET Lid",
+      "continuous": false,
+      "stopDate": "2026-10-20",
+      "stopDateBasis": "confirmed",
+      "stopReason": "purchase_orders_run_out",
+      "note": null,
+      "runs": [
+        {
+          "product": "Point Five ET Lid",
+          "from": "2026-08-23",
+          "fromBasis": "in_progress",
+          "to": "2026-10-20",
+          "toBasis": "confirmed",
+          "mouldChangeBefore": "2026-08-23",
+          "note": null,
+          "purchaseOrders": [
+            {
+              "ref": "2678252-1",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The tray runs on M5."
+            },
+            {
+              "ref": "2679683",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The tray runs on M5."
+            },
+            {
+              "ref": "2679682",
+              "basis": "confirmed",
+              "note": "Carries a tray and its lid. The tray runs on M5."
+            },
+            {
+              "ref": "2678251-1",
+              "basis": "derived",
+              "note": "Same PointFive ET #3 Tray + Lid product as the confirmed orders."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "unscheduled_reasons": [
+    {
+      "ref": "2679131-1",
+      "reason": "On hold at the customer's request until December 2026. Cargo already ready.",
+      "basis": "confirmed"
+    }
+  ]
+}

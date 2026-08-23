@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import dataHandler from '../../functions/data.mts'
 import login from '../../functions/auth-login.mts'
-import { Ledger, Statements } from '../../../src/lib/schema'
+import { Ledger, MachineSchedule, Statements } from '../../../src/lib/schema'
 import { useMemoryStores } from '../kv'
 import { saveUser } from '../users'
 import { ctx, get, post, seedUser, signedIn } from './helpers'
@@ -22,7 +22,7 @@ describe('GET /api/data', () => {
     const res = await data(get('/api/data'))
     expect(res.status).toBe(401)
     // Nothing of the ledger comes back with the refusal.
-    expect(await res.text()).not.toMatch(/uncovered_advance|source_row/)
+    expect(await res.text()).not.toMatch(/uncovered_advance|source_row|machines/)
   })
 
   it('refuses a made-up cookie', async () => {
@@ -30,7 +30,7 @@ describe('GET /api/data', () => {
     expect(res.status).toBe(401)
   })
 
-  it('serves both files to a signed-in user, and they still parse', async () => {
+  it('serves every data file to a signed-in user, and they still parse', async () => {
     await seedUser({ email: IZHAR, password: PASSWORD })
     const res = await data(get('/api/data', signedIn(await signIn())))
 
@@ -42,6 +42,11 @@ describe('GET /api/data', () => {
     expect(ledger.rows.length).toBeGreaterThan(150)
     expect(ledger.summary.uncovered_advance).toBe(1410206.34)
     expect(statements.statements.length).toBe(14)
+
+    // The machine schedule goes the same way as the rest: behind the session,
+    // never compiled into the public bundle.
+    const schedule = MachineSchedule.parse(body.machineSchedule)
+    expect(schedule.machines.length).toBe(8)
   })
 
   it('is never cached, wherever it passes through', async () => {

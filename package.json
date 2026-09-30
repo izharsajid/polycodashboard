@@ -9,21 +9,15 @@
     "preview": "vite preview",
     "test": "vitest run",
     "validate": "tsx scripts/validate-data.ts",
-    "seed:admin": "tsx scripts/seed-admin.ts",
-    "seed:invited": "tsx scripts/seed-invited.ts",
-    "preflight": "tsx scripts/preflight.ts",
-    "issue:link": "tsx scripts/issue-link.ts",
     "statement:tie": "tsx scripts/statement-tie.ts",
     "import:po-tracker": "tsx scripts/import-po-tracker.ts"
   },
   "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
     "@netlify/blobs": "^11.0.1",
-    "exceljs": "^4.4.0",
-    "hash-wasm": "^4.12.0",
     "lucide-react": "^1.33.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^2.15.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

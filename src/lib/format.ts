@@ -1,87 +1,88 @@
 /**
- * Timestamps are stored as UTC and shown in whatever timezone the reader is in,
- * named, because this dashboard is read in Bahrain and in the UK and a bare time
- * with no zone is two different times.
- */
-export function whenLocal(iso: string | null): string {
-  if (!iso) return 'Not yet'
-  const at = new Date(iso)
-  if (Number.isNaN(at.getTime())) return 'Not known'
-
-  return at.toLocaleString(undefined, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  })
-}
-
-/**
- * Money. REDESIGN-2-SPEC section 3: one formatter, and nothing formats money
- * inline. A financial dashboard that shows `5,771,015` and expects the reader to
- * supply the currency is wrong on every screen.
+ * Every figure and date on the page is formatted here and nowhere else.
  *
- * Negatives in parentheses, never a minus sign, because that is what a finance
- * reader expects and a minus is easy to miss. Zero is `$0.00`, never a dash or a
- * blank: a dash reads as "not applicable" when the answer is "nothing".
+ * Money arrives in whole cents, because the statements carry cents and adding
+ * floats would drift. Negatives are shown in parentheses, never with a minus
+ * sign: a minus is easy to miss, and the one credit on the statements must read
+ * as a credit.
  */
-export function money(value: number, dp: 0 | 2 = 2): string {
-  const size = Math.abs(value).toLocaleString('en-US', {
-    minimumFractionDigits: dp,
-    maximumFractionDigits: dp,
-  })
-  return value < 0 ? `($${size})` : `$${size}`
+
+/* ---- Money ------------------------------------------------------------- */
+
+function grouped(cents: number, dp: 0 | 2): string {
+  const units = dp === 2 ? Math.abs(cents) / 100 : Math.round(Math.abs(cents) / 100)
+  return units.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp })
 }
 
-/** Whole dollars, for headline figures. */
-export const moneyWhole = (value: number) => money(value, 0)
-
-/**
- * `$5.77m`. Tiles only, where space is tight. Never in a table, never in the
- * statement, never in an export.
- */
-export function moneyShort(value: number): string {
-  const size = Math.abs(value)
-  const text =
-    size >= 1_000_000
-      ? `$${(size / 1_000_000).toFixed(2)}m`
-      : size >= 1_000
-        ? `$${(size / 1_000).toFixed(0)}k`
-        : `$${size.toFixed(0)}`
-  return value < 0 ? `(${text})` : text
+/** A table cell, where the column header carries the currency: `194,699.10`, `(19,110.00)`. */
+export function amount(cents: number): string {
+  const text = grouped(cents, 2)
+  return cents < 0 ? `(${text})` : text
 }
 
-/** `28 July 2026` in prose. Section 7 of the design system: never numeric. */
+/** Prose, to the cent: `US$2,841,167.50`, `(US$19,110.00)`. */
+export function usd(cents: number): string {
+  const text = `US$${grouped(cents, 2)}`
+  return cents < 0 ? `(${text})` : text
+}
+
+/** Prose, whole dollars, half rounded away from zero: `US$218,551`. */
+export function usdWhole(cents: number): string {
+  const text = `US$${grouped(cents, 0)}`
+  return cents < 0 ? `(${text})` : text
+}
+
+/** A chart axis in thousands of dollars: `250`, `(25)`. */
+export function thousands(cents: number): string {
+  const k = Math.round(Math.abs(cents) / 100_000)
+  return cents < 0 ? `(${k})` : `${k}`
+}
+
+/* ---- Dates ------------------------------------------------------------- */
+
 const MONTHS_LONG = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 const MONTHS_SHORT = MONTHS_LONG.map((m) => m.slice(0, 3))
 
-export function dateProse(iso: string | null): string {
-  if (!iso) return ''
-  const [y, m, d] = iso.split('-')
-  return `${Number(d)} ${MONTHS_LONG[Number(m) - 1]} ${y}`
+function parts(iso: string): [number, number, number] {
+  const [y, m, d] = iso.split('-').map(Number)
+  return [y, m, d ?? 1]
 }
 
-/** `28 Jul 2026` in tables. */
-export function dateTable(iso: string | null): string {
-  if (!iso) return ''
-  const [y, m, d] = iso.split('-')
-  return `${Number(d)} ${MONTHS_SHORT[Number(m) - 1]} ${y}`
+/** `June 2025`, from a date or a `YYYY-MM` id. */
+export function monthLong(iso: string): string {
+  const [y, m] = parts(iso)
+  return `${MONTHS_LONG[m - 1]} ${y}`
 }
 
-/** `Jul 2026`. */
-export function monthTable(period: string): string {
-  const [y, m] = period.split('-')
-  return `${MONTHS_SHORT[Number(m) - 1]} ${y}`
+/** `Jun`, for a chart axis where the year is given once. */
+export function monthOnly(iso: string): string {
+  return MONTHS_SHORT[parts(iso)[1] - 1]
 }
 
-/** `July 2026`. */
-export function monthProse(period: string): string {
-  const [y, m] = period.split('-')
-  return `${MONTHS_LONG[Number(m) - 1]} ${y}`
+/** `5 Feb 2026`. */
+export function day(iso: string): string {
+  const [y, m, d] = parts(iso)
+  return `${d} ${MONTHS_SHORT[m - 1]} ${y}`
+}
+
+/** `5 Feb`. */
+export function dayMonth(iso: string): string {
+  const [, m, d] = parts(iso)
+  return `${d} ${MONTHS_SHORT[m - 1]}`
+}
+
+/**
+ * A date range written the short way a reader expects: `1 to 30 Jun 2025`,
+ * `5 Feb to 5 Mar 2026`, `1 Dec 2025 to 4 Jan 2026`, and a single day as itself.
+ */
+export function range(startIso: string, endIso: string): string {
+  if (startIso === endIso) return day(startIso)
+  const [sy, sm, sd] = parts(startIso)
+  const [ey, em] = parts(endIso)
+  if (sy !== ey) return `${day(startIso)} to ${day(endIso)}`
+  if (sm !== em) return `${dayMonth(startIso)} to ${day(endIso)}`
+  return `${sd} to ${day(endIso)}`
 }

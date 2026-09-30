@@ -1,0 +1,11 @@
+/** EcoFibre's name as the page's mark, and whose dashboard this is. */
+export default function Wordmark({ compact = false }: { compact?: boolean }) {
+  return (
+    <span className="flex min-w-0 items-baseline gap-2">
+      <span className="condensed text-title font-extrabold tracking-tight text-press">ECOFIBRE</span>
+      <span className={`truncate text-table text-press-2 ${compact ? 'hidden sm:inline' : ''}`}>
+        Funding dashboard for Polyco Healthline
+      </span>
+    </span>
+  )
+}

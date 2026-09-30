@@ -18,7 +18,8 @@ is moving to order-by-order payment. The decision is due before the end of Augus
 3. What can we run today, and what does each configuration cost per month?
 4. How do we get to 8 machines and beyond?
 
-`BUILD-SPEC.md` is the authoritative brief. Read it before starting work.
+`BUILD-SPEC.md` is the authoritative brief. Read it before starting work. For the
+Funds Requested tab, `BRIEF-TAB1.md` governs instead; see Status.
 
 ## Absolute rules
 
@@ -36,8 +37,8 @@ MD expenses, other customers, or government support. Not in the UI, not in `/dat
 in a comment. If a calculation seems to need one of these, it is the wrong calculation.
 
 **Exception: `data/funds-requested.json` and the Funds Requested tab.** That file holds
-the fourteen monthly Financial Overview statements exactly as EcoFibre issued them to
-Polyco, who already hold every one. The tab is a recap of documents in Polyco's
+the monthly Financial Overview statements exactly as EcoFibre issued them to Polyco,
+who already hold every one. The tab is a recap of documents in Polyco's
 possession, not a new disclosure, so the list above and the `partner-disclosure` skill
 do not apply to it. Its lines, remarks and notes are stored and rendered as written,
 with no redaction and no cleaned copy, including where they name a person's pay, a
@@ -71,7 +72,23 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 ## Status
 
-Gates 1 to 3 of the delivery sequence are complete: scaffold, schemas, engine, 14 passing
-tests. Start at gate 4, Tab 1. Phase B (Tabs 4 to 7) is blocked pending machine,
-headcount and configuration data — do not start it and do not fabricate machine data to
-get moving.
+Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard now has
+one tab, **Funds requested**, built from `data/funds-requested.json`: a headline, a
+monthly chart and a month-by-month table. Its engine is
+`src/engine/`, its page is `src/tabs/funds-requested/`, and its tests are in `tests/`.
+The design system is recorded in `DESIGN.md`.
+
+The next three tabs follow later: the PHL/EcoFibre Statement, the Orderbook from the
+PO Tracker with its attached files, and Inventory. The `orders`, `order-documents`,
+`documents` and `exports` endpoints, and `data/po-tracker.json`, are kept as the
+Orderbook's plumbing. Add a tab through `src/tabs/index.ts`.
+
+**Access is open.** Sign-in, accounts and Netlify's site password were removed on
+1 October 2026 at Izhar's direction, so anyone with the address can read every statement.
+The site stays out of search results through robots.txt, a noindex meta tag and an
+`X-Robots-Tag` header. `AUTH-SPEC.md` describes the sign-in as it was and no longer
+applies. Anything added to `/data` is now public the moment it deploys; check
+`partner-disclosure` before adding a file.
+
+Machine, headcount and configuration work stays blocked pending that data. Do not
+fabricate machine data to get moving.

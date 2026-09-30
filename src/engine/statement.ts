@@ -20,7 +20,7 @@ import type { EntryT, LedgerDisputesT, WorkbookRowT, WorkbookT } from './stateme
 import type { Tracker, TrackerPo } from './tracker'
 
 export type LineKind = 'order' | 'receipt' | 'recharge' | 'charge'
-export type LineStatus = 'delivered' | 'awaiting' | 'on-hold' | 'cancelled' | 'received' | 'invoiced'
+export type LineStatus = 'delivered' | 'awaiting' | 'on-hold' | 'cancelled' | 'received' | 'invoiced' | 'excluded'
 export type DateStatus = 'confirmed' | 'missing' | 'disputed'
 
 export type Line = {
@@ -52,6 +52,8 @@ export type Line = {
   /** Where the status came from. */
   statusSource: 'efdashboard.com' | 'workbook' | 'recorded'
   corrections: { entry: EntryT; field: 'delivered' | 'received' | 'po_amount'; fromCents: number }[]
+  /** Date, PO or exclusion changes recorded against this line. */
+  fixes: EntryT[]
   discrepancies: number[]
 }
 
@@ -64,8 +66,24 @@ export type Movement = {
   dateStatus: DateStatus
 }
 
+/**
+ * A way to settle a discrepancy. Each becomes a signed entry on the statement;
+ * the ones that change a figure, a date, a PO or leave a line out change the
+ * statement too. Nothing changes the workbook itself.
+ */
+export type Fix =
+  | { type: 'acknowledge'; label: string; hint: string }
+  | { type: 'set-value'; label: string; field: 'delivered' | 'received' | 'po_amount'; row: number; suggestions: { label: string; cents: number }[] }
+  | { type: 'set-date'; label: string; field: 'received_date' | 'delivery_date'; row: number; suggestions: { label: string; date: string }[] }
+  | { type: 'exclude'; label: string; hint: string; row: number }
+  | { type: 'assign-po'; label: string; row: number; candidates: string[] }
+  | { type: 'add-po'; label: string; po: string }
+  | { type: 'upload'; label: string; target: string }
+
 export type Discrepancy = {
   id: number
+  /** Stable across reloads, so a fix stays attached to its discrepancy. */
+  key: string
   severity: 'high' | 'medium' | 'low'
   title: string
   detail: string
@@ -73,6 +91,8 @@ export type Discrepancy = {
   po: string | null
   workbook: string | null
   master: string | null
+  fixes: Fix[]
+  resolved: { entryId: string; by: string; at: string; note: string } | null
 }
 
 export type Month = {
@@ -106,6 +126,8 @@ export type StatementModel = {
   /** Orders on efdashboard.com that the workbook carries no value for. */
   masterOnly: TrackerPo[]
   discrepancies: Discrepancy[]
+  /** How many are still open. */
+  openDiscrepancies: number
   trackerLive: boolean
 }
 
@@ -221,14 +243,22 @@ export function buildStatement(
 ): StatementModel {
   const asAt = workbook.as_at
   const discrepancies: Discrepancy[] = []
-  const flag = (d: Omit<Discrepancy, 'id'>, line?: Line) => {
+  const flag = (d: Omit<Discrepancy, 'id' | 'resolved'>, line?: Line) => {
     const id = discrepancies.length + 1
-    discrepancies.push({ id, ...d })
+    discrepancies.push({ id, ...d, resolved: null })
     line?.discrepancies.push(id)
   }
+  const ack = (label: string, hint: string): Fix => ({ type: 'acknowledge', label, hint })
 
   const live = entries.filter((e) => !e.voided)
   const corrections = live.filter((e) => e.kind === 'correction')
+  const fixFor = (row: number, field: EntryT['field']) =>
+    [...corrections].filter((c) => c.row === row && c.field === field).sort((a, b) => a.at.localeCompare(b.at)).pop() ?? null
+  /** The PO a workbook line refers to: as written, unless a fix assigned one. */
+  const refOf = (r: WorkbookRowT) => {
+    const assigned = fixFor(r.row, 'po')
+    return assigned?.value ? readPo(assigned.value) : readPo(r.ref)
+  }
 
   // Which workbook line gets each master PO: the best match wins, so one
   // dispatch is never counted twice.
@@ -236,8 +266,8 @@ export function buildStatement(
   const rank = { exact: 0, former: 1, base: 2 } as const
   if (tracker) {
     for (const r of workbook.rows) {
-      if (kindOf(r) !== 'order') continue
-      const ref = readPo(r.ref)
+      if (kindOf(r) !== 'order' || fixFor(r.row, 'exclude')) continue
+      const ref = refOf(r)
       const m = ref && matchPo(ref, tracker)
       if (!m) continue
       const held = claims.get(m.po.po)
@@ -252,7 +282,7 @@ export function buildStatement(
 
   for (const r of workbook.rows) {
     const kind = kindOf(r)
-    const ref = readPo(r.ref)
+    const ref = kind === 'order' ? refOf(r) : readPo(r.ref)
     const po = kind === 'order' || kind === 'recharge' ? ref : null
     const match = kind === 'order' && po && tracker ? matchPo(po, tracker) : null
     const owns = match ? claims.get(match.po.po)?.row === r.row : false
@@ -290,8 +320,24 @@ export function buildStatement(
       statusNote: '',
       statusSource: 'workbook',
       corrections: [],
+      fixes: [],
       discrepancies: [],
     }
+
+    // Left out by a fix: kept on the statement, counted nowhere.
+    const excluded = fixFor(r.row, 'exclude')
+    if (excluded) {
+      line.status = 'excluded'
+      line.statusNote = `Left out by ${excluded.by}: ${excluded.description}`
+      line.deliveredCents = 0
+      line.receivedCents = 0
+      line.poAmountCents = 0
+      line.fixes.push(excluded)
+      lines.push(line)
+      continue
+    }
+    const assignedPo = fixFor(r.row, 'po')
+    if (assignedPo) line.fixes.push(assignedPo)
 
     if (kind === 'order') {
       if (t) {
@@ -310,6 +356,11 @@ export function buildStatement(
                 : `PO ${t.po} is dispatched, but the workbook still shows it as not delivered`,
               detail: `efdashboard.com shows it dispatched${t.dispatchDate ? ` on ${day(t.dispatchDate)}` : ''}; the workbook reads "${loaded || 'blank'}" with no delivered value. This statement counts it as delivered at its PO value of ${amount(poAmount)} until an invoice is recorded.`,
               row: r.row, po: t.po, workbook: loaded || 'not delivered', master: t.dispatchDate ? `Dispatched ${day(t.dispatchDate)}` : 'Dispatched',
+              key: `no-delivered-value:row-${r.row}`,
+              fixes: [
+                { type: 'set-value', label: 'Enter the delivered value', field: 'delivered', row: r.row, suggestions: [{ label: 'PO value', cents: poAmount }] },
+                ack('Accept the PO value', `Confirms ${amount(poAmount)} as the delivered value.`),
+              ],
             }, line)
           }
           const wbDate = readDate(r.delivery_date, '9999-12-31')
@@ -322,6 +373,11 @@ export function buildStatement(
                 ? `The workbook reads ${day(wbDate.date)}: the dispatch date with day and month swapped.`
                 : `The workbook reads ${day(wbDate.date)}; efdashboard.com says ${day(t.dispatchDate)}.`,
               row: r.row, po: t.po, workbook: day(wbDate.date), master: day(t.dispatchDate),
+              key: `dispatch-date:row-${r.row}`,
+              fixes: [
+                ack(`Use efdashboard.com's date, ${day(t.dispatchDate)}`, 'Marks the workbook date as wrong. The statement already uses this date.'),
+                { type: 'set-date', label: 'Use another date', field: 'delivery_date', row: r.row, suggestions: [{ label: 'Workbook date', date: wbDate.date }] },
+              ],
             }, line)
           }
         } else if (t.state.key === 'cancelled') {
@@ -340,6 +396,8 @@ export function buildStatement(
               title: `PO ${t.po} is not dispatched, but the workbook counts it as delivered`,
               detail: `efdashboard.com shows "${t.state.label}"; the workbook reads "${loaded}" with ${amount(toCents(g))} delivered. This statement follows efdashboard.com.`,
               row: r.row, po: t.po, workbook: loaded, master: t.state.label,
+              key: `not-dispatched:row-${r.row}`,
+              fixes: [ack("Follow efdashboard.com", 'Confirms the order is not yet delivered.')],
             }, line)
           }
         }
@@ -352,6 +410,8 @@ export function buildStatement(
               ? `efdashboard.com lists PO ${t.po} as the former PO ${po.full}. The workbook still uses the old number.`
               : `The workbook writes "${line.ref}"; efdashboard.com's number is ${t.po}. Matched on the base number ${po.base}.`,
             row: r.row, po: t.po, workbook: po.full, master: t.po,
+            key: `po-number:row-${r.row}`,
+            fixes: [ack(`Use PO ${t.po}`, "Accepts efdashboard.com's number; the workbook should be updated to match.")],
           }, line)
         }
         if (g !== null && g !== 0 && poAmount !== 0 && toCents(g) !== poAmount && t.isDispatched) variance.push(line)
@@ -364,6 +424,8 @@ export function buildStatement(
             title: `${po!.full} was adjusted to another PO`,
             detail: `The workbook reads "${loaded}". efdashboard.com carries the order as PO ${match.po.po}. This line is left out of every total.`,
             row: r.row, po: match.po.po, workbook: loaded, master: match.po.po,
+            key: `adjusted:row-${r.row}`,
+            fixes: [ack('Agree', 'Confirms the line was replaced by the other PO.')],
           }, line)
         } else if (match && !owns) {
           const winner = claims.get(match.po.po)!
@@ -372,6 +434,13 @@ export function buildStatement(
             title: `Possible duplicate: ${po!.full} and row ${winner.row} both match PO ${match.po.po}`,
             detail: `efdashboard.com has one order, PO ${match.po.po}${match.po.formerPo ? ` (formerly ${match.po.formerPo})` : ''}, ${match.po.state.label.toLowerCase()}. The workbook carries it on two lines. This line keeps the workbook's own status until one is removed.`,
             row: r.row, po: match.po.po, workbook: `${po!.full}: ${loaded || 'blank'}`, master: `${match.po.po}: ${match.po.state.label}`,
+            key: `duplicate:row-${r.row}`,
+            fixes: [
+              { type: 'exclude', label: 'Leave this line out as a duplicate', hint: `Row ${r.row} stops counting; row ${winner.row} carries the order.`, row: r.row },
+              ...(tracker
+                ? [{ type: 'assign-po' as const, label: 'It is a different order: assign its PO', row: r.row, candidates: tracker.pos.filter((p) => !p.isInternal).map((p) => p.po) }]
+                : []),
+            ],
           }, line)
         }
         if (/^yes/i.test(loaded) || (g ?? 0) !== 0) {
@@ -391,6 +460,11 @@ export function buildStatement(
             title: `Row ${r.row} has no PO number`,
             detail: `The PO column reads "${line.ref}" for ${line.product ?? 'an order'} at ${amount(poAmount)}, delivered ${line.deliveryDate ? day(line.deliveryDate) : 'on no clear date'}.`,
             row: r.row, po: null, workbook: line.ref, master: null,
+            key: `no-po:row-${r.row}`,
+            fixes: [
+              { type: 'assign-po', label: 'Assign the PO', row: r.row, candidates: tracker ? tracker.pos.filter((p) => !p.isInternal).map((p) => p.po) : [] },
+              { type: 'exclude', label: 'Leave this line out', hint: 'For a copy of another line.', row: r.row },
+            ],
           }, line)
         }
       }
@@ -413,13 +487,24 @@ export function buildStatement(
           title: `Row ${r.row}: invoice not yet issued`,
           detail: `"${line.ref}" at ${amount(line.deliveredCents)} is counted as delivered, but the invoice column reads "Invoice Pending".`,
           row: r.row, po: line.po, workbook: 'Invoice Pending', master: null,
+          key: `invoice-pending:row-${r.row}`,
+          fixes: [
+            { type: 'upload', label: 'Upload the invoice', target: `row-${r.row}` },
+            ack('Mark as invoiced', 'Confirms the invoice has been issued to Polyco.'),
+          ],
         }, line)
       }
     }
 
     // A receipt date another document contradicts.
     const dispute = disputes.disputes.find((d) => d.source_row === r.row && d.movement === 'received')
-    if (dispute) {
+    const receivedFix = fixFor(r.row, 'received_date')
+    const deliveryFix = fixFor(r.row, 'delivery_date')
+    if (receivedFix?.value) {
+      line.receivedDate = receivedFix.value
+      line.receivedDateStatus = 'confirmed'
+      line.fixes.push(receivedFix)
+    } else if (dispute) {
       line.receivedDate = null
       line.receivedDateStatus = 'disputed'
       line.dateNote = `The workbook dates it ${day(dispute.ledger_date)}. ${dispute.other_source}`
@@ -428,22 +513,36 @@ export function buildStatement(
     } else if (line.deliveredCents && line.deliveryDateStatus !== 'confirmed') {
       line.dateNote = deliv.note
     }
-    if (line.receivedCents && line.receivedDateStatus !== 'confirmed') {
+    if (deliveryFix?.value) {
+      line.deliveryDate = deliveryFix.value
+      line.deliveryDateStatus = 'confirmed'
+      line.fixes.push(deliveryFix)
+    }
+    if (line.receivedCents && (line.receivedDateStatus !== 'confirmed' || receivedFix)) {
+      const options = [
+        ...(dispute ? [{ label: 'Other document', date: dispute.other_date }, { label: 'Workbook', date: dispute.ledger_date }] : []),
+        ...(recv.swapped ? [{ label: 'Day and month swapped', date: recv.swapped }] : []),
+      ]
       flag({
         severity: 'medium',
         title: `Row ${r.row}: receipt of ${amount(line.receivedCents)} has ${line.receivedDateStatus === 'missing' ? 'no usable date' : 'a disputed date'}`,
         detail: line.dateNote ?? '',
         row: r.row, po: null, workbook: text(r.received_date) || 'blank', master: null,
+        key: `receipt-date:row-${r.row}`,
+        fixes: [
+          { type: 'set-date', label: 'Set the date received', field: 'received_date', row: r.row, suggestions: options },
+          ack('Leave it undated', 'It keeps counting in every total, outside any month.'),
+        ],
       }, line)
     }
 
     // Wording and reference problems, one per row.
     if (text(r.sno) === '#REF!') brokenSerials.push(r.row)
     if (po && /\d-\d+-\d/.test(line.ref)) {
-      flag({ severity: 'low', title: `Row ${r.row}: PO reference "${line.ref}" has an extra suffix`, detail: `Read as ${po.full}.`, row: r.row, po: line.po, workbook: line.ref, master: line.po }, line)
+      flag({ severity: 'low', title: `Row ${r.row}: PO reference "${line.ref}" has an extra suffix`, detail: `Read as ${po.full}.`, row: r.row, po: line.po, workbook: line.ref, master: line.po, key: `ref-suffix:row-${r.row}`, fixes: [ack(`Read it as ${po.full}`, 'The workbook should be corrected to match.')] }, line)
     }
     if (po && /2\d{6}\d/.test(line.ref)) {
-      flag({ severity: 'low', title: `Row ${r.row}: PO number run into its date`, detail: `"${line.ref}" is read as PO ${po.full}.`, row: r.row, po: line.po, workbook: line.ref, master: line.po }, line)
+      flag({ severity: 'low', title: `Row ${r.row}: PO number run into its date`, detail: `"${line.ref}" is read as PO ${po.full}.`, row: r.row, po: line.po, workbook: line.ref, master: line.po, key: `ref-date:row-${r.row}`, fixes: [ack(`Read it as PO ${po.full}`, 'The workbook should be corrected to match.')] }, line)
     }
     const k = num(r.delivered_k)
     if (k !== null && g !== null && toCents(k) !== toCents(g)) {
@@ -452,12 +551,16 @@ export function buildStatement(
         title: `Row ${r.row}: the two delivered-value columns disagree`,
         detail: `Column G reads ${amount(toCents(g))}; column K reads ${amount(toCents(k))}. Column G is used.`,
         row: r.row, po: line.po, workbook: `G ${amount(toCents(g))} / K ${amount(toCents(k))}`, master: null,
+        key: `columns:row-${r.row}`,
+        fixes: [
+          { type: 'set-value', label: 'Choose the delivered value', field: 'delivered', row: r.row, suggestions: [{ label: 'Column G', cents: toCents(g) }, { label: 'Column K', cents: toCents(k) }] },
+        ],
       }, line)
     }
 
     // Corrections recorded on this site.
-    for (const c of corrections.filter((c) => c.row === r.row && c.field)) {
-      const field = c.field!
+    for (const c of corrections.filter((c) => c.row === r.row && (c.field === 'delivered' || c.field === 'received' || c.field === 'po_amount'))) {
+      const field = c.field as 'delivered' | 'received' | 'po_amount'
       const key = field === 'delivered' ? 'deliveredCents' : field === 'received' ? 'receivedCents' : 'poAmountCents'
       line.corrections.push({ entry: c, field, fromCents: line[key] })
       line[key] = toCents(c.amount)
@@ -496,8 +599,30 @@ export function buildStatement(
       statusNote: `Recorded by ${e.by}`,
       statusSource: 'recorded',
       corrections: [],
+      fixes: [],
       discrepancies: [],
     })
+  }
+
+  // POs efdashboard.com has and the workbook did not, added by a fix.
+  if (tracker) {
+    for (const c of corrections.filter((c) => c.row === null && c.field === 'po_amount' && c.po)) {
+      const t = tracker.byPo.get(c.po!)
+      if (!t || lines.some((l) => l.source === 'recorded' && l.entryId === c.id)) continue
+      const value = toCents(c.amount)
+      const dispatched = t.isDispatched
+      lines.push({
+        key: `entry-${c.id}`, source: 'recorded', row: null, entryId: c.id, kind: 'order', name: `PO ${t.po}`,
+        ref: `PO ${t.po}`, product: t.product, po: t.po, poAsWritten: t.po, tracker: t, poAmountCents: value,
+        deliveredCents: dispatched ? value : 0, receivedCents: 0,
+        openCents: dispatched || t.state.key === 'cancelled' ? 0 : value,
+        deliveryDate: dispatched ? t.dispatchDate : null, deliveryDateStatus: dispatched && t.dispatchDate ? 'confirmed' : 'missing',
+        receivedDate: null, receivedDateStatus: 'confirmed', dateNote: null,
+        status: dispatched ? 'delivered' : t.state.key === 'cancelled' ? 'cancelled' : t.isInactive ? 'on-hold' : 'awaiting',
+        statusNote: dispatched ? `Dispatched ${t.dispatchDate ? day(t.dispatchDate) : ''}`.trim() : t.state.label,
+        statusSource: 'efdashboard.com', corrections: [], fixes: [c], discrepancies: [],
+      })
+    }
   }
 
   if (brokenSerials.length) {
@@ -506,11 +631,13 @@ export function buildStatement(
       title: `${brokenSerials.length} rows have a broken serial number (#REF!)`,
       detail: `Rows ${brokenSerials[0]} to ${brokenSerials[brokenSerials.length - 1]} show #REF! in the S.No. column, so the newest entries are unnumbered on the workbook.`,
       row: brokenSerials[0], po: null, workbook: '#REF!', master: null,
+      key: 'broken-serials',
+      fixes: [ack('Noted: fix the serial numbers in the workbook', 'Does not change any figure.')],
     })
   }
 
   // Two order lines with the same value and delivery date: one is likely a copy.
-  const orders = lines.filter((l) => l.kind === 'order' && l.source === 'workbook' && l.deliveredCents && l.deliveryDate)
+  const orders = lines.filter((l) => l.kind === 'order' && l.source === 'workbook' && l.status !== 'excluded' && l.deliveredCents && l.deliveryDate)
   for (const l of orders) {
     const twin = orders.find((o) => o !== l && o.row! < l.row! && !(o.tracker && l.tracker) && o.deliveredCents === l.deliveredCents && o.deliveryDate === l.deliveryDate && o.po !== l.po)
     if (twin) {
@@ -519,6 +646,11 @@ export function buildStatement(
         title: `Row ${l.row} may duplicate row ${twin.row}`,
         detail: `Both are ${amount(l.deliveredCents)} delivered on ${day(l.deliveryDate!)}: "${twin.ref}" and "${l.ref}". If one is a copy, the delivered total is overstated by ${amount(l.deliveredCents)}.`,
         row: l.row, po: l.po, workbook: `${twin.ref} / ${l.ref}`, master: twin.po,
+        key: `twin:row-${l.row}`,
+        fixes: [
+          { type: 'exclude', label: `Leave row ${l.row} out as a copy`, hint: `Takes ${amount(l.deliveredCents)} off delivered value.`, row: l.row! },
+          ack('Not a copy: keep both', 'Both lines keep counting.'),
+        ],
       }, l)
     }
   }
@@ -530,6 +662,8 @@ export function buildStatement(
       title: `${variance.length} dispatched POs were delivered at a value other than their PO value`,
       detail: `Normal when a container ships a different quantity from the order. Net difference ${amount(net)} across them; each PO shows its own PO and delivered values. The delivered value is what counts.`,
       row: null, po: null, workbook: null, master: null,
+      key: 'value-variance',
+      fixes: [ack('Noted', 'Delivered values stand; nothing changes.')],
     })
   }
 
@@ -551,6 +685,11 @@ export function buildStatement(
       title: `PO ${p.po} is on efdashboard.com but not on the workbook`,
       detail: `${p.product}, ${p.state.label.toLowerCase()}${p.dispatchDate ? ` ${day(p.dispatchDate)}` : ''}. The workbook carries no value for it, so it is not in the exposure figure. Record its invoice to bring it in.`,
       row: null, po: p.po, workbook: 'Missing', master: p.state.label,
+      key: `missing-po:${p.po}`,
+      fixes: [
+        { type: 'add-po', label: 'Add it to the statement with its value', po: p.po },
+        ack('Leave it off the statement', 'For an order that is not part of the Polyco account.'),
+      ],
     })
   }
 
@@ -612,6 +751,8 @@ export function buildStatement(
       title: 'Workbook: "Total Value of POs Pending to Deliver" does not match its rows',
       detail: `The summary line reads ${amount(toCents(wbPending))}; the undelivered PO rows on the workbook add up to ${amount(wbOpen)}, a difference of ${amount(toCents(wbPending) - wbOpen)}.`,
       row: null, po: null, workbook: amount(toCents(wbPending)), master: amount(wbOpen),
+      key: 'workbook-pending-total',
+      fixes: [ack('Noted: correct the workbook total', 'The live statement counts open orders from efdashboard.com.')],
     })
   }
   for (const s of workbook.summary) {
@@ -624,6 +765,8 @@ export function buildStatement(
             ? 'The line is labelled but left blank.'
             : `It deducts ${amount(toCents(num(s.value)))} for containers "for delivery in August", which no workbook row identifies. This statement counts undelivered orders from efdashboard.com instead and does not deduct this line.`,
         row: s.row, po: null, workbook: s.value === null ? 'blank' : amount(toCents(num(s.value))), master: null,
+        key: `workbook-summary:row-${s.row}`,
+        fixes: [ack('Noted: remove or fix the line in the workbook', 'The live statement does not deduct it.')],
       })
     }
   }
@@ -633,6 +776,27 @@ export function buildStatement(
       title: 'Workbook exposure differs from the live figure',
       detail: `The workbook states ${amount(toCents(wbExposure))}; with efdashboard.com as master and recorded changes applied, the live figure is ${amount(exposureCents)}, a difference of ${amount(toCents(wbExposure) - exposureCents)}.`,
       row: null, po: null, workbook: amount(toCents(wbExposure)), master: amount(exposureCents),
+      key: 'workbook-exposure',
+      fixes: [ack('Agree the live figure', `Accepts ${amount(exposureCents)} as the exposure.`)],
+    })
+  }
+
+  // Settled discrepancies: the latest live entry that names each one.
+  const settling = [...live].filter((e) => e.key).sort((a, b) => a.at.localeCompare(b.at))
+  for (const d of discrepancies) {
+    const e = settling.filter((x) => x.key === d.key).pop()
+    if (e) d.resolved = { entryId: e.id, by: e.by, at: e.at, note: e.description }
+  }
+  // A fix can remove the cause altogether (a line left out). The discrepancy it
+  // settled stays on the list as a record, under the title it had.
+  const seen = new Set(discrepancies.map((d) => d.key))
+  for (const e of settling.reverse()) {
+    if (!e.key || seen.has(e.key)) continue
+    seen.add(e.key)
+    discrepancies.push({
+      id: discrepancies.length + 1, key: e.key, severity: 'low', title: e.reference ?? e.key,
+      detail: 'Fixed: the cause no longer appears on the statement.', row: e.row, po: e.po,
+      workbook: null, master: null, fixes: [], resolved: { entryId: e.id, by: e.by, at: e.at, note: e.description },
     })
   }
 
@@ -658,6 +822,7 @@ export function buildStatement(
     },
     masterOnly,
     discrepancies,
+    openDiscrepancies: discrepancies.filter((d) => !d.resolved).length,
     trackerLive: tracker !== null,
   }
 }

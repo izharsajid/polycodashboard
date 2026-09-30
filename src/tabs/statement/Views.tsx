@@ -1,4 +1,4 @@
-import { ExternalLink, PenLine, Plus, TriangleAlert } from 'lucide-react'
+import { CheckCircle2, ExternalLink, PenLine, Plus, TriangleAlert } from 'lucide-react'
 import PoDocuments from '../../components/PoDocuments'
 import StatePill from '../../components/StatePill'
 import type { Discrepancy, Line, Month, StatementModel } from '../../engine/statement'
@@ -15,6 +15,7 @@ export type Nav = {
   correct: (lineKey: string) => void
   invoice: (po?: string) => void
   voidEntry: (id: string) => void
+  fix: (key: string) => void
 }
 
 export function MonthView({ m, opening, filesFor, nav }: { m: Month; opening: number; filesFor: (target: string) => StatementFileT[]; nav: Nav }) {
@@ -37,19 +38,26 @@ export function MonthView({ m, opening, filesFor, nav }: { m: Month; opening: nu
   )
 }
 
-function DiscrepancyItems({ items }: { items: Discrepancy[] }) {
+function DiscrepancyItems({ items, onFix }: { items: Discrepancy[]; onFix: (key: string) => void }) {
   if (!items.length) return null
   return (
     <ul className="space-y-2">
       {items.map((d) => (
-        <li key={d.id} className="flex gap-2 rounded-card bg-caution-wash p-3 text-caution">
-          <TriangleAlert size={16} aria-hidden className="mt-0.5 shrink-0" />
-          <span>
-            <span className="block font-semibold">
-              {d.id}. {d.title}
+        <li key={d.id}>
+          <button
+            type="button"
+            onClick={() => onFix(d.key)}
+            className={`flex w-full gap-2 rounded-card p-3 text-left ${d.resolved ? 'bg-income-wash text-income' : 'bg-caution-wash text-caution'}`}
+          >
+            {d.resolved ? <CheckCircle2 size={16} aria-hidden className="mt-0.5 shrink-0" /> : <TriangleAlert size={16} aria-hidden className="mt-0.5 shrink-0" />}
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold">
+                {d.id}. {d.title}
+              </span>
+              <span className="block text-press">{d.resolved ? `Fixed by ${d.resolved.by}: ${d.resolved.note}` : d.detail}</span>
             </span>
-            <span className="block text-press">{d.detail}</span>
-          </span>
+            <span className="shrink-0 self-center rounded-full bg-sheet px-2.5 py-1 text-small font-semibold text-press">{d.resolved ? 'View' : 'Fix'}</span>
+          </button>
         </li>
       ))}
     </ul>
@@ -120,7 +128,7 @@ export function LineView({
         </p>
       ))}
 
-      <DiscrepancyItems items={issues} />
+      <DiscrepancyItems items={issues} onFix={nav.fix} />
 
       {line.dateNote && <p className="rounded-card bg-mist p-3 text-press-2">{line.dateNote}</p>}
 
@@ -273,7 +281,7 @@ export function PoView({
         )}
       </section>
 
-      <DiscrepancyItems items={issues} />
+      <DiscrepancyItems items={issues} onFix={nav.fix} />
 
       <section aria-label="PO files">
         <h3 className="kicker mb-2">Files on efdashboard.com</h3>

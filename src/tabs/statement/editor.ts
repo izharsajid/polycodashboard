@@ -54,13 +54,16 @@ export function useEditor() {
   return { editor, unlock, lock }
 }
 
-export type NewEntry = Omit<EntryT, 'id' | 'at' | 'voided' | 'by'>
+export type NewEntry = Omit<EntryT, 'id' | 'at' | 'voided' | 'by' | 'key' | 'value'> & {
+  key?: string | null
+  value?: string | null
+}
 
 export async function recordEntry(editor: Editor, entry: NewEntry): Promise<{ ok: true; entry: EntryT } | { ok: false; error: string }> {
   const res = await fetch('/api/statement/entries', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-editor-key': editor.key },
-    body: JSON.stringify({ action: 'create', entry: { ...entry, by: editor.name } }),
+    body: JSON.stringify({ action: 'create', entry: { key: null, value: null, ...entry, by: editor.name } }),
   }).catch(() => null)
   if (!res) return { ok: false, error: 'Could not reach the server. Nothing was recorded.' }
   if (!res.ok) return { ok: false, error: await errorOf(res) }

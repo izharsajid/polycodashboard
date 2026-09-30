@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { buildModel } from '../../engine/funds'
 import type { FundsRequestedT } from '../../engine/schema'
-import { useFundsData } from '../../data/useFundsData'
-import { day, monthLong, usd } from '../../lib/format'
-import MonthlyChart from './MonthlyChart'
+import { FundsPayload } from '../../data/schemas'
+import { useApiData } from '../../data/useApiData'
+import { day, monthLong, range, thousands, usd } from '../../lib/format'
+import MonthBars from '../../components/MonthBars'
 import MonthTable from './MonthTable'
 
 /**
@@ -11,7 +12,7 @@ import MonthTable from './MonthTable'
  * One headline, one chart, one table; every month opens to its lines.
  */
 export default function FundsRequestedTab() {
-  const funds = useFundsData()
+  const funds = useApiData('/api/data', FundsPayload, 'statements')
 
   if (funds.status === 'loading') {
     return (
@@ -27,7 +28,7 @@ export default function FundsRequestedTab() {
       </p>
     )
   }
-  return <FundsRequested data={funds.data} />
+  return <FundsRequested data={funds.data.funds} />
 }
 
 function FundsRequested({ data }: { data: FundsRequestedT }) {
@@ -55,7 +56,19 @@ function FundsRequested({ data }: { data: FundsRequestedT }) {
       <section className="section" aria-labelledby="chart-title">
         <h2 id="chart-title" className="title">Requested each month</h2>
         <figure className="mt-4 card px-3 pb-3 pt-4 sm:px-4 print:mt-2">
-          <MonthlyChart model={model} />
+          <MonthBars
+            label={`Funds requested each month. ${model.headline}`}
+            reference={{ cents: model.averageCents, label: `Average ${thousands(model.averageCents)}` }}
+            bars={model.statements.map((s) => ({
+              id: s.id,
+              cents: s.statedCents,
+              outline: !s.isRequest,
+              note: s.isRequest ? undefined : 'actuals',
+              title: `${range(s.periodStart, s.periodEnd)}: ${usd(s.statedCents)}${
+                s.isRequest ? ' requested' : ', actual spending, not a request'
+              }`,
+            }))}
+          />
         </figure>
       </section>
 

@@ -76,7 +76,7 @@ export default function InviteForm({
           required
           className="field w-full"
         />
-        <span className="text-table text-ink-muted">
+        <span className="text-table text-press-2">
           {isAdmin
             ? 'Either polycohealthline.com or ecofibre.bh.'
             : `Colleagues at ${ownDomain}. Ask an administrator for anyone else.`}
@@ -98,12 +98,12 @@ export default function InviteForm({
       )}
 
       {error && (
-        <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink">
+        <p role="alert" className="border-l-2 border-alert pl-2 py-1 text-body text-press">
           {error}
         </p>
       )}
       {done && (
-        <p role="status" className="border-l-2 border-leaf pl-2 py-1 text-body text-ink">
+        <p role="status" className="border-l-2 border-press pl-2 py-1 text-body text-press">
           {done}
         </p>
       )}

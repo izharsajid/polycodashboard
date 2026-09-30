@@ -96,8 +96,8 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
 
   return (
     <section>
-      <h2 className="text-figure font-semibold tracking-tight mb-1">Audit log</h2>
-      <p className="text-body text-ink-muted leading-relaxed mb-3 max-w-2xl">
+      <h2 className="text-title font-semibold tracking-tight mb-1">Audit log</h2>
+      <p className="text-body text-press-2 leading-relaxed mb-3 max-w-2xl">
         Every sign-in, invitation, role change and password change, kept as it happened.
         Entries are added and never altered or removed.
       </p>
@@ -158,14 +158,14 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
         <button
           type="button"
           onClick={() => setFilters(EMPTY)}
-          className="self-end text-body text-ink-muted underline underline-offset-2 hover:text-ink pb-1"
+          className="self-end text-body text-press-2 underline underline-offset-2 hover:text-press pb-1"
         >
           Clear
         </button>
       </div>
 
       {error && (
-        <p role="alert" className="border-l-2 border-critical pl-2 py-1 text-body text-ink mb-2">
+        <p role="alert" className="border-l-2 border-alert pl-2 py-1 text-body text-press mb-2">
           {error}
         </p>
       )}
@@ -191,10 +191,10 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
                 </td>
                 <td className="py-1 pr-2">{nameFor(entry)}</td>
                 <td className="py-1 pr-2">{ACTION_LABEL[entry.action]}</td>
-                <td className="py-1 pr-2 text-ink-muted">{entry.target ?? ''}</td>
-                <td className="py-1 pr-2 text-ink-muted">{entry.detail ?? ''}</td>
-                <td className="py-1 pr-2 num text-table text-ink-muted">{entry.ip ?? ''}</td>
-                <td className={`py-1 ${entry.result === 'failure' ? 'text-critical' : 'text-ink-muted'}`}>
+                <td className="py-1 pr-2 text-press-2">{entry.target ?? ''}</td>
+                <td className="py-1 pr-2 text-press-2">{entry.detail ?? ''}</td>
+                <td className="py-1 pr-2 num text-table text-press-2">{entry.ip ?? ''}</td>
+                <td className={`py-1 ${entry.result === 'failure' ? 'text-alert' : 'text-press-2'}`}>
                   {entry.result === 'failure' ? 'Refused' : 'Done'}
                 </td>
               </tr>
@@ -204,7 +204,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
       </div>
 
       {entries.length === 0 && !busy && (
-        <p className="text-body text-ink-muted py-2">Nothing matches that.</p>
+        <p className="text-body text-press-2 py-2">Nothing matches that.</p>
       )}
 
       {cursor && (
@@ -212,7 +212,7 @@ export default function AuditLog({ users }: { users: PublicUser[] }) {
           type="button"
           disabled={busy}
           onClick={() => void fetchPage(filters, cursor)}
-          className="mt-2 text-body text-ink-muted underline underline-offset-2 hover:text-ink disabled:opacity-50"
+          className="mt-2 text-body text-press-2 underline underline-offset-2 hover:text-press disabled:opacity-50"
         >
           {busy ? 'Loading' : 'Show older'}
         </button>

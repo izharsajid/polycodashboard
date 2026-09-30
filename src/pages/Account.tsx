@@ -79,7 +79,7 @@ export default function Account({ user }: { user: PublicUser }) {
         </dl>
 
         <section className="max-w-sm border-t border-rule pt-6">
-          <h2 className="text-figure font-bold text-leaf-deep mb-2">Change your password</h2>
+          <h2 className="text-title font-bold text-press mb-2">Change your password</h2>
           <p className="lede mb-4">
             At least 12 characters. A few words you will remember beat a short one with
             symbols in it. Changing it signs you out everywhere else, but not here.
@@ -123,12 +123,12 @@ export default function Account({ user }: { user: PublicUser }) {
             </label>
 
             {error && (
-              <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
+              <p role="alert" className="rounded border-l-2 border-alert bg-alert-wash py-2 pl-3 pr-3 text-table text-press">
                 {error}
               </p>
             )}
             {done && (
-              <p role="status" className="rounded border-l-2 border-leaf bg-tint py-2 pl-3 pr-3 text-table text-ink">
+              <p role="status" className="rounded border-l-2 border-press bg-zinc py-2 pl-3 pr-3 text-table text-press">
                 {done}
               </p>
             )}
@@ -144,7 +144,7 @@ export default function Account({ user }: { user: PublicUser }) {
         </section>
 
         <section className="mt-8 border-t border-rule pt-6">
-          <h2 className="text-figure font-bold text-leaf-deep mb-2">Invite a colleague</h2>
+          <h2 className="text-title font-bold text-press mb-2">Invite a colleague</h2>
           <p className="lede mb-4">
             They choose their own password from a link that works once. Nothing is sent
             while sending is switched off, so adding someone now tells them nothing.

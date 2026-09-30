@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import dataHandler from '../../functions/data.mts'
 import login from '../../functions/auth-login.mts'
-import { Ledger, MachineSchedule, Statements } from '../../../src/lib/schema'
+import { FundsRequested } from '../../../src/engine/schema'
 import { useMemoryStores } from '../kv'
 import { saveUser } from '../users'
 import { ctx, get, post, seedUser, signedIn } from './helpers'
@@ -21,8 +21,8 @@ describe('GET /api/data', () => {
   it('refuses without a session', async () => {
     const res = await data(get('/api/data'))
     expect(res.status).toBe(401)
-    // Nothing of the ledger comes back with the refusal.
-    expect(await res.text()).not.toMatch(/uncovered_advance|source_row|machines/)
+    // Nothing of the statements comes back with the refusal.
+    expect(await res.text()).not.toMatch(/stated_total|statements|description/)
   })
 
   it('refuses a made-up cookie', async () => {
@@ -30,23 +30,16 @@ describe('GET /api/data', () => {
     expect(res.status).toBe(401)
   })
 
-  it('serves every data file to a signed-in user, and they still parse', async () => {
+  it('serves the statements to a signed-in user, and they still parse', async () => {
     await seedUser({ email: IZHAR, password: PASSWORD })
     const res = await data(get('/api/data', signedIn(await signIn())))
 
     expect(res.status).toBe(200)
     const body = await res.json()
 
-    const ledger = Ledger.parse(body.ledger)
-    const statements = Statements.parse(body.statements)
-    expect(ledger.rows.length).toBeGreaterThan(150)
-    expect(ledger.summary.uncovered_advance).toBe(1410206.34)
-    expect(statements.statements.length).toBe(14)
-
-    // The machine schedule goes the same way as the rest: behind the session,
-    // never compiled into the public bundle.
-    const schedule = MachineSchedule.parse(body.machineSchedule)
-    expect(schedule.machines.length).toBe(8)
+    // Behind the session, never compiled into the public bundle.
+    const funds = FundsRequested.parse(body.funds)
+    expect(funds.statements.length).toBe(14)
   })
 
   it('is never cached, wherever it passes through', async () => {

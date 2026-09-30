@@ -70,14 +70,14 @@ export default function Admin({ user }: { user: PublicUser }) {
         {error && (
           <p
             role="alert"
-            className="mx-4 mb-4 rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink sm:mx-6"
+            className="mx-4 mb-4 rounded border-l-2 border-alert bg-alert-wash py-2 pl-3 pr-3 text-table text-press sm:mx-6"
           >
             {error}
           </p>
         )}
 
         {users === null ? (
-          <p className="px-4 text-body text-ink-muted sm:px-6" aria-busy="true">
+          <p className="px-4 text-body text-press-2 sm:px-6" aria-busy="true">
             Loading the list.
           </p>
         ) : (
@@ -98,9 +98,9 @@ export default function Admin({ user }: { user: PublicUser }) {
                   const self = row.id === user.id
                   const busy = working === row.id
                   return (
-                    <tr key={row.id} className="border-b border-rule bg-surface align-middle">
-                      <td className="td font-semibold text-ink-strong">{row.name}</td>
-                      <td className="td text-ink-muted">{row.email}</td>
+                    <tr key={row.id} className="border-b border-rule bg-sheet align-middle">
+                      <td className="td font-semibold text-press">{row.name}</td>
+                      <td className="td text-press-2">{row.email}</td>
                       <td className="td">
                         <select
                           value={row.role}
@@ -113,8 +113,8 @@ export default function Admin({ user }: { user: PublicUser }) {
                           <option value="admin">Administrator</option>
                         </select>
                       </td>
-                      <td className="py-2 pr-2 text-ink-muted">{STATUS_LABEL[row.status]}</td>
-                      <td className="py-2 pr-2 num text-table text-ink-muted">
+                      <td className="py-2 pr-2 text-press-2">{STATUS_LABEL[row.status]}</td>
+                      <td className="py-2 pr-2 num text-table text-press-2">
                         {whenLocal(row.lastLoginAt)}
                       </td>
                       <td className="py-2">
@@ -125,7 +125,7 @@ export default function Admin({ user }: { user: PublicUser }) {
                           onClick={() =>
                             void change(row, { deactivated: row.status !== 'deactivated' })
                           }
-                          className="text-body underline underline-offset-2 text-ink-muted hover:text-ink disabled:opacity-40 disabled:no-underline"
+                          className="text-body underline underline-offset-2 text-press-2 hover:text-press disabled:opacity-40 disabled:no-underline"
                         >
                           {row.status === 'deactivated' ? 'Reactivate' : 'Deactivate'}
                         </button>
@@ -139,7 +139,7 @@ export default function Admin({ user }: { user: PublicUser }) {
         )}
 
         <section className="mt-8 border-t border-rule px-4 pt-6 sm:px-6">
-          <h2 className="text-figure font-bold text-leaf-deep">Add someone</h2>
+          <h2 className="text-title font-bold text-press">Add someone</h2>
           <p className="lede mb-4 mt-1 max-w-prose">
             They go on the list straight away and choose their own password from a link
             that works once. Nothing is sent while sending is switched off, so adding

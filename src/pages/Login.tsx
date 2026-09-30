@@ -70,7 +70,7 @@ export default function Login({ next }: { next: string }) {
           {error && (
             <p
               role="alert"
-              className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink"
+              className="rounded border-l-2 border-alert bg-alert-wash py-2 pl-3 pr-3 text-table text-press"
             >
               {error}
             </p>

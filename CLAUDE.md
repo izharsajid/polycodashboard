@@ -18,7 +18,8 @@ is moving to order-by-order payment. The decision is due before the end of Augus
 3. What can we run today, and what does each configuration cost per month?
 4. How do we get to 8 machines and beyond?
 
-`BUILD-SPEC.md` is the authoritative brief. Read it before starting work.
+`BUILD-SPEC.md` is the authoritative brief. Read it before starting work. For the
+Funds Requested tab, `BRIEF-TAB1.md` governs instead; see Status.
 
 ## Absolute rules
 
@@ -71,7 +72,15 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 ## Status
 
-Gates 1 to 3 of the delivery sequence are complete: scaffold, schemas, engine, 14 passing
-tests. Start at gate 4, Tab 1. Phase B (Tabs 4 to 7) is blocked pending machine,
-headcount and configuration data — do not start it and do not fabricate machine data to
-get moving.
+Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard now has
+one tab, **Funds requested**, built from `data/funds-requested.json`. Its engine is
+`src/engine/`, its page is `src/tabs/funds-requested/`, and its tests are in `tests/`.
+The design system is recorded in `DESIGN.md`.
+
+The next three tabs follow later: the PHL/EcoFibre Statement, the Orderbook from the
+PO Tracker with its attached files, and Inventory. The `orders`, `order-documents`,
+`documents` and `exports` endpoints, and `data/po-tracker.json`, are kept as the
+Orderbook's plumbing. Add a tab through `src/tabs/index.ts`.
+
+Machine, headcount and configuration work stays blocked pending that data. Do not
+fabricate machine data to get moving.

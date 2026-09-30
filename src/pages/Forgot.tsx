@@ -69,7 +69,7 @@ export default function Forgot() {
               </label>
 
               {error && (
-                <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
+                <p role="alert" className="rounded border-l-2 border-alert bg-alert-wash py-2 pl-3 pr-3 text-table text-press">
                   {error}
                 </p>
               )}

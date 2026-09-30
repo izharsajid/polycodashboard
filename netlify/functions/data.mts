@@ -1,8 +1,5 @@
 import type { Config, Context } from '@netlify/functions'
-import ledger from '../../data/polyco-ledger.json' with { type: 'json' }
-import machineSchedule from '../../data/machine-schedule.json' with { type: 'json' }
-import statements from '../../data/monthly-funding-statements.json' with { type: 'json' }
-import poTracker from '../../data/po-tracker.json' with { type: 'json' }
+import funds from '../../data/funds-requested.json' with { type: 'json' }
 import { authenticate, clientIp, json, refuseUnauthenticated, wrongMethod } from '../lib/http'
 
 /**
@@ -16,15 +13,13 @@ import { authenticate, clientIp, json, refuseUnauthenticated, wrongMethod } from
  * Importing them here instead puts them inside the function bundle, which is not
  * public, and the only way out is through this handler.
  *
- * Both files are already validated against their schemas at build time by
+ * The file is validated against its schema at build time by
  * `scripts/validate-data.ts`, and parsed again by Zod when the interface receives
- * them. There is nothing useful for this handler to add in between, so it does
- * not parse them a third time on every request.
+ * it. There is nothing useful for this handler to add in between, so it does
+ * not parse it a third time on every request.
  *
  * Not audited. AUTH-SPEC section 7 asks for exports and downloads to be logged,
- * and this is neither: it is the page loading. Logging every refresh would bury
- * the deliberate exports that the entry is meant to catch. Tab 8's export gets
- * its own entry when it is built.
+ * and this is neither: it is the page loading.
  */
 export default async (req: Request, context: Context) => {
   const badMethod = wrongMethod(req, 'GET')
@@ -33,7 +28,7 @@ export default async (req: Request, context: Context) => {
   const authed = await authenticate(req)
   if (!authed) return refuseUnauthenticated(req, clientIp(context))
 
-  return json({ ledger, statements, poTracker, machineSchedule })
+  return json({ funds })
 }
 
 export const config: Config = { path: '/api/data' }

@@ -75,7 +75,7 @@ export default function Invite({ token }: { token: string | null }) {
     <AuthShell>
 
         {stage.at === 'checking' && (
-          <p className="text-body text-ink-muted" aria-busy="true">
+          <p className="text-body text-press-2" aria-busy="true">
             Checking that link.
           </p>
         )}
@@ -101,7 +101,7 @@ export default function Invite({ token }: { token: string | null }) {
           <>
             <h1 className="title mb-2">Choose a password</h1>
             <p className="lede mb-4">
-              For <span className="text-ink">{stage.email}</span>. At least 12 characters. A
+              For <span className="text-press">{stage.email}</span>. At least 12 characters. A
               few words you will remember beat a short one with symbols in it, and nobody
               here can see what you choose.
             </p>
@@ -133,7 +133,7 @@ export default function Invite({ token }: { token: string | null }) {
               </label>
 
               {error && (
-                <p role="alert" className="rounded border-l-2 border-critical bg-critical-wash py-2 pl-3 pr-3 text-table text-ink">
+                <p role="alert" className="rounded border-l-2 border-alert bg-alert-wash py-2 pl-3 pr-3 text-table text-press">
                   {error}
                 </p>
               )}

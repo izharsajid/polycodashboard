@@ -11,6 +11,10 @@ partner mode, no redacted view, no hidden tab, and no `VITE_MODE`. If you find y
 writing code that shows one user a different number from another, stop: that is not this
 project.
 
+**One exception:** `data/funds-requested.json` and the Funds Requested tab render the
+issued Financial Overview statements as written, outside the exclusions below. The scope
+and the reason are recorded in `CLAUDE.md` under Absolute rules. Nothing else is covered.
+
 The disclosure boundary is **the sign-in, not the build**. Who may see the dashboard is
 settled by authentication and the invitation flow in `AUTH-SPEC.md`. What appears on it
 is settled here.

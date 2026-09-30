@@ -11,6 +11,11 @@ partner mode, no redacted view, no hidden tab, and no `VITE_MODE`. If you find y
 writing code that shows one user a different number from another, stop: that is not this
 project.
 
+**Access is open, as of 1 October 2026.** Izhar removed sign-in and the site password,
+so the disclosure boundary is no longer the sign-in: everything deployed is readable
+by anyone with the address. Treat every data file and every figure as public, and
+read the sections below with that in mind.
+
 **One exception:** `data/funds-requested.json` and the Funds Requested tab render the
 issued Financial Overview statements as written, outside the exclusions below. The scope
 and the reason are recorded in `CLAUDE.md` under Absolute rules. Nothing else is covered.

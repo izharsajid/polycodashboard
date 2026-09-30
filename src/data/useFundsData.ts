@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useSession } from '../auth/session'
 import { FundsRequested, type FundsRequestedT } from '../engine/schema'
 import { api } from '../lib/api'
 
 /**
- * The statements arrive from `/api/data` once there is a session, rather than
- * being compiled into the bundle where anyone could read them without one.
+ * The statements arrive from `/api/data` rather than being compiled into the
+ * bundle, so a data change needs no rebuild of the page and the tabs that follow
+ * can load their own files the same way.
  *
  * Parsed here, on receipt. CLAUDE.md: every business number loads from /data and
  * is validated by Zod at load. A shape mismatch stops the page with the field
@@ -17,7 +17,6 @@ export type FundsState =
   | { status: 'failed'; error: string }
 
 export function useFundsData(): FundsState {
-  const { expire } = useSession()
   const [state, setState] = useState<FundsState>({ status: 'loading' })
 
   useEffect(() => {
@@ -28,10 +27,7 @@ export function useFundsData(): FundsState {
       if (!live) return
 
       if (!result.ok) {
-        // A 401 means the session ended between loading the page and asking for
-        // the figures. The router sends them back to sign in.
-        if (result.status === 401) expire()
-        else setState({ status: 'failed', error: result.error })
+        setState({ status: 'failed', error: result.error })
         return
       }
 
@@ -54,7 +50,7 @@ export function useFundsData(): FundsState {
     return () => {
       live = false
     }
-  }, [expire])
+  }, [])
 
   return state
 }

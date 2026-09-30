@@ -28,42 +28,27 @@ Do not edit a figure in the interface code. Open a pull request against the rele
 in `/data`. The build validates every file against its schema and fails on a bad value, so
 a mistake is caught before it merges — and every change carries an author and a date.
 
-## Signing in for the first time
+## Access
 
-There are no default passwords. The first administrator account gets its password from a
-script run on a laptop, which asks for it at a prompt and stores only the Argon2id hash:
+The dashboard is **open to anyone with the address**. Sign-in, accounts and Netlify's site
+password were removed on 1 October 2026 at Izhar's direction. It is kept out of search
+results by `public/robots.txt`, a noindex meta tag and an `X-Robots-Tag` header on every
+response, but that asks crawlers to stay away; it does not stop anyone who has the link.
 
-```bash
-export NETLIFY_SITE_ID=...      # from the Netlify project settings
-export NETLIFY_BLOBS_TOKEN=...
-npm run seed:admin
-```
-
-Then create the four accounts that exist so the user list and the admin panel have real
-addresses to work against. They are created with no password, no invitation token, and
-nothing sent:
-
-```bash
-npm run seed:invited
-```
-
-Everyone after that is invited and chooses their own password, so no password ever exists
-in a message. See `AUTH-SPEC.md` sections 1 and 4.
+The Orderbook's endpoints (`orders`, `order-documents`, `documents`, `exports`) still
+check for a session. No session can be created now, so they stay shut until the Orderbook
+tab is built and their access is decided.
 
 ## Where the figures come from
 
-`/data` is not compiled into the browser bundle. It is served from `GET /api/data`, which
-requires a session, and the tabs fetch it once sign-in resolves. Do not import a `/data`
-file into anything under `/src`: it would put every figure back into a public asset that
-no session guard can protect.
+`/data` is not compiled into the browser bundle. It is served from `GET /api/data`, and
+each tab fetches its own data.
 
 ## One shared view
 
 EcoFibre and Polyco see the same dashboard and the same figures. One site, one build, no
-partner mode and no redaction layer. Access is controlled by sign-in, and the only thing
-withheld from anyone is individual pay. Read
-`.claude/skills/partner-disclosure/SKILL.md` before changing any UI, any data file or any
-chart.
+partner mode and no redaction layer. Read `.claude/skills/partner-disclosure/SKILL.md`
+before changing any UI, any data file or any chart.
 
 ## Read before working
 

@@ -2,13 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import documentsEndpoint from '../../functions/documents.mts'
 import orderDocuments from '../../functions/order-documents.mts'
 import orders from '../../functions/orders.mts'
-import login from '../../functions/auth-login.mts'
 import { listAudit } from '../audit'
 import { getDocument, listDocuments, saveDocument, sniff, storageKey } from '../documents'
 import { useMemoryStores } from '../kv'
-import { ctx, get, post, seedUser, signedIn } from './helpers'
+import { get, seedUser, sessionFor } from './helpers'
 
-const PASSWORD = 'brackish tundra ledger'
 const IZHAR = 'izhar@ecofibre.bh'
 const SAMUEL = 'samuel.story-taylor@polycohealthline.com'
 /** A real PO number from the tracker. */
@@ -17,8 +15,6 @@ const ORDER = '2678631-1'
 beforeEach(() => {
   useMemoryStores()
 })
-
-const signIn = (email: string) => login(post('/api/auth/login', { email, password: PASSWORD }), ctx())
 
 const bytes = (...values: number[]) => new Uint8Array(values.slice()) as Uint8Array<ArrayBuffer>
 const PDF = bytes(0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37)
@@ -102,8 +98,8 @@ describe('POST /api/orders/:id/documents', () => {
   })
 
   it('lets a Polyco member upload, which is the point of the store', async () => {
-    await seedUser({ email: SAMUEL, password: PASSWORD, name: 'Samuel Story-Taylor' })
-    const headers = signedIn(await signIn(SAMUEL))
+    await seedUser({ email: SAMUEL, name: 'Samuel Story-Taylor' })
+    const headers = await sessionFor(SAMUEL)
 
     const res = await upload(ORDER, { name: 'bill-of-lading.pdf', bytes: PDF }, headers)
     expect(res.status).toBe(201)
@@ -115,8 +111,8 @@ describe('POST /api/orders/:id/documents', () => {
   })
 
   it('refuses a file whose bytes do not match what it claims to be', async () => {
-    await seedUser({ email: IZHAR, password: PASSWORD, role: 'admin' })
-    const headers = signedIn(await signIn(IZHAR))
+    await seedUser({ email: IZHAR, role: 'admin' })
+    const headers = await sessionFor(IZHAR)
 
     const res = await upload(ORDER, { name: 'invoice.pdf', bytes: bytes(0x4d, 0x5a, 0x90) }, headers)
     expect(res.status).toBe(415)
@@ -127,14 +123,14 @@ describe('POST /api/orders/:id/documents', () => {
   })
 
   it('refuses an order that does not exist', async () => {
-    await seedUser({ email: IZHAR, password: PASSWORD, role: 'admin' })
-    const headers = signedIn(await signIn(IZHAR))
+    await seedUser({ email: IZHAR, role: 'admin' })
+    const headers = await sessionFor(IZHAR)
     expect((await upload('9999999-9', { name: 'po.pdf', bytes: PDF }, headers)).status).toBe(404)
   })
 
   it('records who uploaded what, against which order', async () => {
-    await seedUser({ email: IZHAR, password: PASSWORD, role: 'admin' })
-    const headers = signedIn(await signIn(IZHAR))
+    await seedUser({ email: IZHAR, role: 'admin' })
+    const headers = await sessionFor(IZHAR)
     await upload(ORDER, { name: 'po.pdf', bytes: PDF }, headers)
 
     const [entry] = await listAudit({ action: 'document_uploaded' })
@@ -147,8 +143,8 @@ describe('POST /api/orders/:id/documents', () => {
 
 describe('GET /api/documents/:id', () => {
   async function uploaded(email = IZHAR, role: 'admin' | 'member' = 'admin') {
-    await seedUser({ email, password: PASSWORD, role, name: 'Someone' })
-    const headers = signedIn(await signIn(email))
+    await seedUser({ email, role, name: 'Someone' })
+    const headers = await sessionFor(email)
     const meta = await saveDocument({
       orderId: ORDER,
       group: 'delivery',
@@ -196,8 +192,8 @@ describe('GET /api/documents/:id', () => {
   })
 
   it('cannot have a filename break out of the header', async () => {
-    await seedUser({ email: IZHAR, password: PASSWORD, role: 'admin' })
-    const headers = signedIn(await signIn(IZHAR))
+    await seedUser({ email: IZHAR, role: 'admin' })
+    const headers = await sessionFor(IZHAR)
     const meta = await saveDocument({
       orderId: ORDER,
       group: 'delivery',
@@ -224,8 +220,8 @@ describe('DELETE /api/documents/:id', () => {
     )
 
   async function withDocument() {
-    await seedUser({ email: IZHAR, password: PASSWORD, role: 'admin', name: 'Izhar Sajid' })
-    await seedUser({ email: SAMUEL, password: PASSWORD, name: 'Samuel Story-Taylor' })
+    await seedUser({ email: IZHAR, role: 'admin', name: 'Izhar Sajid' })
+    await seedUser({ email: SAMUEL, name: 'Samuel Story-Taylor' })
     const meta = await saveDocument({
       orderId: ORDER,
       group: 'purchase-order',
@@ -240,7 +236,7 @@ describe('DELETE /api/documents/:id', () => {
 
   it('refuses a member', async () => {
     const meta = await withDocument()
-    const res = await remove(meta.id, signedIn(await signIn(SAMUEL)))
+    const res = await remove(meta.id, await sessionFor(SAMUEL))
 
     expect(res.status).toBe(403)
     expect((await getDocument(meta.id))?.deletedAt).toBeNull()
@@ -248,7 +244,7 @@ describe('DELETE /api/documents/:id', () => {
 
   it('lets an administrator delete, softly, and the file stays retrievable', async () => {
     const meta = await withDocument()
-    const headers = signedIn(await signIn(IZHAR))
+    const headers = await sessionFor(IZHAR)
 
     const res = await remove(meta.id, headers)
     expect(res.status).toBe(200)
@@ -267,7 +263,7 @@ describe('DELETE /api/documents/:id', () => {
 
   it('records the deletion with a name on it', async () => {
     const meta = await withDocument()
-    await remove(meta.id, signedIn(await signIn(IZHAR)))
+    await remove(meta.id, await sessionFor(IZHAR))
 
     const [entry] = await listAudit({ action: 'document_deleted' })
     expect(entry.actorEmail).toBe(IZHAR)
@@ -287,16 +283,16 @@ describe('GET /api/orders', () => {
   })
 
   it('serves the tracker to a signed-in user', async () => {
-    await seedUser({ email: SAMUEL, password: PASSWORD })
-    const res = await call(undefined, signedIn(await signIn(SAMUEL)))
+    await seedUser({ email: SAMUEL, })
+    const res = await call(undefined, await sessionFor(SAMUEL))
 
     expect(res.status).toBe(200)
     expect((await res.json()).tracker.orders.length).toBe(102)
   })
 
   it('serves one order with its documents', async () => {
-    await seedUser({ email: SAMUEL, password: PASSWORD })
-    const headers = signedIn(await signIn(SAMUEL))
+    await seedUser({ email: SAMUEL, })
+    const headers = await sessionFor(SAMUEL)
     await saveDocument({
       orderId: ORDER, group: 'delivery', filename: 'x.pdf', bytes: PDF,
       contentType: 'application/pdf', uploadedBy: 'u1', uploadedByEmail: SAMUEL,
@@ -308,7 +304,7 @@ describe('GET /api/orders', () => {
   })
 
   it('refuses an order that does not exist', async () => {
-    await seedUser({ email: SAMUEL, password: PASSWORD })
-    expect((await call('9999999-9', signedIn(await signIn(SAMUEL)))).status).toBe(404)
+    await seedUser({ email: SAMUEL, })
+    expect((await call('9999999-9', await sessionFor(SAMUEL))).status).toBe(404)
   })
 })

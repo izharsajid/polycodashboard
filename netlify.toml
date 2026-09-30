@@ -9,3 +9,11 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# The dashboard is open to anyone with the address but is not meant to be found.
+# Every response asks crawlers not to index or follow it, alongside robots.txt and
+# the noindex meta tag in index.html.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

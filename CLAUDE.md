@@ -82,5 +82,12 @@ PO Tracker with its attached files, and Inventory. The `orders`, `order-document
 `documents` and `exports` endpoints, and `data/po-tracker.json`, are kept as the
 Orderbook's plumbing. Add a tab through `src/tabs/index.ts`.
 
+**Access is open.** Sign-in, accounts and Netlify's site password were removed on
+1 October 2026 at Izhar's direction, so anyone with the address can read every statement.
+The site stays out of search results through robots.txt, a noindex meta tag and an
+`X-Robots-Tag` header. `AUTH-SPEC.md` describes the sign-in as it was and no longer
+applies. Anything added to `/data` is now public the moment it deploys; check
+`partner-disclosure` before adding a file.
+
 Machine, headcount and configuration work stays blocked pending that data. Do not
 fabricate machine data to get moving.

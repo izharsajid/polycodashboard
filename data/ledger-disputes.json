@@ -1,0 +1,12 @@
+{
+  "note": "Dates in data/polyco-ledger.json that another document of record contradicts. Shown as unresolved until agreed; never corrected silently.",
+  "disputes": [
+    {
+      "source_row": 122,
+      "movement": "received",
+      "ledger_date": "2025-07-10",
+      "other_date": "2025-10-06",
+      "other_source": "EcoFibre's October 2025 actuals statement records the PHL payment of 220,000.00 as received 6 October 2025."
+    }
+  ]
+}

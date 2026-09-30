@@ -20,6 +20,8 @@ literal representing a business fact.
 | File | What it holds |
 |---|---|
 | `data/funds-requested.json` | The 14 monthly Financial Overview statements exactly as issued, 149 lines. The Funds Requested tab. |
+| `data/polyco-ledger.json` | The PHL/EcoFibre ledger from the statement workbook, 174 rows, as at 28 July 2026. The Statement tab. |
+| `data/ledger-disputes.json` | Ledger dates another document of record contradicts, shown as unresolved |
 | `data/po-tracker.json` | The PO Tracker, kept for the Orderbook tab that follows |
 
 ## Changing a number
@@ -41,8 +43,8 @@ tab is built and their access is decided.
 
 ## Where the figures come from
 
-`/data` is not compiled into the browser bundle. It is served from `GET /api/data`, and
-each tab fetches its own data.
+`/data` is not compiled into the browser bundle. The Funds Requested tab reads `GET /api/data`
+and the Statement tab reads `GET /api/ledger`; each tab fetches its own data.
 
 ## One shared view
 

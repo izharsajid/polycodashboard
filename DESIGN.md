@@ -1,71 +1,85 @@
 # Design tokens
 
-From `BRIEF-TAB1.md` section 4 and the approved design plan of 30 September 2026,
-simplified on 1 October 2026 to one chart and one month-by-month table.
-This replaces the efdashboard house style (Montserrat, leaf green, rounded cards),
-which the brief retired.
+Revised on 1 October 2026 at Izhar's direction. The pages are now **month cards**:
+white rounded cards on a galvanised ground, colour-coded by cost category, that open
+into a pop-out panel. This replaces the ruled engineering sheet and the drop-down
+rows, which read as too dense for the dashboard's readers.
 
-The register is an **engineering sheet**: a galvanised ground, white ruled sheets
-with square corners and no shadow, blue-black ink, a heavy rule across the top of
-each section, and a title block like the one on a packaging drawing. It belongs to
-a factory with presses and containers, not a metrics product.
-
-## Colour: six for the page
+## Colour
 
 | Token | Value | Use | Contrast |
 |---|---|---|---|
-| `zinc` | `#E9ECEB` | Page ground. Cool galvanised grey, deliberately not cream. | |
-| `sheet` | `#FFFFFF` | Surfaces: ruled sheets, table rows | |
-| `press` | `#16202A` | Ink: text, axes, structural rules, the focus ring | 16.5:1 on sheet |
-| `press-2` | `#56626C` | Secondary text, outlines, control borders | 6.25:1 sheet, 5.26:1 zinc |
-| `rule` | `#C5CCCF` | Hairlines only, never the only edge of a control | |
-| `marking` | `#F2B300` | Safety-line yellow. The average line on the chart and the active tab. Never text. | 1.87:1, so never alone |
+| `zinc` | `#E9ECEB` | Page ground. Cool galvanised grey. | |
+| `sheet` | `#FFFFFF` | Cards and the panel | |
+| `mist` | `#F6F7F7` | Soft ground inside a card or panel: tiles, line groups | press-2 5.82:1 |
+| `press` | `#16202A` | Ink, and the one strong tile per panel | 16.5:1 on sheet |
+| `press-2` | `#56626C` | Secondary text | 6.25:1 on sheet |
+| `rule` | `#C5CCCF` | Hairlines and card edges | |
+| `marking` | `#F2B300` | The active tab and a chart's reference line. Never text. | |
+| `income` / `income-wash` | `#1E6B34` / `#E3F2E6` | Money coming in or reducing a request: other income, credits, receipts. Always with an icon and a word. | 5.65:1 on wash, 6.55:1 on white |
+| `caution` / `caution-wash` | `#7A4B00` / `#FDF1D6` | Lines on hold or paid elsewhere, flagged statements, unattributed receipts | 6.61:1 on wash |
+| `alert` | `#A3261F` | Only the message when data fails to load | 7.2:1 on sheet |
 
-`alert` (`#A3261F`, 7.2:1) is only for the message shown when the statements fail
-to load. The figures carry no red: `manufacturing-finance` keeps red for placeholders
-and shortfalls, and the tab has neither.
+## The seven cost categories
 
-## Colour: the data
+Each category keeps one hue and one lucide icon on every card, bar, legend and panel.
+Text never wears these colours; an icon tile or a bar segment does. Fibre containers
+carry the container icon.
 
-The chart is one colour: requests in `press`, a statement of actuals as a dashed
-`press-2` outline with no fill, and the average across the requests as a dashed
-`marking` line. The seven-category palette was retired with the category breakdown
-on 1 October 2026.
+| Stack | Category | Token | Value | Icon |
+|---|---|---|---|---|
+| 1 | Payroll and people | `cat-payroll` | `#2F6BC4` | `Users` |
+| 2 | Raw material | `cat-raw` | `#B5801C` | `Container` |
+| 3 | Working capital | `cat-working` | `#C24D86` | `Wallet` |
+| 4 | Compliance and certification | `cat-compliance` | `#3B8A1F` | `BadgeCheck` |
+| 5 | Supplier payments | `cat-supplier` | `#6A4FC2` | `Handshake` |
+| 6 | Facility | `cat-facility` | `#13A08A` | `Factory` |
+| 7 | Logistics and clearance | `cat-logistics` | `#E0612B` | `Ship` |
+
+Validated with the `dataviz` palette validator on `#FFFFFF`, in stack order: every
+check passes, worst adjacent colour-blind ΔE 10.8, worst normal-vision ΔE 19.9, every
+hue at least 3:1 on white, so white icons on these tiles pass the graphics threshold.
+Change a hue or the order and re-run it.
 
 ## Type
 
-One family: **Archivo**, self-hosted from `@fontsource-variable/archivo` with its
-width axis. Headings use the condensed width (`font-stretch: 78%`, the `.title`
-and `.condensed` classes). Every figure uses tabular numerals. No serif, no
-monospace, no tracked-caps eyebrows. The one exception is the statement-kind stamp,
-because a stamp is set in capitals.
+One family, **Archivo**, self-hosted with its width axis. Headings use the condensed
+width. Every figure uses tabular numerals.
 
 | Token | Size / line height | Use |
 |---|---|---|
-| `display` | 32 / 1.15 | The headline sentence, once per page |
-| `title` | 20 / 1.25 | Section headings, which state the finding |
+| `display` | 32 / 1.15 | Reserved |
+| `figure` | 24 / 1.15 | The amount on a month card; page and panel titles |
+| `title` | 20 / 1.25 | Card titles, section headings, tile figures |
 | `body` | 15 / 1.55 | Prose |
-| `table` | 13 / 1.4 | Table cells, controls |
-| `small` | 11.5 / 1.35 | Axis labels, secondary lines. Weight 400 or above, never hairline. |
+| `table` | 13 / 1.4 | Lines, lists, controls |
+| `small` | 11.5 / 1.35 | Secondary lines, badges |
 
-## Structure
+## Shape and depth
 
-- **Title block** at the top of the tab: a ruled grid like a drawing's title block,
-  then the headline sentence. Not a hero.
-- **Sections** carry a 2px `press` rule across the top (`.section`). Content sits
-  in ruled sheets (`.card`): square corners, a hairline edge, no shadow.
-- **Three parts only:** the headline, the monthly chart, and the month-by-month
-  table. Any month opens to its lines, remarks and notes as issued.
-- **Radius** is 2px on buttons and fields, 0 everywhere else.
+- **Radius:** 6px on buttons, chips and icon tiles; 14px (`card`) on cards and tiles;
+  18px (`panel`) on the pop-out.
+- **Shadow:** `card` at rest, `lift` under the pointer, `panel` for the pop-out. No
+  other shadows.
+- A card that is shown but not counted (an actuals statement) has a **dashed edge**.
 
-## Motion
+## Components
 
-None. The motion budget allows only transform and opacity, and the one movement
-considered (the stack recomposing when a category is toggled) would animate layout
-properties. The page answers interaction instantly.
+- **Month card** (`MonthCard`, `LedgerMonthCard`): the whole card is one button. Month,
+  period, the main figure, a category bar and icon tiles, then badges for anything
+  that needs attention. Grouped by year, newest first, in a 1–4 column grid.
+- **Panel** (`src/components/Panel.tsx`): a native modal `<dialog>`. It traps focus,
+  starts focus on its title, closes on Escape or a backdrop click, and returns focus
+  to the card. It is the page's one moment of motion: 180ms, transform and opacity
+  only, and none under reduced motion.
+- **Tile** (`Tile`): a summary figure inside a panel. Income is green; the figure the
+  panel is about is the single dark tile.
+- **Category bar** (`CategoryBar`): a rounded strip of a month's costs by category, with
+  the split as text for screen readers.
+- **Badge** (`Badge`): neutral, income or caution, always with a word.
+- **Month bars** (`MonthBars`): the shared one-colour monthly chart, used on the
+  statement tab.
 
 ## Print
 
-A4 portrait, 12mm margins. The chart redraws at the page width before printing
-and stays whole on its page. The table runs on with its header repeated, and any
-month left open prints open.
+A4 portrait, 12mm margins. The panel does not print; cards print as a grid.

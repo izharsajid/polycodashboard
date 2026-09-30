@@ -1,17 +1,20 @@
-import { useMemo } from 'react'
-import { buildModel } from '../../engine/funds'
+import { useMemo, useState } from 'react'
+import { CATEGORY_STYLE } from '../../components/categoryStyle'
+import { FundsPayload } from '../../data/schemas'
+import { useApiData } from '../../data/useApiData'
+import { CATEGORIES, CATEGORY_LABEL } from '../../engine/classify'
+import { buildModel, type Statement } from '../../engine/funds'
 import type { FundsRequestedT } from '../../engine/schema'
-import { useFundsData } from '../../data/useFundsData'
-import { day, monthLong, usd } from '../../lib/format'
-import MonthlyChart from './MonthlyChart'
-import MonthTable from './MonthTable'
+import MonthCard from './MonthCard'
+import MonthPanel from './MonthPanel'
 
 /**
- * Tab 1, Funds Requested. What EcoFibre has asked Polyco for, month by month.
- * One headline, one chart, one table; every month opens to its lines.
+ * Tab 1, Funds Requested. Every month EcoFibre has asked Polyco for, as a card,
+ * newest first and grouped by year. A card opens into the month's full
+ * statement.
  */
 export default function FundsRequestedTab() {
-  const funds = useFundsData()
+  const funds = useApiData('/api/data', FundsPayload, 'statements')
 
   if (funds.status === 'loading') {
     return (
@@ -22,50 +25,63 @@ export default function FundsRequestedTab() {
   }
   if (funds.status === 'failed') {
     return (
-      <p role="alert" className="mt-8 max-w-prose border-l-3 border-alert bg-sheet py-3 pl-4 pr-4 text-body text-alert">
+      <p role="alert" className="mt-8 max-w-prose rounded-card border-l-3 border-alert bg-sheet py-3 pl-4 pr-4 text-body text-alert">
         {funds.error}
       </p>
     )
   }
-  return <FundsRequested data={funds.data} />
+  return <FundsRequested data={funds.data.funds} />
 }
 
 function FundsRequested({ data }: { data: FundsRequestedT }) {
   const model = useMemo(() => buildModel(data, __BUILD_DATE__), [data])
+  const [openId, setOpenId] = useState<string | null>(null)
+  const open: Statement | null = model.statements.find((s) => s.id === openId) ?? null
+
+  const newestFirst = [...model.statements].reverse()
+  const years = [...new Set(newestFirst.map((s) => s.id.slice(0, 4)))]
 
   return (
-    <div className="space-y-8 pt-6 print:space-y-5 print:pt-2">
-      <header className="card border-t-3 border-t-press px-4 py-5 sm:px-6">
-        <h1 className="title text-title uppercase tracking-wide">Funds requested</h1>
+    <div className="space-y-8 pt-6">
+      <header>
+        <h1 className="condensed text-figure font-bold">Funds requested</h1>
         <p className="mt-1 text-table text-press-2">
-          Financial Overview statements issued by Eco Fibre Bahrain W.L.L. to Polyco Healthline Ltd
+          Financial Overview statements issued by Eco Fibre Bahrain W.L.L. to Polyco Healthline Ltd. Open a month
+          to see every line.
         </p>
-        <p className="mt-4 max-w-[40ch] text-title font-semibold leading-snug sm:text-display sm:leading-tight print:max-w-none print:text-title">
-          {model.headline}
-        </p>
-        <p className="mt-2 max-w-prose text-table text-press-2">
-          {usd(model.requestedCents)} requested in total.{' '}
-          {model.excluded
-            .map((s) => `${monthLong(s.id)} records actual spending, not a request, so it is not counted.`)
-            .join(' ')}{' '}
-          As at {day(model.asAt)}.
-        </p>
+        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-small text-press-2" aria-label="Category colours">
+          {CATEGORIES.map((c) => {
+            const { bg, Icon } = CATEGORY_STYLE[c]
+            return (
+              <li key={c} className="flex items-center gap-1.5">
+                <span className={`inline-flex h-5 w-5 items-center justify-center rounded ${bg} text-sheet`} aria-hidden>
+                  <Icon size={12} strokeWidth={2.5} />
+                </span>
+                {CATEGORY_LABEL[c]}
+              </li>
+            )
+          })}
+        </ul>
       </header>
 
-      <section className="section" aria-labelledby="chart-title">
-        <h2 id="chart-title" className="title">Requested each month</h2>
-        <figure className="mt-4 card px-3 pb-3 pt-4 sm:px-4 print:mt-2">
-          <MonthlyChart model={model} />
-        </figure>
-      </section>
+      {years.map((year) => (
+        <section key={year} aria-labelledby={`year-${year}`}>
+          <h2 id={`year-${year}`} className="condensed mb-3 text-title font-bold text-press-2">
+            {year}
+          </h2>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {newestFirst
+              .filter((s) => s.id.startsWith(year))
+              .map((s) => (
+                <li key={s.id}>
+                  <MonthCard s={s} onOpen={() => setOpenId(s.id)} />
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))}
 
-      <section className="section" aria-labelledby="months-title">
-        <h2 id="months-title" className="title">Month by month</h2>
-        <p className="lede no-print mt-1">Open a month to see its lines as issued.</p>
-        <div className="mt-4 card px-4 py-2 sm:px-6">
-          <MonthTable model={model} />
-        </div>
-      </section>
+      <MonthPanel s={open} onClose={() => setOpenId(null)} />
     </div>
   )
 }

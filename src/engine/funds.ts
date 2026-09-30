@@ -7,9 +7,16 @@
  * code is wrong, not the statement.
  */
 import { monthLong, usdWhole } from '../lib/format'
+import { CATEGORIES, classify, type Category } from './classify'
 import type { FundsRequestedT, StatementKindT } from './schema'
 
 export type Line = { cents: number; description: string; remarks: string | null }
+
+/** A cost line, with the one category it belongs to. */
+export type CostLine = Line & { category: Category }
+
+/** What a statement spends in one category, with its lines. */
+export type CategoryGroup = { category: Category; cents: number; lines: CostLine[] }
 
 export type Statement = {
   id: string
@@ -24,7 +31,9 @@ export type Statement = {
   incomeCents: number
   /** The statement's own total: costs less income. What was asked of Polyco. */
   statedCents: number
-  lines: Line[]
+  lines: CostLine[]
+  /** The cost lines by category, in stack order, empty categories left out. */
+  groups: CategoryGroup[]
   income: Line[]
   notes: string[]
 }
@@ -53,7 +62,7 @@ function buildStatement(raw: FundsRequestedT['statements'][number]): Statement {
     description: l.description,
     remarks: l.remarks,
   })
-  const lines = raw.lines.map(toLine)
+  const lines: CostLine[] = raw.lines.map((l) => ({ ...toLine(l), category: classify(l.description) }))
   const income = raw.income.map(toLine)
   const costsCents = sum(lines)
   const incomeCents = sum(income)
@@ -75,6 +84,10 @@ function buildStatement(raw: FundsRequestedT['statements'][number]): Statement {
     incomeCents,
     statedCents,
     lines,
+    groups: CATEGORIES.map((category) => {
+      const inGroup = lines.filter((l) => l.category === category)
+      return { category, cents: sum(inGroup), lines: inGroup }
+    }).filter((g) => g.lines.length > 0),
     income,
     notes: raw.notes,
   }

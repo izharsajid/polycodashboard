@@ -23,6 +23,7 @@ import type { StatementFileT } from '../../engine/statementSchema'
 import type { Tracker } from '../../engine/tracker'
 import { amount, day, monthLong, usd } from '../../lib/format'
 import { useEditor } from './editor'
+import FixView from './FixView'
 import { CorrectionForm, InvoiceForm, PaymentForm, UnlockForm, VoidForm } from './Forms'
 import { MovementRow, PoChip, Tile } from './parts'
 import { LineView, MonthView, PoView, type Nav } from './Views'
@@ -42,6 +43,7 @@ type View =
   | { k: 'invoice'; po?: string }
   | { k: 'correction'; lineKey?: string }
   | { k: 'void'; id: string }
+  | { k: 'fix'; key: string }
 
 export default function StatementTab() {
   const statement = useApiData('/api/statement', StatementPayload, 'statement')
@@ -65,6 +67,7 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
   const { editor, unlock, lock } = useEditor()
   const [views, setViews] = useState<View[]>([])
   const [severity, setSeverity] = useState<'all' | Discrepancy['severity']>('all')
+  const [showFixed, setShowFixed] = useState(false)
 
   const go = (v: View) => setViews((s) => [...s, v])
   const back = () => setViews((s) => s.slice(0, -1))
@@ -79,6 +82,7 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
     correct: (lineKey) => go({ k: 'correction', lineKey }),
     invoice: (po) => go({ k: 'invoice', po }),
     voidEntry: (id) => go({ k: 'void', id }),
+    fix: (key) => go({ k: 'fix', key }),
   }
   const needEditor = (v: View) => (editor ? go(v) : go({ k: 'unlock' }))
 
@@ -89,8 +93,9 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
   const years = [...new Set(newestFirst.map((m) => m.month.slice(0, 4)))]
   const openOrders = model.lines.filter((l) => l.status === 'awaiting' || l.status === 'on-hold')
   const counts = { high: 0, medium: 0, low: 0 }
-  for (const d of model.discrepancies) counts[d.severity] += 1
-  const shown = model.discrepancies.filter((d) => severity === 'all' || d.severity === severity)
+  for (const d of model.discrepancies) if (!d.resolved) counts[d.severity] += 1
+  const fixedCount = model.discrepancies.length - model.openDiscrepancies
+  const shown = model.discrepancies.filter((d) => (showFixed || !d.resolved) && (severity === 'all' || d.severity === severity))
   const pos = tracker ? tracker.pos.filter((x) => !x.isInternal) : []
 
   // What the panel shows.
@@ -122,6 +127,15 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
     title = `PO ${view.po}`
     eyebrow = 'Purchase order'
     body = <PoView po={view.po} tracker={tracker?.byPo.get(view.po) ?? null} model={model} files={filesFor(`po-${view.po}`)} editor={editor} onChanged={reload} nav={nav} />
+  } else if (view?.k === 'fix') {
+    const d = model.discrepancies.find((x) => x.key === view.key)
+    title = d ? `${d.id}. ${d.title}` : 'Discrepancy'
+    eyebrow = d?.resolved ? 'Fixed' : 'Fix a discrepancy'
+    body = d ? (
+      <FixView d={d} tracker={tracker} editor={editor} onUnlock={() => go({ k: 'unlock' })} onDone={() => { reload(); back() }} />
+    ) : (
+      <p className="text-table">This discrepancy no longer appears on the statement.</p>
+    )
   } else if (view?.k === 'unlock') {
     title = 'Unlock editing'
     body = data.editor.enabled ? (
@@ -249,11 +263,16 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
       <section aria-labelledby="disc-title" className="rounded-card bg-sheet p-5 shadow-card">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 id="disc-title" className="flex items-center gap-2 text-title font-bold">
-            <TriangleAlert size={20} aria-hidden className="text-caution" /> {model.discrepancies.length} discrepancies to resolve
+            <TriangleAlert size={20} aria-hidden className="text-caution" /> {model.openDiscrepancies} discrepancies to fix
+            {fixedCount > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-income-wash px-2.5 py-1 text-small font-semibold text-income">
+                <CircleCheck size={13} aria-hidden /> {fixedCount} fixed
+              </span>
+            )}
           </h2>
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show by importance">
             {([
-              ['all', `All ${model.discrepancies.length}`],
+              ['all', `All ${model.openDiscrepancies}`],
               ['high', `High ${counts.high}`],
               ['medium', `Medium ${counts.medium}`],
               ['low', `Low ${counts.low}`],
@@ -272,27 +291,49 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
         </div>
         <p className="mt-1 max-w-prose text-small text-press-2">
           Where the workbook ({data.workbook.file}) and efdashboard.com disagree, this statement follows efdashboard.com.
-          Each item says what each side reads.
+          Open any item to see what each side reads and fix it. Every fix is signed, and can be undone.
         </p>
+        {fixedCount > 0 && (
+          <label className="mt-2 inline-flex items-center gap-2 text-small">
+            <input type="checkbox" checked={showFixed} onChange={(e) => setShowFixed(e.target.checked)} className="h-4 w-4" />
+            Show the {fixedCount} fixed
+          </label>
+        )}
         <ol className="mt-4 divide-y divide-rule">
           {shown.map((d) => (
             <li key={d.id}>
               <button
                 type="button"
-                onClick={() => (d.po && (tracker?.byPo.has(d.po) || model.lines.some((l) => l.po === d.po)) ? nav.po(d.po) : d.row && model.lines.some((l) => l.row === d.row) ? nav.line(`row-${d.row}`) : undefined)}
+                onClick={() => nav.fix(d.key)}
+                aria-haspopup="dialog"
                 className="flex w-full items-start gap-3 py-2.5 text-left hover:bg-mist"
               >
                 <span
                   className={`mt-0.5 inline-flex h-6 min-w-[2.25rem] shrink-0 items-center justify-center rounded-full px-1.5 text-small font-bold ${
-                    d.severity === 'high' ? 'bg-caution text-sheet' : d.severity === 'medium' ? 'bg-caution-wash text-caution' : 'bg-mist text-press-2'
+                    d.resolved
+                      ? 'bg-income-wash text-income'
+                      : d.severity === 'high'
+                        ? 'bg-caution text-sheet'
+                        : d.severity === 'medium'
+                          ? 'bg-caution-wash text-caution'
+                          : 'bg-mist text-press-2'
                   }`}
-                  aria-label={`${d.severity} importance, number ${d.id}`}
+                  aria-label={`${d.resolved ? 'fixed' : `${d.severity} importance`}, number ${d.id}`}
                 >
                   {d.id}
                 </span>
-                <span className="min-w-0 text-table">
-                  <span className="block font-semibold">{d.title}</span>
-                  <span className="block text-press-2">{d.detail}</span>
+                <span className="min-w-0 flex-1 text-table">
+                  <span className={`block font-semibold ${d.resolved ? 'text-press-2 line-through' : ''}`}>{d.title}</span>
+                  <span className="block text-press-2">
+                    {d.resolved ? `Fixed by ${d.resolved.by}, ${day(d.resolved.at.slice(0, 10))}: ${d.resolved.note}` : d.detail}
+                  </span>
+                </span>
+                <span
+                  className={`shrink-0 self-center rounded-full px-3 py-1 text-small font-semibold ${
+                    d.resolved ? 'bg-income-wash text-income' : 'bg-press text-sheet'
+                  }`}
+                >
+                  {d.resolved ? 'Fixed' : 'Fix'}
                 </span>
               </button>
             </li>

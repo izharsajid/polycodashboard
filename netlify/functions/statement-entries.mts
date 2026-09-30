@@ -36,9 +36,16 @@ export default async (req: Request, context: Context) => {
 
   if (body.action === 'create') {
     const e = body.entry
-    if (e.kind === 'correction' && (e.row === null || e.field === null)) {
-      return fail(400, 'A correction needs the workbook row and which figure to correct.')
+    if (e.kind === 'correction') {
+      if (!e.field) return fail(400, 'Say what is being corrected.')
+      const addsPo = e.field === 'po_amount' && e.row === null && e.po
+      if (e.row === null && !addsPo) return fail(400, 'A correction needs the workbook row it applies to.')
+      if ((e.field === 'received_date' || e.field === 'delivery_date') && !/^\d{4}-\d{2}-\d{2}$/.test(e.value ?? '')) {
+        return fail(400, 'Give the corrected date.')
+      }
+      if (e.field === 'po' && !/^[A-Za-z0-9-]{1,40}$/.test(e.value ?? '')) return fail(400, 'Choose the PO to assign.')
     }
+    if (e.kind === 'resolution' && !e.key) return fail(400, 'Say which discrepancy this settles.')
     if (e.kind === 'invoice' && !e.invoiceKind) return fail(400, 'Say whether the invoice is for goods, a recharge or something else.')
     const saved = Entry.parse({ ...e, id: newId(), at: new Date().toISOString(), voided: null })
     await store.put(saved.id, saved)

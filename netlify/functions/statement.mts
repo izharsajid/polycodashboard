@@ -1,7 +1,6 @@
 import type { Config } from '@netlify/functions'
 import disputes from '../../data/ledger-disputes.json' with { type: 'json' }
 import workbook from '../../data/polyco-statement.json' with { type: 'json' }
-import { editorEnabled } from '../lib/editor'
 import { json, wrongMethod } from '../lib/http'
 import { listEntries, listStatementFiles } from '../lib/statement-store'
 
@@ -29,7 +28,7 @@ export default async (req: Request) => {
         uploadedBy: f.uploadedBy,
         uploadedAt: f.uploadedAt,
       })),
-      editor: { enabled: editorEnabled() },
+      editor: { enabled: true },
     },
     200,
     { 'x-robots-tag': 'noindex, nofollow' },

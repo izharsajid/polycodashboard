@@ -97,6 +97,7 @@ describe('the audit log', () => {
     // accident later.
     expect(Object.keys(auditModule).sort()).toEqual([
       'auditKey',
+      'auditOn',
       'listAudit',
       'pageAudit',
       'record',
@@ -155,5 +156,19 @@ describe('paging the audit log', () => {
     await twelve()
     expect((await pageAudit({ limit: 100000 })).entries).toHaveLength(12)
     expect((await pageAudit({ limit: 0 })).entries).toHaveLength(1)
+  })
+})
+
+describe('the audit log while paused', () => {
+  it('writes nothing unless AUDIT_LOG is on', async () => {
+    useMemoryStores()
+    const was = process.env.AUDIT_LOG
+    delete process.env.AUDIT_LOG
+    try {
+      await record({ action: 'data_edited', result: 'success', detail: 'paused' })
+      expect(await listAudit()).toHaveLength(0)
+    } finally {
+      process.env.AUDIT_LOG = was
+    }
   })
 })

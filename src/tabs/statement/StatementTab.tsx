@@ -3,7 +3,7 @@ import {
   CalendarX2,
   CircleCheck,
   History,
-  Lock,
+  LogIn,
   PenLine,
   Plus,
   Radio,
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import Panel from '../../components/Panel'
+import { navigate } from '../../lib/navigation'
+import { LOGIN } from '../../lib/router'
 import { StatementPayload, type StatementPayloadT } from '../../data/schemas'
 import { useApiData } from '../../data/useApiData'
 import { useTracker } from '../../data/useTracker'
@@ -24,7 +26,7 @@ import type { Tracker } from '../../engine/tracker'
 import { amount, day, monthLong, usd } from '../../lib/format'
 import { useEditor } from './editor'
 import FixView from './FixView'
-import { CorrectionForm, InvoiceForm, PaymentForm, UnlockForm, VoidForm } from './Forms'
+import { CorrectionForm, InvoiceForm, PaymentForm, VoidForm } from './Forms'
 import { MovementRow, PoChip, Tile } from './parts'
 import { LineView, MonthView, PoView, type Nav } from './Views'
 
@@ -64,7 +66,7 @@ export default function StatementTab() {
 
 function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT; tracker: Tracker | null; trackerError: string | null; reload: () => void }) {
   const model = useMemo(() => buildStatement(data.workbook, tracker, data.entries, data.disputes), [data, tracker])
-  const { editor, unlock, lock } = useEditor()
+  const { editor } = useEditor()
   const [views, setViews] = useState<View[]>([])
   const [severity, setSeverity] = useState<'all' | Discrepancy['severity']>('all')
   const [showFixed, setShowFixed] = useState(false)
@@ -137,11 +139,17 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
       <p className="text-table">This discrepancy no longer appears on the statement.</p>
     )
   } else if (view?.k === 'unlock') {
-    title = 'Unlock editing'
-    body = data.editor.enabled ? (
-      <UnlockForm onUnlock={unlock} onDone={back} />
-    ) : (
-      <p className="text-table">Editing is switched off. It turns on when the editor passcode is set as EDITOR_KEY in the Netlify environment.</p>
+    title = 'Sign in to make changes'
+    body = (
+      <div className="space-y-4 text-table">
+        <p>
+          Anyone with the link can read the statement. Recording a payment or invoice, correcting a figure, fixing a
+          discrepancy or uploading a file needs you to sign in, so each change shows who made it.
+        </p>
+        <button type="button" className="btn-primary" onClick={() => navigate(LOGIN)}>
+          <LogIn size={16} aria-hidden /> Sign in
+        </button>
+      </div>
     )
   } else if (view && editor) {
     if (view.k === 'payment') {
@@ -181,15 +189,12 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {editor ? (
-            <>
-              <span className="text-small text-press-2">Editing as {editor.name}</span>
-              <button type="button" className="btn-text" onClick={lock}>
-                <Lock size={14} aria-hidden /> Lock
-              </button>
-            </>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-income-wash px-3 py-1.5 text-small font-semibold text-income">
+              <Unlock size={13} aria-hidden /> Editing as {editor.name}
+            </span>
           ) : (
-            <button type="button" className="btn-secondary" onClick={() => go({ k: 'unlock' })}>
-              <Unlock size={15} aria-hidden /> Unlock editing
+            <button type="button" className="btn-secondary" onClick={() => navigate(LOGIN)}>
+              <LogIn size={15} aria-hidden /> Sign in to make changes
             </button>
           )}
         </div>

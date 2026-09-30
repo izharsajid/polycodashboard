@@ -82,4 +82,6 @@ export const STORES = {
   /** Document bytes and their metadata, kept apart so a listing is cheap. */
   documents: 'documents',
   documentMeta: 'document-meta',
+  /** Payments, invoices and corrections recorded on the statement tab. */
+  statementEntries: 'statement-entries',
 } as const

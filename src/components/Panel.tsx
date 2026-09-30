@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 
 /**
@@ -12,8 +12,11 @@ export default function Panel({
   title,
   eyebrow,
   badges,
+  onBack,
   children,
 }: {
+  /** Shown when the panel was reached from another one. */
+  onBack?: () => void
   open: boolean
   onClose: () => void
   title: string
@@ -51,6 +54,11 @@ export default function Panel({
       <div className="flex max-h-[90vh] flex-col">
         <header className="flex items-start justify-between gap-4 border-b border-rule px-5 py-4 sm:px-6">
           <div className="min-w-0">
+            {onBack && (
+              <button type="button" onClick={onBack} className="btn-text mb-1 min-h-[28px] text-press-2">
+                <ArrowLeft size={14} aria-hidden /> Back
+              </button>
+            )}
             {eyebrow && <p className="text-small text-press-2">{eyebrow}</p>}
             <h2 id={titleId} ref={titleRef} tabIndex={-1} className="condensed text-figure font-bold outline-none">
               {title}

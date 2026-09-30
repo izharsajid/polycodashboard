@@ -72,22 +72,30 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 ## Status
 
-Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard has two
+Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard has three
 tabs, both built as month cards that open into a panel (see `DESIGN.md`):
 
 - **Funds requested**, from `data/funds-requested.json`, cards colour-coded by cost
   category.
-- **PHL/EcoFibre statement**, from `data/polyco-ledger.json` (as at 28 July 2026) and
-  `data/ledger-disputes.json`. The position to the uncovered advance, the balance month
-  by month, and every movement whose date is missing, disputed or after the as-at date
-  listed as unresolved, never placed in a month. Read `polyco-ledger` before changing it.
+- **PHL/EcoFibre statement**, live. efdashboard.com is the MASTER for which orders
+  exist and whether each was dispatched; a dispatched order counts as delivered and
+  moves the exposure. Values and history back to 2022 come from the statement
+  workbook, copied as issued into `data/polyco-statement.json` by
+  `scripts/import-statement.py` (as at 30 September 2026). Payments, invoices,
+  corrections and files recorded on the tab are kept in Netlify Blobs and never
+  overwrite the workbook. Every disagreement is a numbered discrepancy. Editing needs
+  the passcode set as `EDITOR_KEY` on Netlify. Read `polyco-ledger` before changing it.
+- **PO tracker**, efdashboard.com's tracker read live through `/api/tracker`, with its
+  own rules ported to `src/engine/tracker.ts`, and every PO file viewable and
+  downloadable through `/api/po-document`. The Supabase URL and public key are
+  `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
 
 Engines are in `src/engine/`, pages in `src/tabs/`, shared components in
 `src/components/`, tests in `tests/`. Add a tab through `src/tabs/index.ts`.
 
-The next two tabs follow: the Orderbook from the PO Tracker with its attached files,
-and Inventory. The `orders`, `order-documents`, `documents` and `exports` endpoints,
-and `data/po-tracker.json`, are kept as the Orderbook's plumbing.
+An Inventory tab follows. The old `orders`, `order-documents`, `documents` and
+`exports` endpoints and `data/po-tracker.json` predate the live tracker and still
+need a session nobody can create; they can go once nothing depends on them.
 
 **Access is open.** Sign-in, accounts and Netlify's site password were removed on
 1 October 2026 at Izhar's direction, so anyone with the address can read every statement.

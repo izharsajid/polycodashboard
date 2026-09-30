@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { z } from 'zod'
 import { api } from '../lib/api'
 
@@ -8,13 +8,21 @@ import { api } from '../lib/api'
  * stops the tab with the field that failed, rather than rendering a blank where
  * a figure should be.
  */
-export type ApiState<T> =
+export type ApiState<T> = (
   | { status: 'loading' }
   | { status: 'ready'; data: T }
   | { status: 'failed'; error: string }
+) & {
+  /** Fetch again, keeping what is on screen until the new data arrives. */
+  reload: () => void
+}
+
+type Loaded<T> = { status: 'loading' } | { status: 'ready'; data: T } | { status: 'failed'; error: string }
 
 export function useApiData<S extends z.ZodTypeAny>(path: string, schema: S, what: string): ApiState<z.infer<S>> {
-  const [state, setState] = useState<ApiState<z.infer<S>>>({ status: 'loading' })
+  const [state, setState] = useState<Loaded<z.infer<S>>>({ status: 'loading' })
+  const [version, setVersion] = useState(0)
+  const reload = useCallback(() => setVersion((v) => v + 1), [])
 
   useEffect(() => {
     let live = true
@@ -47,7 +55,7 @@ export function useApiData<S extends z.ZodTypeAny>(path: string, schema: S, what
     return () => {
       live = false
     }
-  }, [path, schema, what])
+  }, [path, schema, what, version])
 
-  return state
+  return { ...state, reload }
 }

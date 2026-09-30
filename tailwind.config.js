@@ -47,6 +47,15 @@ export default {
        */
       income: { DEFAULT: '#1E6B34', wash: '#E3F2E6' },
 
+      /** Orders on their way: container requested or confirmed, booked. Text 7.11:1 on its wash. */
+      info: { DEFAULT: '#1F4E8C', wash: '#E6EEF9' },
+
+      /**
+       * Cargo clearing, freight and courier recharges on the statement: the
+       * logistics hue, darkened for text. 5.21:1 on its wash.
+       */
+      recharge: { DEFAULT: '#A8431A', wash: '#FCEBE3' },
+
       /** Lines on hold or paid elsewhere, and flags on the record. Text 6.61:1 on its wash. */
       caution: { DEFAULT: '#7A4B00', wash: '#FDF1D6' },
 

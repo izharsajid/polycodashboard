@@ -38,6 +38,11 @@ export function thousands(cents: number): string {
   return cents < 0 ? `(${k})` : `${k}`
 }
 
+/** `34.2%`. Always shown beside the base it is a share of. */
+export function percent(fraction: number): string {
+  return `${(fraction * 100).toFixed(1)}%`
+}
+
 /* ---- Dates ------------------------------------------------------------- */
 
 const MONTHS_LONG = [

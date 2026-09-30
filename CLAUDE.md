@@ -72,16 +72,22 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 ## Status
 
-Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard now has
-one tab, **Funds requested**, built from `data/funds-requested.json`: a headline, a
-monthly chart and a month-by-month table. Its engine is
-`src/engine/`, its page is `src/tabs/funds-requested/`, and its tests are in `tests/`.
-The design system is recorded in `DESIGN.md`.
+Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard has two
+tabs, both built as month cards that open into a panel (see `DESIGN.md`):
 
-The next three tabs follow later: the PHL/EcoFibre Statement, the Orderbook from the
-PO Tracker with its attached files, and Inventory. The `orders`, `order-documents`,
-`documents` and `exports` endpoints, and `data/po-tracker.json`, are kept as the
-Orderbook's plumbing. Add a tab through `src/tabs/index.ts`.
+- **Funds requested**, from `data/funds-requested.json`, cards colour-coded by cost
+  category.
+- **PHL/EcoFibre statement**, from `data/polyco-ledger.json` (as at 28 July 2026) and
+  `data/ledger-disputes.json`. The position to the uncovered advance, the balance month
+  by month, and every movement whose date is missing, disputed or after the as-at date
+  listed as unresolved, never placed in a month. Read `polyco-ledger` before changing it.
+
+Engines are in `src/engine/`, pages in `src/tabs/`, shared components in
+`src/components/`, tests in `tests/`. Add a tab through `src/tabs/index.ts`.
+
+The next two tabs follow: the Orderbook from the PO Tracker with its attached files,
+and Inventory. The `orders`, `order-documents`, `documents` and `exports` endpoints,
+and `data/po-tracker.json`, are kept as the Orderbook's plumbing.
 
 **Access is open.** Sign-in, accounts and Netlify's site password were removed on
 1 October 2026 at Izhar's direction, so anyone with the address can read every statement.

@@ -69,10 +69,11 @@ describe('what stays unresolved', () => {
     expect(disputed.dateNote).toContain('6 October 2025')
   })
 
-  it('keeps every day/month swap the importer made out of the months until confirmed', () => {
+  it('keeps every day/month swap, and every date after the statement date, out of the months', () => {
     expect(unresolvedRows('disputed').sort()).toEqual(
-      ['118d', '122r', '129d', '150r', '163r', '165r', '167d', '168d'].sort(),
+      ['118d', '122r', '129d', '150r', '163r', '165r', '167d', '168d', '173d'].sort(),
     )
+    expect(model.months.flatMap((m) => m.movements).every((m) => m.date! <= model.asAt)).toBe(true)
   })
 
   it('keeps every movement with no usable date out of the months', () => {

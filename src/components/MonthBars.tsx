@@ -91,7 +91,10 @@ export default function MonthBars({
             const x = cx - barW / 2
             const y1 = Math.min(y(b.cents), y(0))
             const h = Math.abs(y(0) - y(b.cents))
-            const firstOfYear = i === 0 || b.id.endsWith('-01')
+            // Mark the year at each January, and at the first bar unless a
+            // January follows so closely that the two labels would collide.
+            const januaryAhead = bars.slice(i + 1, i + 4).some((x) => x.id.endsWith('-01'))
+            const firstOfYear = b.id.endsWith('-01') || (i === 0 && !(sparse && januaryAhead))
             const year = b.id.slice(0, 4)
             return (
               <g key={b.id}>

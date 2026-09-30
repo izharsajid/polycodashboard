@@ -81,6 +81,7 @@ function resolveDate(
   stored: string | null,
   source: string | null,
   dispute: LedgerDisputesT['disputes'][number] | undefined,
+  asAt: string,
 ): { date: string | null; status: DateStatus; note: string | null } {
   if (dispute) {
     return {
@@ -102,10 +103,19 @@ function resolveDate(
         `probably swapped on entry, giving ${day(stored)}. Not yet confirmed.`,
     }
   }
+  // polyco-ledger skill: a date after the statement's own as-at date cannot be
+  // right as recorded.
+  if (stored > asAt) {
+    return {
+      date: null,
+      status: 'disputed',
+      note: `The ledger dates it ${day(stored)}, after the statement date of ${day(asAt)}. Not yet confirmed.`,
+    }
+  }
   return { date: stored, status: 'confirmed', note: null }
 }
 
-function movementsOf(row: LedgerRowT, disputes: LedgerDisputesT['disputes']): Movement[] {
+function movementsOf(row: LedgerRowT, disputes: LedgerDisputesT['disputes'], asAt: string): Movement[] {
   const out: Movement[] = []
   const base = { sourceRow: row.source_row, rowType: row.type, ref: row.ref, poNumber: row.po_number, product: row.product }
 
@@ -115,6 +125,7 @@ function movementsOf(row: LedgerRowT, disputes: LedgerDisputesT['disputes']): Mo
       row.delivery_date,
       row.delivery_date_source,
       disputes.find((x) => x.source_row === row.source_row && x.movement === 'delivered'),
+      asAt,
     )
     out.push({ ...base, key: `${row.source_row}-d`, kind: 'delivery', cents: delivered, date: d.date, dateStatus: d.status, dateNote: d.note, unattributed: false })
   }
@@ -125,6 +136,7 @@ function movementsOf(row: LedgerRowT, disputes: LedgerDisputesT['disputes']): Mo
       row.received_date,
       row.received_date_source,
       disputes.find((x) => x.source_row === row.source_row && x.movement === 'received'),
+      asAt,
     )
     out.push({ ...base, key: `${row.source_row}-r`, kind: 'receipt', cents: received, date: d.date, dateStatus: d.status, dateNote: d.note, unattributed: row.type === 'receipt' && row.po_number === null })
   }
@@ -150,7 +162,7 @@ function monthsBetween(first: string, last: string): string[] {
 
 export function buildLedgerModel(ledger: LedgerT, disputes: LedgerDisputesT): LedgerModel {
   const s = ledger.summary
-  const movements = ledger.rows.flatMap((row) => movementsOf(row, disputes.disputes))
+  const movements = ledger.rows.flatMap((row) => movementsOf(row, disputes.disputes, s.as_at))
 
   const deliveredCents = movements.filter((m) => m.kind === 'delivery').reduce((a, m) => a + m.cents, 0)
   const receivedCents = movements.filter((m) => m.kind === 'receipt').reduce((a, m) => a + m.cents, 0)

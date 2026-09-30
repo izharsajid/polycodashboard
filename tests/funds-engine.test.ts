@@ -6,6 +6,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { matchCategories } from '../src/engine/classify'
 import { buildModel } from '../src/engine/funds'
 import { FundsRequested } from '../src/engine/schema'
 import { amount, usd } from '../src/lib/format'
@@ -84,5 +85,26 @@ describe('credits', () => {
     const credit = byId('2026-07').lines.find((l) => l.cents < 0)!
     expect(credit.cents).toBe(-1_911_000)
     expect(amount(credit.cents)).toBe('(19,110.00)')
+  })
+})
+
+describe('categories', () => {
+  it('puts every one of the 167 lines in exactly one category, with no catch-all', () => {
+    for (const s of data.statements) {
+      for (const l of s.lines) {
+        expect(matchCategories(l.description), `${s.id}: ${l.description}`).toHaveLength(1)
+      }
+    }
+  })
+
+  it('keeps a supplier payment that lists wire mesh and sweet water in supplier payments', () => {
+    const line = byId('2026-09').lines.find((l) => l.description.startsWith('Supplier Payments'))!
+    expect(line.category).toBe('supplier')
+  })
+
+  it('sums each statement\'s category groups back to its costs', () => {
+    for (const s of model.statements) {
+      expect(s.groups.reduce((a, g) => a + g.cents, 0), s.id).toBe(s.costsCents)
+    }
   })
 })

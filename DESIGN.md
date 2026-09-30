@@ -1,6 +1,7 @@
 # Design tokens
 
-From `BRIEF-TAB1.md` section 4 and the approved design plan of 30 September 2026.
+From `BRIEF-TAB1.md` section 4 and the approved design plan of 30 September 2026,
+simplified on 1 October 2026 to one chart and one month-by-month table.
 This replaces the efdashboard house style (Montserrat, leaf green, rounded cards),
 which the brief retired.
 
@@ -18,45 +19,18 @@ a factory with presses and containers, not a metrics product.
 | `press` | `#16202A` | Ink: text, axes, structural rules, the focus ring | 16.5:1 on sheet |
 | `press-2` | `#56626C` | Secondary text, outlines, control borders | 6.25:1 sheet, 5.26:1 zinc |
 | `rule` | `#C5CCCF` | Hairlines only, never the only edge of a control | |
-| `marking` | `#F2B300` | Safety-line yellow. The selected statement, and nothing else. Never text; always edged in `press`. | 1.87:1, so never alone |
+| `marking` | `#F2B300` | Safety-line yellow. The average line on the chart and the active tab. Never text. | 1.87:1, so never alone |
 
-`alert` (`#A3261F`, 7.2:1) is for form errors on the sign-in and account pages only.
-The Funds Requested tab carries no red: `manufacturing-finance` keeps red for
-placeholders and shortfalls, and the tab has neither.
+`alert` (`#A3261F`, 7.2:1) is only for the message shown when the statements fail
+to load. The figures carry no red: `manufacturing-finance` keeps red for placeholders
+and shortfalls, and the tab has neither.
 
-## Colour: seven for the data
+## Colour: the data
 
-The only other colour anywhere. Each category keeps one hue and one lucide icon in
-every chart, legend, table row and detail view. Text never wears these colours.
-
-| Stack | Category | Token | Value | Icon |
-|---|---|---|---|---|
-| 1 | Payroll and people | `cat-payroll` | `#2F6BC4` | `Users` |
-| 2 | Raw material | `cat-raw` | `#B5801C` | `Container` |
-| 3 | Working capital | `cat-working` | `#C24D86` | `Wallet` |
-| 4 | Compliance and certification | `cat-compliance` | `#3B8A1F` | `BadgeCheck` |
-| 5 | Supplier payments | `cat-supplier` | `#6A4FC2` | `Handshake` |
-| 6 | Facility | `cat-facility` | `#13A08A` | `Factory` |
-| 7 | Logistics and clearance | `cat-logistics` | `#E0612B` | `Ship` |
-
-Validated with the `dataviz` palette validator on `#FFFFFF`, in stack order, and every
-check passes. All seven sit in the lightness band with chroma at or above 0.10. The worst
-adjacent colour-blind ΔE is 10.8 (deutan), the worst normal-vision ΔE is 19.9, and every
-hue is at least 3:1 against white. The stack order was chosen by the validator. Change a
-hue or the order and re-run it.
-
-## Texture
-
-Three textures, the same in the charts and in the HTML legends
-(`.hatch-utilised`, `.hatch-gap`, `.hatch-overlap` in `index.css`):
-
-- **Hatched over a category colour:** the utilised part of a request carrying actuals.
-- **Diagonal hatch on white:** days no request covers.
-- **Cross-hatch on ink:** days two statements both claim.
-
-A dashed outline with no fill is a statement of actuals, which is not a request.
-Texture and fill carry the statement kind, so colour is left to the categories and
-everything survives greyscale printing.
+The chart is one colour: requests in `press`, a statement of actuals as a dashed
+`press-2` outline with no fill, and the average across the requests as a dashed
+`marking` line. The seven-category palette was retired with the category breakdown
+on 1 October 2026.
 
 ## Type
 
@@ -80,8 +54,8 @@ because a stamp is set in capitals.
   then the headline sentence. Not a hero.
 - **Sections** carry a 2px `press` rule across the top (`.section`). Content sits
   in ruled sheets (`.card`): square corners, a hairline edge, no shadow.
-- **One bold element:** the requirement chart with the coverage rail beneath it.
-  Everything else stays quiet.
+- **Three parts only:** the headline, the monthly chart, and the month-by-month
+  table. Any month opens to its lines, remarks and notes as issued.
 - **Radius** is 2px on buttons and fields, 0 everywhere else.
 
 ## Motion
@@ -92,7 +66,6 @@ properties. The page answers interaction instantly.
 
 ## Print
 
-A4 portrait, 12mm margins. The charts redraw at the page width before printing,
-controls are hidden and replaced by a line saying which categories are shown, and
-direct labels replace hover. Sections from the second onward start a new page, and
-table headers repeat across page breaks.
+A4 portrait, 12mm margins. The chart redraws at the page width before printing
+and stays whole on its page. The table runs on with its header repeated, and any
+month left open prints open.

@@ -1,21 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { amount, movement, range, thousands, usd, usdWhole } from '../src/lib/format'
+import { amount, range, thousands, usd, usdWhole } from '../src/lib/format'
 
 describe('money', () => {
   it('puts a credit in parentheses, never a minus sign', () => {
     expect(amount(-1_911_000)).toBe('(19,110.00)')
     expect(usd(-1_911_000)).toBe('(US$19,110.00)')
-    expect(movement(-1_911_000)).toBe('(19,110.00)')
   })
 
   it('shows zero as a figure, not a dash', () => {
     expect(amount(0)).toBe('0.00')
-    expect(movement(0)).toBe('0.00')
   })
 
   it('keeps cents where the source carries them', () => {
     expect(amount(24_310_555)).toBe('243,105.55')
-    expect(movement(73_900)).toBe('+739.00')
   })
 
   it('rounds whole dollars half away from zero', () => {

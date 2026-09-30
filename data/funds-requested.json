@@ -919,6 +919,130 @@
       "notes": [
         "Period runs 15 July to 15 August 2026, leaving 10 to 15 July 2026 uncovered by any statement."
       ]
+    },
+    {
+      "id": "2026-08",
+      "period_start": "2026-08-15",
+      "period_end": "2026-09-15",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 128975.27,
+      "lines": [
+        {
+          "amount": 0.0,
+          "description": "2 Fiber Containers (2 Bagasse)",
+          "remarks": "On Hold"
+        },
+        {
+          "amount": 54000.0,
+          "description": "Staff Salaries for August 2026",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental for August 2026",
+          "remarks": null
+        },
+        {
+          "amount": 38992.27,
+          "description": "Supplier Payments August + September 2026 (Wire Mesh, Trimming Blades + Plates, LPG, Sweet Water, Polybags, Boxes, Printing, Mechanical Items, Disposables, Pest Control, Workers Travel, Stationary)",
+          "remarks": null
+        },
+        {
+          "amount": 0.0,
+          "description": "GOSI+LMRA Labor Social Taxes - August 2026",
+          "remarks": "Paid By EcoFibre Directors ($9,469.00)"
+        },
+        {
+          "amount": 19533.0,
+          "description": "Electricity Bill August 2026",
+          "remarks": null
+        },
+        {
+          "amount": 0.0,
+          "description": "Monthly Petty Cash (Maintenance, Fuel, Local Purchases)",
+          "remarks": "Paid By EcoFibre Directors ($9,500.00)"
+        },
+        {
+          "amount": 0.0,
+          "description": "Staff Accommodation August 2026",
+          "remarks": "Paid By EcoFibre ($6,400.00)"
+        },
+        {
+          "amount": 0.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": "Paid By EcoFibre ($2,000.00)"
+        }
+      ],
+      "income": [],
+      "notes": [
+        "Titled \"Funds Required from 15th August to 15th September 2026\". Lines at $0.00 are struck through on the statement."
+      ]
+    },
+    {
+      "id": "2026-09",
+      "period_start": "2026-09-24",
+      "period_end": "2026-10-24",
+      "prepared_date": null,
+      "kind": "request",
+      "stated_total": 205689.86,
+      "lines": [
+        {
+          "amount": 62907.0,
+          "description": "2 Fiber Containers (Bagasse and Bamboo)",
+          "remarks": null
+        },
+        {
+          "amount": 54741.32,
+          "description": "Staff Salaries for September 2026",
+          "remarks": null
+        },
+        {
+          "amount": 16450.0,
+          "description": "Factory Rental for September 2026",
+          "remarks": null
+        },
+        {
+          "amount": 39918.54,
+          "description": "Supplier Payments September + October 2026 (Wire Mesh, Trimming Blades + Plates, LPG, Sweet Water, Polybags, Boxes, Printing, Mechanical Items, Disposables, Pest Control, Workers Travel, Stationary)",
+          "remarks": null
+        },
+        {
+          "amount": 9469.0,
+          "description": "GOSI+LMRA Labor Social Taxes - September 2026",
+          "remarks": null
+        },
+        {
+          "amount": 19554.0,
+          "description": "Electricity Bill September 2026",
+          "remarks": null
+        },
+        {
+          "amount": 9500.0,
+          "description": "Monthly Petty Cash (Maintenance, Fuel, Local Purchases)",
+          "remarks": null
+        },
+        {
+          "amount": 6400.0,
+          "description": "Staff Accommodation September 2026",
+          "remarks": null
+        },
+        {
+          "amount": 2000.0,
+          "description": "Employee Work Visa Renewals",
+          "remarks": null
+        }
+      ],
+      "income": [
+        {
+          "amount": 15250.0,
+          "description": "Extra Income Recieved from Zultec for 1/2 Million Tooling",
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Titled \"Funds Required from 24th September to 24th October 2026\". Sub-total Sept 2026 Expenses 220,939.86, less extra income 15,250.00, gives Total Funds Required until 24th October 2026 of 205,689.86."
+      ]
     }
   ]
 }

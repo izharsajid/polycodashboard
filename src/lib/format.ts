@@ -32,21 +32,10 @@ export function usdWhole(cents: number): string {
   return cents < 0 ? `(${text})` : text
 }
 
-/** Signed, for a movement between two statements: `+739.00`, `(19,110.00)`. */
-export function movement(cents: number): string {
-  if (cents === 0) return '0.00'
-  return cents > 0 ? `+${amount(cents)}` : amount(cents)
-}
-
 /** A chart axis in thousands of dollars: `250`, `(25)`. */
 export function thousands(cents: number): string {
   const k = Math.round(Math.abs(cents) / 100_000)
   return cents < 0 ? `(${k})` : `${k}`
-}
-
-/** `34.2%`. Always shown beside the base it is a share of. */
-export function percent(fraction: number): string {
-  return `${(fraction * 100).toFixed(1)}%`
 }
 
 /* ---- Dates ------------------------------------------------------------- */
@@ -66,12 +55,6 @@ function parts(iso: string): [number, number, number] {
 export function monthLong(iso: string): string {
   const [y, m] = parts(iso)
   return `${MONTHS_LONG[m - 1]} ${y}`
-}
-
-/** `Jun 2025`, from a date or a `YYYY-MM` id. */
-export function monthShort(iso: string): string {
-  const [y, m] = parts(iso)
-  return `${MONTHS_SHORT[m - 1]} ${y}`
 }
 
 /** `Jun`, for a chart axis where the year is given once. */

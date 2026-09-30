@@ -1,11 +1,9 @@
 /**
  * The visual system. See DESIGN.md for what each token is for and why.
  *
- * Six tokens for the page and seven for the data. The page is an engineering
- * sheet: a galvanised ground, white ruled sheets with square corners, blue-black
- * ink, and one safety-marking yellow that means "selected" and nothing else.
- * The seven category hues are the only other colour anywhere, validated as a set
- * for colour-blind separation and contrast on white.
+ * Six tokens. The page is an engineering sheet: a galvanised ground, white ruled
+ * sheets with square corners, blue-black ink, and one safety-marking yellow that
+ * marks the average line and the active tab, and nothing else.
  *
  * `spacing` and `fontWeight` keep Tailwind's own scales.
  *
@@ -31,25 +29,14 @@ export default {
       },
       /** Hairlines only. Never the only boundary of a control. */
       rule: '#C5CCCF',
-      /** Selection, and nothing else. Never text, always edged in press. */
+      /** The average line and the active tab. Never text. */
       marking: '#F2B300',
       /**
-       * Form errors on the sign-in and account pages. 7.2:1 on sheet. The tab
-       * itself carries no red: manufacturing-finance keeps red for placeholders
-       * and shortfalls, and this tab has neither.
+       * The message when the statements fail to load, and nothing else. 7.2:1
+       * on sheet. manufacturing-finance keeps red for placeholders and
+       * shortfalls, and the figures have neither.
        */
-      alert: { DEFAULT: '#A3261F', wash: '#FBEAE8' },
-
-      /** The seven categories, in stack order. Text never wears these. */
-      cat: {
-        payroll: '#2F6BC4',
-        raw: '#B5801C',
-        working: '#C24D86',
-        compliance: '#3B8A1F',
-        supplier: '#6A4FC2',
-        facility: '#13A08A',
-        logistics: '#E0612B',
-      },
+      alert: '#A3261F',
     },
 
     fontFamily: {

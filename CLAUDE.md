@@ -37,8 +37,8 @@ MD expenses, other customers, or government support. Not in the UI, not in `/dat
 in a comment. If a calculation seems to need one of these, it is the wrong calculation.
 
 **Exception: `data/funds-requested.json` and the Funds Requested tab.** That file holds
-the fourteen monthly Financial Overview statements exactly as EcoFibre issued them to
-Polyco, who already hold every one. The tab is a recap of documents in Polyco's
+the monthly Financial Overview statements exactly as EcoFibre issued them to Polyco,
+who already hold every one. The tab is a recap of documents in Polyco's
 possession, not a new disclosure, so the list above and the `partner-disclosure` skill
 do not apply to it. Its lines, remarks and notes are stored and rendered as written,
 with no redaction and no cleaned copy, including where they name a person's pay, a
@@ -73,7 +73,8 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 ## Status
 
 Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard now has
-one tab, **Funds requested**, built from `data/funds-requested.json`. Its engine is
+one tab, **Funds requested**, built from `data/funds-requested.json`: a headline, a
+monthly chart and a month-by-month table. Its engine is
 `src/engine/`, its page is `src/tabs/funds-requested/`, and its tests are in `tests/`.
 The design system is recorded in `DESIGN.md`.
 

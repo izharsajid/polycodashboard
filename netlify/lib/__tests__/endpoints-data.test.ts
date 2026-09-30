@@ -10,7 +10,7 @@ describe('GET /api/data', () => {
     const res = await data(get('/api/data'))
     expect(res.status).toBe(200)
     const funds = FundsRequested.parse((await res.json()).funds)
-    expect(funds.statements.length).toBe(14)
+    expect(funds.statements.length).toBe(16)
   })
 
   it('asks every cache not to keep a copy and every crawler not to list it', async () => {

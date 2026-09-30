@@ -110,37 +110,6 @@
   .table-rows > tr {
     @apply border-b border-rule;
   }
-
-  /* ---- Textures, the same ones the charts draw ------------------------ */
-
-  /* Over a category colour: the part of a statement already utilised. */
-  .hatch-utilised {
-    background-image: repeating-linear-gradient(45deg, transparent 0 2px, theme('colors.sheet') 2px 3.5px);
-  }
-
-  /* Days no request covers. */
-  .hatch-gap {
-    background-image: repeating-linear-gradient(45deg, transparent 0 2px, theme('colors.press.2') 2px 3px);
-  }
-
-  /* Days two statements both claim. */
-  .hatch-overlap {
-    background-image:
-      repeating-linear-gradient(45deg, transparent 0 2px, theme('colors.sheet') 2px 3px),
-      repeating-linear-gradient(-45deg, transparent 0 2px, theme('colors.sheet') 2px 3px);
-  }
-
-  .hatch-utilised,
-  .hatch-gap,
-  .hatch-overlap {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-}
-
-/* Shown on paper only, where the screen control it replaces cannot be used. */
-.print-only {
-  display: none;
 }
 
 @media print {
@@ -157,18 +126,9 @@
     display: none !important;
   }
 
-  .print-only {
-    display: block !important;
-  }
-
-  /* A chart with its coverage rail, and the statement header, stay whole; the
-     key and long tables run on, with table headers repeated on every page. */
-  .keep-together {
+  /* The chart stays whole; the table runs on, its header repeated on every page. */
+  figure {
     break-inside: avoid;
-  }
-
-  .page-break {
-    break-before: page;
   }
 
   table {

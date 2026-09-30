@@ -16,6 +16,13 @@ export const FundsLine = z.object({
   remarks: z.string().nullable(),
 })
 
+/** Money received that the statement sets against its costs, such as other income. */
+export const FundsIncome = z.object({
+  amount: z.number().finite(),
+  description: z.string().min(1),
+  remarks: z.string().nullable(),
+})
+
 export const FundsStatement = z.object({
   id: z.string().regex(/^\d{4}-\d{2}$/, 'expected YYYY-MM'),
   period_start: IsoDate,
@@ -24,6 +31,8 @@ export const FundsStatement = z.object({
   kind: StatementKind,
   stated_total: z.number().finite(),
   lines: z.array(FundsLine).min(1),
+  /** Absent on the statements that set nothing against their costs. */
+  income: z.array(FundsIncome).default([]),
   notes: z.array(z.string()),
 })
 

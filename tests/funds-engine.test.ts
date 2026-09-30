@@ -59,7 +59,7 @@ describe('what counts as a request', () => {
   it('averages US$211,722 in the headline', () => {
     expect(model.averageCents).toBe(21_172_218)
     expect(model.headline).toBe(
-      '15 funding requests, June 2025 to October 2026, averaging US$211,722 a month.',
+      '15 funding requests, June 2025 to September 2026, averaging US$211,722 a month.',
     )
   })
 })

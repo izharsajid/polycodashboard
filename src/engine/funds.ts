@@ -90,7 +90,6 @@ export function buildModel(data: FundsRequestedT, asAt: string): Model {
   const requestCount = requests.length
   const averageCents = Math.round(requestedCents / requestCount)
   const recordEnd = statements.map((s) => s.periodEnd).sort().reverse()[0]
-  const lastRequestEnd = requests.map((s) => s.periodEnd).sort().reverse()[0]
 
   return {
     statements,
@@ -102,8 +101,10 @@ export function buildModel(data: FundsRequestedT, asAt: string): Model {
     recordEnd,
     asAt,
     headline:
-      `${requestCount} funding requests, ${monthLong(requests[0].periodStart)} to ` +
-      `${monthLong(lastRequestEnd)}, averaging ${usdWhole(averageCents)} a month.`,
+      // Named by statement month, not by the dates a period runs to: the
+      // September 2026 statement runs to 24 October but is September's request.
+      `${requestCount} funding requests, ${monthLong(requests[0].id)} to ` +
+      `${monthLong(requests[requests.length - 1].id)}, averaging ${usdWhole(averageCents)} a month.`,
   }
 }
 

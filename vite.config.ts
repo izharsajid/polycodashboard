@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 /**
@@ -16,4 +16,8 @@ const buildDate = new Intl.DateTimeFormat('en-CA', {
 export default defineConfig({
   plugins: [react()],
   define: { __BUILD_DATE__: JSON.stringify(buildDate) },
+  // The audit log is paused in production until Polyco's users are onboarded
+  // (AUDIT_LOG=on turns it on). The tests run with it on, so what it records
+  // stays proven for when it is switched on.
+  test: { env: { AUDIT_LOG: 'on' } },
 })

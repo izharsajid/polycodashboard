@@ -1,4 +1,4 @@
-import { Lock, Upload } from 'lucide-react'
+import { Upload } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import type { Line } from '../../engine/statement'
 import type { TrackerPo } from '../../engine/tracker'
@@ -69,41 +69,6 @@ function FileField({ onChange, hint }: { onChange: (f: File | null) => void; hin
     <Field label="Supporting file (optional)" hint={hint ?? 'PDF, image or Office file, up to 20 MB.'}>
       <input type="file" className="field py-1.5" onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
     </Field>
-  )
-}
-
-export function UnlockForm({ onUnlock, onDone }: { onUnlock: (name: string, key: string) => Promise<string | null>; onDone: () => void }) {
-  const [name, setName] = useState('')
-  const [key, setKey] = useState('')
-  const s = useSubmit()
-  return (
-    <div className="space-y-4">
-      <p className="flex items-start gap-2 text-table text-press-2">
-        <Lock size={16} aria-hidden className="mt-0.5 shrink-0" />
-        Anyone can read the statement. To record a payment or invoice, correct a figure or upload a file, give your
-        name and the editor passcode. Your name is shown against every change you make.
-      </p>
-      <Form
-        submit="Unlock editing"
-        busy={s.busy}
-        error={s.error}
-        onSubmit={() =>
-          void s.run(async () => {
-            if (!name.trim()) return 'Give your name, so each change shows who made it.'
-            const problem = await onUnlock(name, key)
-            if (!problem) onDone()
-            return problem
-          })
-        }
-      >
-        <Field label="Your name">
-          <input className="field" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
-        </Field>
-        <Field label="Editor passcode">
-          <input className="field" type="password" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="current-password" />
-        </Field>
-      </Form>
-    </div>
   )
 }
 

@@ -97,11 +97,20 @@ An Inventory tab follows. The old `orders`, `order-documents`, `documents` and
 `exports` endpoints and `data/po-tracker.json` predate the live tracker and still
 need a session nobody can create; they can go once nothing depends on them.
 
-**Access is open.** Sign-in, accounts and Netlify's site password were removed on
-1 October 2026 at Izhar's direction, so anyone with the address can read every statement.
+**Access.** Anyone with the address can read the dashboard. Making a change (recording a
+payment or invoice, correcting a figure, fixing a discrepancy, uploading a file) needs a
+signed-in account, and the server stamps each change with that account's name. Accounts
+are added by an administrator on the People page; while email sending is off, the page
+shows the new person's one-time link to pass on. As of 1 October 2026 the only active
+account is izhar@ecofibre.bh (administrator).
+
+**The audit log is paused** at Izhar's direction while he reconciles the statement: nothing
+is written to it. Set `AUDIT_LOG=on` in the Netlify environment when Polyco's users are
+onboarded, and every sign-in, change and upload is logged from then on. The changes
+themselves are always kept, signed, on the statement.
+
 The site stays out of search results through robots.txt, a noindex meta tag and an
-`X-Robots-Tag` header. `AUTH-SPEC.md` describes the sign-in as it was and no longer
-applies. Anything added to `/data` is now public the moment it deploys; check
+`X-Robots-Tag` header. Anything added to `/data` is public the moment it deploys; check
 `partner-disclosure` before adding a file.
 
 Machine, headcount and configuration work stays blocked pending that data. Do not

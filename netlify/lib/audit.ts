@@ -28,6 +28,13 @@ export type NewAuditEntry = {
   ip?: string | null
 }
 
+/**
+ * Paused while Izhar reconciles the statement, at his direction on 1 October
+ * 2026. Set AUDIT_LOG=on in the Netlify environment when Polyco's users are
+ * onboarded, and every sign-in, change and upload is logged from then on.
+ */
+export const auditOn = () => process.env.AUDIT_LOG === 'on'
+
 export async function record(entry: NewAuditEntry, now = new Date()): Promise<AuditEntryT> {
   const parsed = AuditEntry.parse({
     id: newId(),
@@ -42,7 +49,7 @@ export async function record(entry: NewAuditEntry, now = new Date()): Promise<Au
   })
 
   // create, not put: an entry is written once and never revised.
-  await audit().create(auditKey(parsed), parsed)
+  if (auditOn()) await audit().create(auditKey(parsed), parsed)
   return parsed
 }
 

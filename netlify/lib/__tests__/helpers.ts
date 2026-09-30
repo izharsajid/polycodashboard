@@ -1,4 +1,5 @@
 import type { Context } from '@netlify/functions'
+import { hashPassword } from '../password'
 import type { RoleT, UserStatusT, UserT } from '../schema'
 import { createSession, sessionCookie } from '../sessions'
 import { createUser, getUserByEmail, saveUser } from '../users'
@@ -24,13 +25,20 @@ export function get(path: string, headers: Record<string, string> = {}): Request
   return new Request(`https://dashboard.ecofibre.bh${path}`, { method: 'GET', headers })
 }
 
-/**
- * An account for the endpoints that still check for a session (the Orderbook's
- * orders and documents). There is no sign-in any more, so the hash is a stand-in:
- * nothing ever verifies it.
- */
+/** The cookie a browser would send back, taken from a response's Set-Cookie. */
+export function cookieFrom(res: Response): string {
+  const setCookie = res.headers.get('set-cookie')
+  if (!setCookie) throw new Error('That response set no cookie')
+  return setCookie.split(';')[0]
+}
+
+export function signedIn(res: Response): Record<string, string> {
+  return { cookie: cookieFrom(res) }
+}
+
 export async function seedUser(input: {
   email: string
+  password?: string
   name?: string
   role?: RoleT
   status?: UserStatusT
@@ -40,14 +48,19 @@ export async function seedUser(input: {
     name: input.name ?? 'Test Person',
     role: input.role ?? 'member',
   })
-  const status = input.status ?? 'active'
-  return saveUser({ ...user, status, passwordHash: status === 'active' ? 'test-only' : user.passwordHash })
+  const status = input.status ?? (input.password ? 'active' : 'invited')
+  return saveUser({
+    ...user,
+    status,
+    passwordHash: input.password ? await hashPassword(input.password) : user.passwordHash,
+  })
 }
 
 /** The cookie headers of a fresh session for an account already seeded. */
 export async function sessionFor(email: string): Promise<Record<string, string>> {
   const user = await getUserByEmail(email)
   if (!user) throw new Error(`No account for ${email}`)
+  if (user.status !== 'active') await saveUser({ ...user, status: 'active', passwordHash: user.passwordHash ?? 'test-only' })
   const { token } = await createSession({ userId: user.id })
   return { cookie: sessionCookie(token).split(';')[0] }
 }

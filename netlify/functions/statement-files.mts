@@ -1,7 +1,7 @@
 import type { Config, Context } from '@netlify/functions'
 import { record } from '../lib/audit'
 import { ALLOWED_DESCRIPTION, getDocument, MAX_FILE_BYTES, readDocumentBytes, saveDocument, sniff } from '../lib/documents'
-import { refuseUnlessEditor } from '../lib/editor'
+import { requireEditor } from '../lib/editor'
 import { clientIp, fail, json } from '../lib/http'
 import { orderIdFor, TARGET } from '../lib/statement-store'
 
@@ -9,7 +9,7 @@ import { orderIdFor, TARGET } from '../lib/statement-store'
  * Files on the statement: an invoice for a cargo clearance line, a remittance
  * for a payment, anything that supports a figure.
  *
- *   POST /api/statement/files?target=row-81   multipart: file, by   (editor)
+ *   POST /api/statement/files?target=row-81   multipart: file   (signed in)
  *   GET  /api/statement/files?id=...&action=view|download          (anyone)
  *
  * The type is read from the file's own bytes, never its name, and the stored
@@ -38,16 +38,17 @@ export default async (req: Request, context: Context) => {
   }
 
   if (req.method !== 'POST') return fail(405, 'Use GET to read a file or POST to upload one.')
-  const refused = refuseUnlessEditor(req)
-  if (refused) return refused
+  const gate = await requireEditor(req)
+  if ('refused' in gate) return gate.refused
+  const editor = gate.authed.user
 
   const target = url.searchParams.get('target') ?? ''
   if (!TARGET.test(target)) return fail(400, 'Say which line, entry or PO the file belongs to.')
 
   const form = await req.formData().catch(() => null)
   const file = form?.get('file')
-  const by = String(form?.get('by') ?? '').trim().slice(0, 80)
-  if (!(file instanceof File) || !by) return fail(400, 'Choose a file and give your name.')
+  const by = editor.name
+  if (!(file instanceof File)) return fail(400, 'Choose a file to upload.')
   if (file.size === 0 || file.size > MAX_FILE_BYTES) return fail(413, `Files must be under ${MAX_FILE_BYTES / 1024 / 1024} MB.`)
 
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -61,7 +62,7 @@ export default async (req: Request, context: Context) => {
     bytes,
     contentType: kind.contentType,
     uploadedBy: by,
-    uploadedByEmail: '',
+    uploadedByEmail: editor.email,
   })
   await record({
     action: 'document_uploaded',

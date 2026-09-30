@@ -16,7 +16,11 @@ Uncovered advance
     − Containers in process, month after
 ```
 
-At 28 July 2026 this returns **1,410,206.34**. It is asserted in the engine tests. If a
+At 28 July 2026 this returned **1,410,206.34**. Since 1 October 2026 the statement tab
+works it out live instead (`src/engine/statement.ts`): efdashboard.com decides which
+orders are delivered and which are still open, so the containers lines of the workbook
+are no longer deducted separately. The workbook's own figure is shown beside the live
+one, with the difference explained as numbered discrepancies. If a
 change moves that number, either the change is wrong or the underlying data changed and
 the test must be updated deliberately, with the reason recorded in the commit message.
 

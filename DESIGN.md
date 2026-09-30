@@ -17,6 +17,8 @@ rows, which read as too dense for the dashboard's readers.
 | `rule` | `#C5CCCF` | Hairlines and card edges | |
 | `marking` | `#F2B300` | The active tab and a chart's reference line. Never text. | |
 | `income` / `income-wash` | `#1E6B34` / `#E3F2E6` | Money coming in or reducing a request: other income, credits, receipts. Always with an icon and a word. | 5.65:1 on wash, 6.55:1 on white |
+| `info` / `info-wash` | `#1F4E8C` / `#E6EEF9` | Orders on their way: container requested or confirmed, booked; PO links | 7.11:1 on wash |
+| `recharge` / `recharge-wash` | `#A8431A` / `#FCEBE3` | Cargo clearing, freight and courier recharges on the statement, always with the ship icon | 5.21:1 on wash |
 | `caution` / `caution-wash` | `#7A4B00` / `#FDF1D6` | Lines on hold or paid elsewhere, flagged statements, unattributed receipts | 6.61:1 on wash |
 | `alert` | `#A3261F` | Only the message when data fails to load | 7.2:1 on sheet |
 
@@ -77,8 +79,11 @@ width. Every figure uses tabular numerals.
 - **Category bar** (`CategoryBar`): a rounded strip of a month's costs by category, with
   the split as text for screen readers.
 - **Badge** (`Badge`): neutral, income or caution, always with a word.
-- **Month bars** (`MonthBars`): the shared one-colour monthly chart, used on the
-  statement tab.
+- **Status pill** (`StatePill`): an order's status in efdashboard.com's words, green
+  when dispatched, blue on its way, amber held or awaiting a PO, grey cancelled.
+- **PO files** (`PoDocuments`): each file efdashboard.com holds for a PO, viewable and
+  downloadable through this site.
+- **Month bars** (`MonthBars`): the shared one-colour monthly chart.
 
 ## Print
 

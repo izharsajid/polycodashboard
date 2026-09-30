@@ -70,7 +70,7 @@ export default function FixView({
               <span className="block text-press">{d.resolved.note}</span>
             </span>
           </p>
-          {editor && (
+          {editor && d.resolved.entryId && (
             <button
               type="button"
               className="btn-secondary"

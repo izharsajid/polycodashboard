@@ -16,7 +16,7 @@
  * and are never deducted a second time (polyco-ledger skill).
  */
 import { amount, day } from '../lib/format'
-import type { EntryT, LedgerDisputesT, WorkbookRowT, WorkbookT } from './statementSchema'
+import { NO_RULES, type EntryT, type LedgerDisputesT, type StatementRulesT, type WorkbookRowT, type WorkbookT } from './statementSchema'
 import type { Tracker, TrackerPo } from './tracker'
 
 export type LineKind = 'order' | 'receipt' | 'recharge' | 'charge'
@@ -161,36 +161,64 @@ function iso(y: number, m: number, d: number): string | null {
  * month swapped; text is read day first. Anything after the workbook's as-at
  * date, or that reads two ways, is not confirmed.
  */
-export function readDate(v: string | number | null, asAt: string): { date: string | null; status: DateStatus; note: string | null; swapped: string | null } {
+export type ReadDate = {
+  date: string | null
+  status: DateStatus
+  note: string | null
+  /** The other reading of a date cell with a day of 12 or under. */
+  swapped: string | null
+  /** The date cell exactly as stored, before any day-first reading. */
+  stored: string | null
+  /** True when the day-first rule chose the reading. */
+  dayFirst: boolean
+}
+
+/**
+ * A workbook date. A date cell arrives as YYYY-MM-DD. With the day-first rule
+ * (data/statement-rules.json), a cell with a day of 12 or under is read with day
+ * and month swapped, because the dates were typed day first and Excel stored
+ * them month first. Text is always read day first. Anything after the
+ * workbook's as-at date, or that reads two ways, is not confirmed.
+ */
+export function readDate(v: string | number | null, asAt: string, dayFirst = false): ReadDate {
   const raw = text(v)
-  if (!raw || raw === '-') return { date: null, status: 'missing', note: 'No date on the workbook.', swapped: null }
+  const none = { swapped: null, stored: null, dayFirst: false }
+  if (!raw || raw === '-') return { date: null, status: 'missing', note: 'No date on the workbook.', ...none }
   if (ISO.test(raw)) {
     const [y, m, d] = raw.split('-').map(Number)
     const swapped = d <= 12 && d !== m ? iso(y, d, m) : null
+    if (dayFirst && swapped) {
+      const note = `The workbook's date cell reads ${day(raw)}; the dates were typed day first, so it is read as ${day(swapped)}.`
+      return swapped <= asAt
+        ? { date: swapped, status: 'confirmed', note, swapped: raw, stored: raw, dayFirst: true }
+        : { date: null, status: 'disputed', note: `${note} That is after the workbook's as-at date of ${day(asAt)}. Not yet confirmed.`, swapped: raw, stored: raw, dayFirst: true }
+    }
     if (raw > asAt) {
       return {
         date: null,
         status: 'disputed',
         note: `The workbook reads ${day(raw)}, after its as-at date of ${day(asAt)}${swapped ? `; with day and month swapped it would be ${day(swapped)}` : ''}. Not yet confirmed.`,
         swapped,
+        stored: raw,
+        dayFirst: false,
       }
     }
-    return { date: raw, status: 'confirmed', note: null, swapped }
+    return { date: raw, status: 'confirmed', note: null, swapped, stored: raw, dayFirst: false }
   }
   let m = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2}|\d{4})$/)
   if (m) {
     const y = Number(m[3]) < 100 ? 2000 + Number(m[3]) : Number(m[3])
     const date = iso(y, Number(m[2]), Number(m[1]))
-    if (date && date <= asAt) return { date, status: 'confirmed', note: null, swapped: null }
-    return { date: null, status: 'disputed', note: `The workbook reads "${raw}", which is not a usable date.`, swapped: null }
+    if (date && date <= asAt) return { date, status: 'confirmed', note: null, ...none }
+    return { date: null, status: 'disputed', note: `The workbook reads "${raw}", which is not a usable date.`, ...none }
   }
   m = raw.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,})\s+(\d{4})$/)
   if (m && MONTHS[m[2].slice(0, 3).toLowerCase()]) {
     const date = iso(Number(m[3]), MONTHS[m[2].slice(0, 3).toLowerCase()], Number(m[1]))
-    if (date && date <= asAt) return { date, status: 'confirmed', note: null, swapped: null }
-    if (date) return { date: null, status: 'disputed', note: `The workbook reads "${raw}", after its as-at date. Not yet confirmed.`, swapped: null }
+    if (date && date <= asAt) return { date, status: 'confirmed', note: null, ...none }
+    if (date) return { date: null, status: 'disputed', note: `The workbook reads "${raw}", after its as-at date. Not yet confirmed.`, ...none }
   }
-  return { date: null, status: 'missing', note: `The workbook reads "${raw}", which is not a single usable date.`, swapped: null }
+  return { date: null, status: 'missing', note: `The workbook reads "${raw}", which is not a single usable date.`, ...none }
 }
 
 /* ---- PO numbers ------------------------------------------------------- */
@@ -240,8 +268,11 @@ export function buildStatement(
   tracker: Tracker | null,
   entries: EntryT[],
   disputes: LedgerDisputesT,
+  rules: StatementRulesT = NO_RULES,
 ): StatementModel {
   const asAt = workbook.as_at
+  const dayFirst = rules.date_cells_day_first.applies
+  let readDayFirst = 0
   const discrepancies: Discrepancy[] = []
   const flag = (d: Omit<Discrepancy, 'id' | 'resolved'>, line?: Line) => {
     const id = discrepancies.length + 1
@@ -292,8 +323,10 @@ export function buildStatement(
     const g = num(r.delivered)
     const h = num(r.received)
     const loaded = text(r.loaded)
-    const recv = readDate(r.received_date, asAt)
-    const deliv = readDate(r.delivery_date, asAt)
+    const recv = readDate(r.received_date, asAt, dayFirst)
+    const deliv = readDate(r.delivery_date, asAt, dayFirst)
+    if (recv.dayFirst) readDayFirst += 1
+    if (deliv.dayFirst) readDayFirst += 1
 
     const line: Line = {
       key: `row-${r.row}`,
@@ -363,8 +396,9 @@ export function buildStatement(
               ],
             }, line)
           }
-          const wbDate = readDate(r.delivery_date, '9999-12-31')
-          if (t.dispatchDate && wbDate.date && wbDate.date !== t.dispatchDate) {
+          const wbDate = readDate(r.delivery_date, '9999-12-31', dayFirst)
+          // Either reading of the cell agreeing with efdashboard.com is agreement.
+          if (t.dispatchDate && wbDate.date && wbDate.date !== t.dispatchDate && wbDate.stored !== t.dispatchDate) {
             const swappedMatch = wbDate.swapped === t.dispatchDate
             flag({
               severity: 'medium',
@@ -507,12 +541,13 @@ export function buildStatement(
     } else if (dispute) {
       line.receivedDate = null
       line.receivedDateStatus = 'disputed'
-      line.dateNote = `The workbook dates it ${day(dispute.ledger_date)}. ${dispute.other_source}`
+      line.dateNote = `The workbook dates it ${day(recv.date ?? dispute.ledger_date)}${recv.dayFirst ? ' (read day first)' : ''}. ${dispute.other_source}`
     } else if (line.receivedCents && line.receivedDateStatus !== 'confirmed') {
       line.dateNote = recv.note
     } else if (line.deliveredCents && line.deliveryDateStatus !== 'confirmed') {
       line.dateNote = deliv.note
     }
+    if (!line.dateNote && (recv.dayFirst || deliv.dayFirst)) line.dateNote = (recv.dayFirst ? recv.note : deliv.note)
     if (deliveryFix?.value) {
       line.deliveryDate = deliveryFix.value
       line.deliveryDateStatus = 'confirmed'
@@ -520,8 +555,9 @@ export function buildStatement(
     }
     if (line.receivedCents && (line.receivedDateStatus !== 'confirmed' || receivedFix)) {
       const options = [
-        ...(dispute ? [{ label: 'Other document', date: dispute.other_date }, { label: 'Workbook', date: dispute.ledger_date }] : []),
-        ...(recv.swapped ? [{ label: 'Day and month swapped', date: recv.swapped }] : []),
+        ...(dispute ? [{ label: 'Other document', date: dispute.other_date }] : []),
+        ...(recv.date ? [{ label: recv.dayFirst ? 'Workbook, read day first' : 'Workbook', date: recv.date }] : []),
+        ...(recv.swapped && recv.swapped !== recv.date && recv.swapped <= asAt ? [{ label: recv.dayFirst ? 'Workbook, as stored' : 'Day and month swapped', date: recv.swapped }] : []),
       ]
       flag({
         severity: 'medium',
@@ -779,6 +815,20 @@ export function buildStatement(
       key: 'workbook-exposure',
       fixes: [ack('Agree the live figure', `Accepts ${amount(exposureCents)} as the exposure.`)],
     })
+  }
+
+  // The day-first rule, on the list as a settled decision with its evidence.
+  if (dayFirst && readDayFirst) {
+    const r = rules.date_cells_day_first
+    flag({
+      severity: 'low',
+      title: `${readDayFirst} workbook dates were typed day first, and are read that way`,
+      detail: r.evidence,
+      row: null, po: null, workbook: 'Month first', master: 'Day first',
+      key: 'rule:dates-day-first',
+      fixes: [],
+    })
+    discrepancies[discrepancies.length - 1].resolved = { entryId: '', by: r.confirmed_by, at: `${r.confirmed_on}T00:00:00Z`, note: 'Confirmed rule: dates in the workbook were typed day first.' }
   }
 
   // Settled discrepancies: the latest live entry that names each one.

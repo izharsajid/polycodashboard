@@ -65,7 +65,7 @@ export default function StatementTab() {
 }
 
 function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT; tracker: Tracker | null; trackerError: string | null; reload: () => void }) {
-  const model = useMemo(() => buildStatement(data.workbook, tracker, data.entries, data.disputes), [data, tracker])
+  const model = useMemo(() => buildStatement(data.workbook, tracker, data.entries, data.disputes, data.rules), [data, tracker])
   const { editor } = useEditor()
   const [views, setViews] = useState<View[]>([])
   const [severity, setSeverity] = useState<'all' | Discrepancy['severity']>('all')

@@ -1,6 +1,7 @@
 import type { Config } from '@netlify/functions'
 import disputes from '../../data/ledger-disputes.json' with { type: 'json' }
 import workbook from '../../data/polyco-statement.json' with { type: 'json' }
+import rules from '../../data/statement-rules.json' with { type: 'json' }
 import { json, wrongMethod } from '../lib/http'
 import { listEntries, listStatementFiles } from '../lib/statement-store'
 
@@ -18,6 +19,7 @@ export default async (req: Request) => {
     {
       workbook,
       disputes,
+      rules,
       entries,
       files: files.map((f) => ({
         id: f.id,

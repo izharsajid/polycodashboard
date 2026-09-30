@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { buildModel } from '../src/engine/funds'
 import { buildStatement } from '../src/engine/statement'
-import { LedgerDisputes, Workbook } from '../src/engine/statementSchema'
+import { LedgerDisputes, StatementRules, Workbook } from '../src/engine/statementSchema'
 import { FundsRequested } from '../src/engine/schema'
 
 const read = (p: string) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'))
@@ -30,6 +30,7 @@ try {
     null,
     [],
     LedgerDisputes.parse(read('../data/ledger-disputes.json')),
+    StatementRules.parse(read('../data/statement-rules.json')),
   )
   console.log(
     `Statement workbook: ${statement.lines.length} rows, ${statement.discrepancies.length} discrepancies ` +

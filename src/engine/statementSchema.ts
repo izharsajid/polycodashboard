@@ -47,11 +47,20 @@ export const Workbook = z.object({
 })
 
 /**
- * A change recorded on this site: a payment in, an invoice out, or a correction
- * to a workbook figure. Recorded changes are added to the statement; nothing in
- * the workbook is overwritten, and a correction shows the figure it replaces.
+ * A change recorded on this site: a payment in, an invoice out, a correction to
+ * a workbook line, or a resolution of a discrepancy. Recorded changes are added
+ * to the statement; nothing in the workbook is overwritten, and a correction
+ * shows what it replaces.
  */
-export const EntryKind = z.enum(['payment', 'invoice', 'correction'])
+export const EntryKind = z.enum(['payment', 'invoice', 'correction', 'resolution'])
+
+/**
+ * What a correction changes. A figure (delivered, received, PO value), a date
+ * (received or delivered), the PO a line belongs to, or leaving a line out of
+ * every total (a duplicate). `po_amount` with no row adds a PO that
+ * efdashboard.com has and the workbook does not.
+ */
+export const CorrectionField = z.enum(['delivered', 'received', 'po_amount', 'received_date', 'delivery_date', 'po', 'exclude'])
 export const InvoiceKind = z.enum(['goods', 'recharge', 'other'])
 
 export const Entry = z.object({
@@ -66,7 +75,11 @@ export const Entry = z.object({
   po: z.string().max(40).nullable(),
   /** A correction: the workbook row and which figure on it. */
   row: z.number().int().nullable(),
-  field: z.enum(['delivered', 'received', 'po_amount']).nullable(),
+  field: CorrectionField.nullable(),
+  /** A corrected date (YYYY-MM-DD) or PO number, for the fields that are not money. */
+  value: z.string().max(40).nullable().default(null),
+  /** The discrepancy this change settles, by its stable key. */
+  key: z.string().max(120).nullable().default(null),
   reference: z.string().max(120).nullable(),
   description: z.string().min(1).max(300),
   by: z.string().min(1).max(80),

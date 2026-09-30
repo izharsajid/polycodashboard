@@ -74,3 +74,23 @@ describe('PO files from efdashboard.com', () => {
     expect((await bad('po=2679713&file=')).status).toBe(400)
   })
 })
+
+describe('fixing a discrepancy', () => {
+  const create = (entry: Record<string, unknown>) =>
+    entriesEndpoint(post('/api/statement/entries', { action: 'create', entry: { ...payment.entry, ...entry } }, KEY), ctx())
+
+  it('records a resolution that names its discrepancy', async () => {
+    expect((await create({ kind: 'resolution', amount: 0, key: 'broken-serials', description: 'Noted' })).status).toBe(201)
+    expect((await create({ kind: 'resolution', amount: 0, description: 'Noted' })).status).toBe(400)
+  })
+
+  it('records a date fix only with a real date', async () => {
+    expect((await create({ kind: 'correction', row: 150, field: 'received_date', value: '2026-02-11', amount: 0, key: 'receipt-date:row-150' })).status).toBe(201)
+    expect((await create({ kind: 'correction', row: 150, field: 'received_date', value: 'soon', amount: 0 })).status).toBe(400)
+  })
+
+  it('adds a missing PO only when it names the PO', async () => {
+    expect((await create({ kind: 'correction', row: null, field: 'po_amount', po: '2679969', amount: 40000, key: 'missing-po:2679969' })).status).toBe(201)
+    expect((await create({ kind: 'correction', row: null, field: 'po_amount', po: null, amount: 40000 })).status).toBe(400)
+  })
+})

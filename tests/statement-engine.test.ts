@@ -18,7 +18,7 @@ const line = (po: string) => model.lines.find((l) => l.po === po && l.kind === '
 
 const entry = (e: Partial<EntryT>): EntryT => ({
   id: 'e1', kind: 'payment', date: '2026-09-30', amount: 0, invoiceKind: null, po: null, row: null, field: null,
-  reference: null, description: 'test', by: 'Test', at: '2026-09-30T12:00:00Z', voided: null, ...e,
+  reference: null, description: 'test', by: 'Test', at: '2026-09-30T12:00:00Z', voided: null, value: null, key: null, ...e,
 })
 
 describe('the workbook as issued', () => {
@@ -119,5 +119,51 @@ describe('changes recorded on this site', () => {
   it('ignores a voided entry', () => {
     const next = buildStatement(workbook, tracker, [entry({ amount: 1000, voided: { by: 'Test', at: 'x', reason: 'entered twice' } })], disputes)
     expect(next.position.receivedCents).toBe(model.position.receivedCents)
+  })
+})
+
+describe('fixing discrepancies', () => {
+  const find = (m: typeof model, title: string) => m.discrepancies.find((d) => d.title === title)!
+
+  it('offers a fix for every discrepancy, each with a stable key', () => {
+    for (const d of model.discrepancies) {
+      expect(d.fixes.length, d.title).toBeGreaterThan(0)
+      expect(d.key, d.title).toMatch(/\S/)
+    }
+    expect(new Set(model.discrepancies.map((d) => d.key)).size).toBe(model.discrepancies.length)
+  })
+
+  it('leaves a copied line out of every total, and marks the discrepancy settled', () => {
+    const d = find(model, 'Row 187 may duplicate row 183')
+    const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: 187, field: 'exclude', description: 'Copy of 2679302-1', key: d.key, reference: d.title })], disputes)
+    expect(model.position.deliveredCents - next.position.deliveredCents).toBe(1_940_280)
+    expect(next.lines.find((l) => l.row === 187)!.status).toBe('excluded')
+    const settled = next.discrepancies.find((x) => x.key === d.key)!
+    expect(settled.resolved?.by).toBe('Test')
+    expect(settled.title).toBe(d.title)
+    expect(next.openDiscrepancies).toBeLessThan(model.openDiscrepancies)
+  })
+
+  it('puts an undated receipt into its month once a date is set', () => {
+    const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: 150, field: 'received_date', value: '2026-02-11', description: 'Bank advice', key: 'receipt-date:row-150' })], disputes)
+    const line = next.lines.find((l) => l.row === 150)!
+    expect(line.receivedDate).toBe('2026-02-11')
+    expect(next.unresolved.length).toBe(model.unresolved.length - 1)
+  })
+
+  it('adds a PO efdashboard.com has and the workbook lacks as an open order', () => {
+    const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: null, field: 'po_amount', po: '2679969', amount: 40000, description: 'PO value', key: 'missing-po:2679969' })], disputes)
+    expect(next.position.awaitingCents - model.position.awaitingCents).toBe(4_000_000)
+    expect(next.masterOnly.map((p) => p.po)).not.toContain('2679969')
+  })
+
+  it('matches a line to the PO assigned to it', () => {
+    const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: 187, field: 'po', value: '2680213-1', description: 'Assigned', key: 'no-po:row-187' })], disputes)
+    expect(next.lines.find((l) => l.row === 187)!.po).toBe('2680213-1')
+  })
+
+  it('undoes a fix when its entry is voided', () => {
+    const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: 187, field: 'exclude', description: 'x', key: 'twin:row-187', voided: { by: 'Test', at: 'x', reason: 'undo' } })], disputes)
+    expect(next.position.deliveredCents).toBe(model.position.deliveredCents)
   })
 })

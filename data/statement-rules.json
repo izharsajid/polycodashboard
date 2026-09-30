@@ -1,0 +1,9 @@
+{
+  "note": "How the statement reads the workbook, where the workbook itself is ambiguous. Each rule is a confirmed decision, recorded with who confirmed it and on what evidence.",
+  "date_cells_day_first": {
+    "applies": true,
+    "confirmed_by": "Izhar",
+    "confirmed_on": "2026-10-01",
+    "evidence": "Dates were typed day first, and Excel stored every one with a day of 12 or under month first. Izhar confirmed 211,565.05 (row 163) was received in May 2026 and 217,000.00 (row 165) in June 2026; 29 dispatch dates match efdashboard.com only when read day first; and receipts such as 47,845.00 (row 76) would otherwise fall before their own PO."
+  }
+}

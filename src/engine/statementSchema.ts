@@ -121,3 +121,21 @@ export const LedgerDisputes = z.object({
 })
 
 export type LedgerDisputesT = z.infer<typeof LedgerDisputes>
+
+/** `data/statement-rules.json`: confirmed decisions on how to read the workbook. */
+export const StatementRules = z.object({
+  note: z.string(),
+  date_cells_day_first: z.object({
+    applies: z.boolean(),
+    confirmed_by: z.string(),
+    confirmed_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    evidence: z.string(),
+  }),
+})
+
+export type StatementRulesT = z.infer<typeof StatementRules>
+
+export const NO_RULES: StatementRulesT = {
+  note: '',
+  date_cells_day_first: { applies: false, confirmed_by: '', confirmed_on: '1970-01-01', evidence: '' },
+}

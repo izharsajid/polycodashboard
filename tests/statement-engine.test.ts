@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { buildStatement, readDate, readPo } from '../src/engine/statement'
-import { LedgerDisputes, Workbook, type EntryT } from '../src/engine/statementSchema'
+import { LedgerDisputes, StatementRules, Workbook, type EntryT } from '../src/engine/statementSchema'
 import { buildTracker } from '../src/engine/tracker'
 import { TrackerPayload } from '../src/engine/trackerSchema'
 
@@ -13,6 +13,7 @@ const read = (p: string) => JSON.parse(readFileSync(new URL(p, import.meta.url),
 const workbook = Workbook.parse(read('../data/polyco-statement.json'))
 const tracker = buildTracker(TrackerPayload.parse(read('./fixtures/tracker-2026-09-30.json')))
 const disputes = LedgerDisputes.parse(read('../data/ledger-disputes.json'))
+const rules = StatementRules.parse(read('../data/statement-rules.json'))
 const model = buildStatement(workbook, tracker, [], disputes)
 const line = (po: string) => model.lines.find((l) => l.po === po && l.kind === 'order')!
 
@@ -165,5 +166,43 @@ describe('fixing discrepancies', () => {
   it('undoes a fix when its entry is voided', () => {
     const next = buildStatement(workbook, tracker, [entry({ kind: 'correction', row: 187, field: 'exclude', description: 'x', key: 'twin:row-187', voided: { by: 'Test', at: 'x', reason: 'undo' } })], disputes)
     expect(next.position.deliveredCents).toBe(model.position.deliveredCents)
+  })
+})
+
+describe('dates typed day first (confirmed by Izhar, 1 October 2026)', () => {
+  const ruled = buildStatement(workbook, tracker, [], disputes, rules)
+  const row = (n: number) => ruled.lines.find((l) => l.row === n)!
+
+  it('reads 211,565.05 as received on 12 May 2026 and 217,000.00 on 11 June 2026', () => {
+    expect(row(163).receivedCents).toBe(21_156_505)
+    expect(row(163).receivedDate).toBe('2026-05-12')
+    expect(row(165).receivedDate).toBe('2026-06-11')
+    expect(ruled.discrepancies.some((d) => d.row === 163 || d.row === 165)).toBe(false)
+  })
+
+  it('keeps the cell as stored visible on the line', () => {
+    expect(row(163).dateNote).toContain('5 Dec 2026')
+    expect(row(163).dateNote).toContain('12 May 2026')
+  })
+
+  it('stops flagging dispatch dates that only differed by the swap', () => {
+    const before = model.discrepancies.filter((d) => /dispatch date differs/.test(d.title)).length
+    const after = ruled.discrepancies.filter((d) => /dispatch date differs/.test(d.title)).length
+    expect(after).toBeLessThan(before)
+    expect(ruled.discrepancies.find((d) => d.title === 'PO 2576475-1: dispatch date differs')).toBeUndefined()
+  })
+
+  it('leaves a date cell that efdashboard.com confirms as stored alone', () => {
+    expect(ruled.discrepancies.some((d) => d.row === 30 && /dispatch date/.test(d.title))).toBe(false)
+  })
+
+  it('records the rule itself as a settled item', () => {
+    const r = ruled.discrepancies.find((d) => d.key === 'rule:dates-day-first')!
+    expect(r.resolved?.by).toBe('Izhar')
+  })
+
+  it('still reads a date the other way only when there is no rule', () => {
+    expect(readDate('2026-12-05', '2026-09-30').status).toBe('disputed')
+    expect(readDate('2026-12-05', '2026-09-30', true).date).toBe('2026-05-12')
   })
 })

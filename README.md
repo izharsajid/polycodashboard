@@ -19,8 +19,8 @@ literal representing a business fact.
 
 | File | What it holds |
 |---|---|
-| `data/polyco-ledger.json` | The Polyco statement ledger, 174 rows, generated from the source workbook |
-| `data/monthly-funding-statements.json` | The 14 monthly Financial Overviews and their reconciliation to the ledger |
+| `data/funds-requested.json` | The 14 monthly Financial Overview statements exactly as issued, 149 lines. The Funds Requested tab. |
+| `data/po-tracker.json` | The PO Tracker, kept for the Orderbook tab that follows |
 
 ## Changing a number
 

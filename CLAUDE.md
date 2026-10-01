@@ -89,8 +89,9 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   own rules ported to `src/engine/tracker.ts`, and every PO file viewable and
   downloadable through `/api/po-document`. The Supabase URL and public key are
   `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
-- **Machines**, month by month: what each thermoforming, lamination, trimming and
-  X-ray machine runs, until when, and which open POs it is making. Thermoforming,
+- **Machines**: a Gantt chart of when every machine runs until, September to
+  December 2026, then thermoforming, trimming, lamination and X-ray in turn, each
+  machine with what it runs from today and which open POs it is making. Thermoforming,
   lamination and the manual trimmers follow `data/machine-plan.json`, typed from
   Izhar's production and finishing department plans of 1 October 2026; change a date
   there through a PR. The auto trimmers and X-ray come live from efdashboard.com's Line

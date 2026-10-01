@@ -173,6 +173,8 @@ export type MachinesModel = {
   source: string
   machines: Machine[]
   months: string[]
+  /** The whole span the months cover, first day to last, for the Gantt chart. */
+  range: { from: string; to: string }
   /** Open POs on efdashboard.com no planned run serves. */
   unplanned: TrackerPo[]
   /** Where efdashboard.com's Line Usage disagrees with the plan for a forming machine. */
@@ -239,7 +241,8 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineU
     return agree ? [] : [{ machine: m.name, plan: planText, lineUsage: luText }]
   })
 
-  return { asAt: plan.as_at, source: plan.source, machines, months, unplanned, differences }
+  const range = { from: `${months[0]}-01`, to: `${months.at(-1)}-${String(daysIn(months.at(-1)!)).padStart(2, '0')}` }
+  return { asAt: plan.as_at, source: plan.source, machines, months, range, unplanned, differences }
 }
 
 export function shiftMonth(month: string, by: number): string {
@@ -278,4 +281,41 @@ export function machineMonth(machine: Machine, month: string): MachineMonth {
   const stopDay = machine.stops && machine.stops.startsWith(month) ? dayOf(machine.stops) : null
   const pauseDays = runs.filter((r) => r.stopsAfter && r.until?.startsWith(month)).map((r) => dayOf(r.until!))
   return { machine, segments, stopDay, pauseDays, active: segments.length > 0, runs }
+}
+
+/** Days since 1 January 1970, for placing dates on a scale. */
+export const dayNumber = (iso: string) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / 86_400_000
+
+export function addDays(iso: string, by: number): string {
+  return new Date((dayNumber(iso) + by) * 86_400_000).toISOString().slice(0, 10)
+}
+
+/** One run as a bar on the Gantt chart: first and last running day, both inclusive. */
+export type Bar = { product: string; family: Family; from: string; to: string; startsBefore: boolean; runsOn: boolean; run: Run }
+
+/**
+ * A machine's runs laid across a span. `until` is the change-over day, so a run
+ * ends the day before, unless the machine stops that day or stands idle after it.
+ */
+export function timeline(machine: Machine, span: { from: string; to: string }): Bar[] {
+  return machine.runs.flatMap((r) => {
+    const last = r.until === null ? null : r.stopsAfter || r.until === machine.stops ? r.until : addDays(r.until, -1)
+    const from = r.from !== null && r.from > span.from ? r.from : span.from
+    const to = last === null || last > span.to ? span.to : last
+    if (to < from) return []
+    return [{
+      product: r.product,
+      family: r.family,
+      from,
+      to,
+      startsBefore: r.from === null || r.from < span.from,
+      runsOn: last === null || last > span.to,
+      run: r,
+    }]
+  })
+}
+
+/** What a machine still has to run from a given day, the current run first. */
+export function upcoming(machine: Machine, today: string): Bar[] {
+  return timeline(machine, { from: today, to: '9999-12-31' })
 }

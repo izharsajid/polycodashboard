@@ -38,15 +38,59 @@ describe('what each machine runs', () => {
     expect(machineMonth(machine('Machine 4'), '2026-12').segments[0].runsOn).toBe(true)
   })
 
-  it('reads lamination and trimming live from efdashboard.com', () => {
-    expect(machine('Laminator 1').status).toBe('offline')
-    expect(machine('Laminator 1').note).toContain('CPET Film Out of Stock')
+  it('takes lamination and the manual trimmers from the finishing plan, the auto trimmers live', () => {
+    expect(machine('Lamination Machine 1').source).toBe('plan')
+    expect(model.machines.find((m) => m.name === 'Laminator 1')).toBeUndefined()
+    expect(machine('Manual Trimmer 2').type).toBe('trimming')
     expect(machine('Auto Trimmer 1').type).toBe('trimming')
     expect(machine('Auto Trimmer 1').source).toBe('efdashboard.com')
+  })
+
+  it('runs Lamination Machine 1 on Platinum 2, 3, then 2, and stops it after 25 October', () => {
+    const oct = machineMonth(machine('Lamination Machine 1'), '2026-10')
+    expect(oct.segments.map((s) => [s.product, s.fromDay, s.toDay])).toEqual([
+      ['Platinum 2', 1, 9],
+      ['Platinum 3', 10, 16],
+      ['Platinum 2', 17, 25],
+    ])
+    expect(oct.pauseDays).toEqual([25])
+    expect(machineMonth(machine('Lamination Machine 1'), '2026-11').segments.map((s) => [s.product, s.fromDay, s.toDay])).toEqual([
+      ['Platinum 1', 20, 30],
+    ])
+    expect(machineMonth(machine('Lamination Machine 1'), '2026-12').stopDay).toBe(20)
+  })
+
+  it('alternates Lamination Machine 2 between the Potato tray and the 1/2M bowl', () => {
+    const nov = machineMonth(machine('Lamination Machine 2'), '2026-11')
+    expect(nov.segments.map((s) => [s.product, s.fromDay, s.toDay])).toEqual([
+      ['1/2M Bowl', 1, 4],
+      ['Potato Tray', 5, 19],
+      ['1/2M Bowl', 20, 30],
+    ])
+    expect(familyOf('Potato Tray')).toBe('destiny')
+    expect(familyOf('Every Table')).toBe('pointfive')
+    expect(familyOf('1/2M Bowl')).toBe('halfm')
+  })
+
+  it('switches Manual Trimmer 2 from the medium medical tray to Oasis on 25 October', () => {
+    const oct = machineMonth(machine('Manual Trimmer 2'), '2026-10')
+    expect(oct.segments.map((s) => [s.product, s.fromDay, s.toDay])).toEqual([
+      ['Medium Medical Tray', 1, 24],
+      ['Oasis Tray', 25, 31],
+    ])
   })
 })
 
 describe('matching machines to open POs', () => {
+  it('ties a finishing run to the PO the sheet names', () => {
+    expect(pos('Lamination Machine 1')).toEqual(['2679969', '2679971'])
+    const lam2 = machine('Lamination Machine 2')
+    expect(lam2.runs[0].serves.map((s) => s.po.po)).toEqual(['2466123-3'])
+    expect(lam2.runs[1].serves.map((s) => s.po.po)).toEqual(['2679682'])
+    expect(lam2.runs[2].serves).toEqual([])
+    expect(lam2.runs[2].note).toBe('1/2M PO required')
+  })
+
   it('ties each forming run to the open POs for its product', () => {
     expect(pos('Machine 6')).toEqual(['2679868', '2680265-1'])
     expect(pos('Machine 3')).toEqual(['2679867', '2680266-1'])
@@ -69,12 +113,12 @@ describe('matching machines to open POs', () => {
   })
 
   it('names where efdashboard.com Line Usage disagrees with the plan', () => {
-    expect(model.differences.map((d) => d.machine)).toEqual(['Machine 1', 'Machine 7', 'Machine 8'])
+    expect(model.differences.map((d) => d.machine)).toEqual(['Machine 1', 'Machine 7', 'Machine 8', 'Lamination Machine 1', 'Lamination Machine 2'])
   })
 
   it('groups products into families for colour', () => {
     expect(familyOf('PHTRASCM')).toBe('medical')
     expect(familyOf('Platinum C2')).toBe('platinum')
-    expect(familyOf('1/2M Bowl')).toBe('other')
+    expect(familyOf('1/2M Bowl')).toBe('halfm')
   })
 })

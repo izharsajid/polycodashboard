@@ -13,12 +13,15 @@ import MachineCard from './MachineCard'
  * Machine utilisation, month by month: what each forming, lamination, trimming
  * and X-ray machine runs, until when, and the open POs it is making.
  */
-const SECTIONS: { type: MachineType; title: string; Icon: LucideIcon; source: string }[] = [
-  { type: 'forming', title: 'Thermoforming', Icon: Factory, source: 'From the production plan' },
-  { type: 'lamination', title: 'Lamination', Icon: Layers, source: 'Live from efdashboard.com' },
-  { type: 'trimming', title: 'Trimming', Icon: Scissors, source: 'Live from efdashboard.com' },
-  { type: 'xray', title: 'X-ray inspection', Icon: ScanLine, source: 'Live from efdashboard.com' },
+const SECTIONS: { type: MachineType; title: string; Icon: LucideIcon }[] = [
+  { type: 'forming', title: 'Thermoforming', Icon: Factory },
+  { type: 'lamination', title: 'Lamination', Icon: Layers },
+  { type: 'trimming', title: 'Trimming', Icon: Scissors },
+  { type: 'xray', title: 'X-ray inspection', Icon: ScanLine },
 ]
+
+const sourceOf = (sources: Set<string>) =>
+  sources.size > 1 ? 'Plan, and live from efdashboard.com' : sources.has('plan') ? 'From the plan' : 'Live from efdashboard.com'
 
 const monthName = (m: string) =>
   new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${m}-01T00:00:00Z`))
@@ -55,8 +58,9 @@ export default function MachinesTab() {
       <header>
         <h1 className="condensed text-figure font-bold">Machines</h1>
         <p className="mt-1 max-w-prose text-table text-press-2">
-          What each machine runs, until when, and the open POs it is making. Thermoforming follows the production plan
-          of {day(model.asAt)}; lamination, trimming and X-ray are live from efdashboard.com.
+          What each machine runs, until when, and the open POs it is making. Thermoforming, lamination and the manual
+          trimmers follow the production and finishing plans of {day(model.asAt)}; the auto trimmers and X-ray are live
+          from efdashboard.com.
           {error && ` efdashboard.com could not be read just now (${error}), so no POs are matched.`}
         </p>
       </header>
@@ -97,9 +101,10 @@ export default function MachinesTab() {
         </ul>
       )}
 
-      {SECTIONS.map(({ type, title, Icon, source }) => {
+      {SECTIONS.map(({ type, title, Icon }) => {
         const list = months.filter((x) => x.machine.type === type)
         if (!list.length) return null
+        const source = sourceOf(new Set(list.map((x) => x.machine.source)))
         return (
           <section key={type} aria-labelledby={`sec-${type}`}>
             <h2 id={`sec-${type}`} className="flex items-baseline gap-2 text-title font-bold">

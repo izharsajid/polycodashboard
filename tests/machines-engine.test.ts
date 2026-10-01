@@ -86,7 +86,7 @@ describe('matching machines to open POs', () => {
     expect(pos('Lamination Machine 1')).toEqual(['2679969', '2679971'])
     const lam2 = machine('Lamination Machine 2')
     expect(lam2.runs[0].serves.map((s) => s.po.po)).toEqual(['2466123-3'])
-    expect(lam2.runs[1].serves.map((s) => s.po.po)).toEqual(['2679682'])
+    expect(lam2.runs[1].serves).toEqual([])
     expect(lam2.runs[2].serves).toEqual([])
     expect(lam2.runs[2].note).toBe('1/2M PO required')
   })
@@ -94,7 +94,7 @@ describe('matching machines to open POs', () => {
   it('ties each forming run to the open POs for its product', () => {
     expect(pos('Machine 6')).toEqual(['2679868', '2680265-1'])
     expect(pos('Machine 3')).toEqual(['2679867', '2680266-1'])
-    expect(pos('Machine 5')).toEqual(['2679682'])
+    expect(pos('Machine 5')).toEqual([])
   })
 
   it('shows only the quantity that run makes for a PO with several products', () => {

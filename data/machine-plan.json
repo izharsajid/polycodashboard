@@ -68,7 +68,7 @@
       "id": "lamination-2", "name": "Lamination Machine 2", "type": "lamination", "status": "running", "line_usage": "Laminator 2",
       "runs": [
         { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "match": ["7x7", "Destiny"], "pos": ["2466123-3"], "note": "Then the monthly Potato tray, no PO, before Every Table starts" },
-        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "match": ["Point Five", "PointFive"], "pos": ["2679682"] },
+        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "match": [] },
         { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "match": [], "note": "1/2M PO required" },
         { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "match": [], "note": "Monthly one, no PO" },
         { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "match": [], "note": "1/2M PO required" },

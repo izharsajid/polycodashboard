@@ -1,0 +1,4 @@
+{
+  "note": "POs Polyco cancelled. Izhar, 1 October 2026: remove them from the dashboard entirely, whatever efdashboard.com shows. Read server-side only, to drop them from efdashboard.com's feed and from a statement import; never shown.",
+  "pos": ["2676085", "2679682", "2678302", "2678303", "2678304"]
+}

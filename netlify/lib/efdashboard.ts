@@ -6,8 +6,11 @@
  * in the Netlify environment and never sent to the browser. The file list and
  * the files themselves come from efdashboard.com's own /api/po-documents.
  *
- * Read only. This site never writes to efdashboard.com.
+ * Read only. This site never writes to efdashboard.com. POs listed in
+ * data/removed-pos.json are dropped here, before anything reaches the browser.
  */
+import removed from '../../data/removed-pos.json' with { type: 'json' }
+
 export const EFDASHBOARD = 'https://efdashboard.com'
 
 export class MasterUnavailable extends Error {}
@@ -40,7 +43,25 @@ export async function readTracker(): Promise<unknown> {
     po: d.po, name: d.name, title: d.title, note: d.note, size: d.size, updated_at: d.updated_at,
   }))
 
-  const payload = { rows, settings, documents, line_usage: lineUsage, fetched_at: new Date().toISOString() }
+  const payload = withoutRemoved(
+    { rows: rows as { po_number?: unknown }[], settings, documents, line_usage: lineUsage, fetched_at: new Date().toISOString() },
+    removed.pos,
+  )
   cached = { at: Date.now(), payload }
   return payload
+}
+
+/** A PO number, or one of its numbered lots, from the given list. */
+const isRemoved = (po: unknown, list: string[]) => {
+  const v = String(po ?? '').trim()
+  return list.some((id) => v === id || new RegExp(`^${id}-\\d+$`).test(v))
+}
+
+/** The feed without any row or file for a PO removed from the dashboard. */
+export function withoutRemoved<T extends { rows: { po_number?: unknown }[]; documents: { po?: unknown }[] }>(feed: T, list: string[]): T {
+  return {
+    ...feed,
+    rows: feed.rows.filter((r) => !isRemoved(r.po_number, list)),
+    documents: feed.documents.filter((d) => !isRemoved(d.po, list)),
+  }
 }

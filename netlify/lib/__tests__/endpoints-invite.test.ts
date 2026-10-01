@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import accept from '../../functions/invitations-accept.mts'
 import validate from '../../functions/invitations-validate.mts'
 import login from '../../functions/auth-login.mts'
@@ -145,6 +145,21 @@ describe('POST /api/users/invite', () => {
     expect(body.link).toBe(`https://dashboard.ecofibre.bh/invite#${sent[0].token}`)
     expect(JSON.stringify(body.user)).not.toContain(sent[0].token)
     expect(JSON.stringify(await listAudit())).not.toContain(sent[0].token)
+  })
+
+  it('gives the inviter the link even while email is switched on, to pass on by hand', async () => {
+    vi.stubEnv('EMAIL_SENDING_ENABLED', 'true')
+    vi.stubEnv('RESEND_API_KEY', 'test-not-a-key')
+    vi.stubEnv('EMAIL_FROM', 'dashboard@ecofibre.bh')
+    vi.stubEnv('PUBLIC_BASE_URL', 'https://dashboard.ecofibre.bh')
+    try {
+      const headers = await asAdmin()
+      const body = await (await sendInvite({ email: SAMUEL, name: 'Samuel Story-Taylor' }, headers)).json()
+      expect(body.link).toBe(`https://dashboard.ecofibre.bh/invite#${sent[0].token}`)
+      expect(body.emailed).toBe(true)
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 })
 

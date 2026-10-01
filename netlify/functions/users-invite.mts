@@ -128,12 +128,16 @@ export default async (req: Request, context: Context) => {
     detail: `invited as ${decision.role}, link expires ${invitation.expiresAt}`,
   })
 
-  // While email is switched off the link goes nowhere, so the administrator who
-  // created the account gets it once, to pass on themselves. It works once and
-  // expires; it is never stored in plain form or logged.
-  const link = emailReadiness().ready ? null : linkFor({ kind: 'invitation', email: user.email, token, expiresAt: invitation.expiresAt }, new URL(req.url).origin)
+  // The inviter always gets the link once, to pass on themselves (by WhatsApp,
+  // say), whether or not an email also went out: email may be off, slow or
+  // filtered. It works once and expires; it is never stored in plain form or logged.
+  const emailed = emailReadiness().ready
+  const link = linkFor({ kind: 'invitation', email: user.email, token, expiresAt: invitation.expiresAt }, new URL(req.url).origin)
 
-  return json({ user: publicUser({ ...user, name: body.name, role: decision.role }), link, expiresAt: invitation.expiresAt }, 201)
+  return json(
+    { user: publicUser({ ...user, name: body.name, role: decision.role }), link, emailed, expiresAt: invitation.expiresAt },
+    201,
+  )
 }
 
 export const config: Config = { path: '/api/users/invite' }

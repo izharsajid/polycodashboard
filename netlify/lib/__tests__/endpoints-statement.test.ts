@@ -81,3 +81,13 @@ describe('PO files from efdashboard.com', () => {
     expect((await bad('po=2679713&file=../../etc/passwd')).status).toBe(400)
   })
 })
+
+describe('files on the statement', () => {
+  it('lists a file saved against a line', async () => {
+    const { saveDocument } = await import('../documents')
+    const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37])
+    await saveDocument({ orderId: 'stmt-row-180', group: 'delivery', filename: 'CI-2679683-3.pdf', bytes: pdf, contentType: 'application/pdf', uploadedBy: 'Izhar Sajid', uploadedByEmail: IZHAR })
+    const body = await (await statement(get('/api/statement'))).json()
+    expect(body.files.map((f: { target: string; filename: string }) => `${f.target}:${f.filename}`)).toEqual(['row-180:CI-2679683-3.pdf'])
+  })
+})

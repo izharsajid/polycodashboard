@@ -3,7 +3,7 @@ import disputes from '../../data/ledger-disputes.json' with { type: 'json' }
 import workbook from '../../data/polyco-statement.json' with { type: 'json' }
 import rules from '../../data/statement-rules.json' with { type: 'json' }
 import { json, wrongMethod } from '../lib/http'
-import { listEntries, listStatementFiles } from '../lib/statement-store'
+import { listEntries, listStatementFiles, targetOf } from '../lib/statement-store'
 
 /**
  * The statement: the workbook as issued, the disputed dates, and everything
@@ -23,7 +23,7 @@ export default async (req: Request) => {
       entries,
       files: files.map((f) => ({
         id: f.id,
-        target: f.orderId.replace(/^stmt:/, ''),
+        target: targetOf(f.orderId),
         filename: f.filename,
         contentType: f.contentType,
         size: f.size,

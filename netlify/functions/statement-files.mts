@@ -22,7 +22,7 @@ export default async (req: Request, context: Context) => {
     const id = url.searchParams.get('id') ?? ''
     if (!/^[A-Za-z0-9_-]{1,60}$/.test(id)) return fail(400, 'That file reference is not valid.')
     const meta = await getDocument(id)
-    if (!meta || meta.deletedAt || !meta.orderId.startsWith('stmt:')) return fail(404, 'No file has that reference.')
+    if (!meta || meta.deletedAt || !meta.orderId.startsWith('stmt-')) return fail(404, 'No file has that reference.')
     const base64 = await readDocumentBytes(meta)
     if (!base64) return fail(404, 'That file could not be found.')
     const download = url.searchParams.get('action') === 'download'

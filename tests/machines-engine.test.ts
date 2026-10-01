@@ -4,7 +4,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { buildMachines, familyOf, machineMonth, MachinePlan } from '../src/engine/machines'
+import { buildMachines, familyOf, machineMonth, MachinePlan, timeline, upcoming } from '../src/engine/machines'
 import { buildTracker } from '../src/engine/tracker'
 import { TrackerPayload } from '../src/engine/trackerSchema'
 
@@ -120,5 +120,38 @@ describe('matching machines to open POs', () => {
     expect(familyOf('PHTRASCM')).toBe('medical')
     expect(familyOf('Platinum C2')).toBe('platinum')
     expect(familyOf('1/2M Bowl')).toBe('halfm')
+  })
+})
+
+describe('the Gantt timeline', () => {
+  const bars = (name: string) => timeline(machine(name), model.range).map((b) => [b.product, b.from, b.to])
+
+  it('spans September to the end of December', () => {
+    expect(model.range).toEqual({ from: '2026-09-01', to: '2026-12-31' })
+  })
+
+  it('lays each run end to end, the last running through its stop day', () => {
+    expect(bars('Machine 1')).toEqual([
+      ['Large Medical Tray', '2026-09-01', '2026-09-28'],
+      ['Platinum C3', '2026-09-29', '2026-10-09'],
+      ['1/2M Lid', '2026-10-10', '2026-12-30'],
+    ])
+  })
+
+  it('leaves the gap where Lamination Machine 1 stands idle', () => {
+    expect(bars('Lamination Machine 1').slice(2, 4)).toEqual([
+      ['Platinum 2', '2026-10-17', '2026-10-25'],
+      ['Platinum 1', '2026-11-20', '2026-12-07'],
+    ])
+  })
+
+  it('runs a machine with no end date to the edge, marked as running on', () => {
+    const [bar] = timeline(machine('Machine 4'), model.range)
+    expect([bar.to, bar.startsBefore, bar.runsOn]).toEqual(['2026-12-31', true, true])
+  })
+
+  it('lists what is still to run from a given day', () => {
+    expect(upcoming(machine('Machine 1'), '2026-10-12').map((b) => b.product)).toEqual(['1/2M Lid'])
+    expect(upcoming(machine('Machine 8'), '2026-10-21')).toEqual([])
   })
 })

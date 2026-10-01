@@ -1,30 +1,31 @@
 import { AlertTriangle, Factory, Layers, Scissors, ScanLine, type LucideIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { FAMILY_BG, FAMILY_LABEL } from '../../components/machines/MachineArt'
+import { useMemo } from 'react'
+import MachineArt, { FAMILY_BG, FAMILY_LABEL } from '../../components/machines/MachineArt'
 import StatePill from '../../components/StatePill'
 import { MachinesPayload } from '../../data/schemas'
 import { useApiData } from '../../data/useApiData'
 import { useTracker } from '../../data/useTracker'
-import { buildMachines, machineMonth, type Family, type MachineType } from '../../engine/machines'
-import { day } from '../../lib/format'
-import MachineCard from './MachineCard'
+import { buildMachines, timeline, upcoming, type Family, type MachineType } from '../../engine/machines'
+import { day, dayMonth } from '../../lib/format'
+import Gantt from './Gantt'
+import MachineRow from './MachineRow'
 
 /**
- * Machine utilisation, month by month: what each forming, lamination, trimming
- * and X-ray machine runs, until when, and the open POs it is making.
+ * Machine utilisation: one Gantt chart of when every machine runs until, then
+ * each kind of machine in turn, with what it runs and the open POs it makes.
  */
 const SECTIONS: { type: MachineType; title: string; Icon: LucideIcon }[] = [
   { type: 'forming', title: 'Thermoforming', Icon: Factory },
-  { type: 'lamination', title: 'Lamination', Icon: Layers },
   { type: 'trimming', title: 'Trimming', Icon: Scissors },
-  { type: 'xray', title: 'X-ray inspection', Icon: ScanLine },
+  { type: 'lamination', title: 'Lamination', Icon: Layers },
+  { type: 'xray', title: 'X-ray', Icon: ScanLine },
 ]
 
 const sourceOf = (sources: Set<string>) =>
   sources.size > 1 ? 'Plan, and live from efdashboard.com' : sources.has('plan') ? 'From the plan' : 'Live from efdashboard.com'
 
-const monthName = (m: string) =>
-  new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${m}-01T00:00:00Z`))
+/** Today in Bahrain, as YYYY-MM-DD. */
+const todayIso = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bahrain' })
 
 export default function MachinesTab() {
   const plan = useApiData('/api/machines', MachinesPayload, 'machine plan')
@@ -33,7 +34,6 @@ export default function MachinesTab() {
     () => (plan.status === 'ready' ? buildMachines(plan.data.plan, tracker, lineUsage) : null),
     [plan, tracker, lineUsage],
   )
-  const [chosen, setChosen] = useState<string | null>(null)
 
   if (plan.status === 'loading' || loading) return <p className="mt-8 text-body text-press-2" aria-busy="true">Loading the machines.</p>
   if (plan.status === 'failed' || !model) {
@@ -44,12 +44,17 @@ export default function MachinesTab() {
     )
   }
 
-  const month = chosen ?? model.asAt.slice(0, 7)
-  const months = model.machines.map((m) => machineMonth(m, month))
-  const forming = months.filter((x) => x.machine.type === 'forming')
-  const running = forming.filter((x) => x.active).length
-  const stopping = forming.filter((x) => x.stopDay)
-  const families = [...new Set(months.flatMap((x) => x.segments.map((s) => s.family)))] as Family[]
+  const today = todayIso()
+  const runningNow = (id: string) => {
+    const [first] = upcoming(model.machines.find((m) => m.id === id)!, today)
+    return Boolean(first && first.from <= today)
+  }
+  const groups = SECTIONS.map((s) => ({ ...s, machines: model.machines.filter((m) => m.type === s.type) })).filter((g) => g.machines.length)
+  const running = model.machines.filter((m) => runningNow(m.id)).length
+  const nextStop = model.machines
+    .filter((m) => m.stops && m.stops >= today)
+    .sort((a, b) => a.stops!.localeCompare(b.stops!))[0]
+  const families = [...new Set(model.machines.flatMap((m) => timeline(m, model.range).map((b) => b.family)))] as Family[]
   const activeUnplanned = model.unplanned.filter((p) => !p.isInactive)
   const inactiveUnplanned = model.unplanned.filter((p) => p.isInactive)
 
@@ -58,35 +63,24 @@ export default function MachinesTab() {
       <header>
         <h1 className="condensed text-figure font-bold">Machines</h1>
         <p className="mt-1 max-w-prose text-table text-press-2">
-          What each machine runs, until when, and the open POs it is making. Thermoforming, lamination and the manual
-          trimmers follow the production and finishing plans of {day(model.asAt)}; the auto trimmers and X-ray are live
-          from efdashboard.com.
+          When each machine runs until, and the open POs it is making. Thermoforming, lamination and the manual trimmers
+          follow the plans of {day(model.asAt)}; the auto trimmers and X-ray are live from efdashboard.com.
           {error && ` efdashboard.com could not be read just now (${error}), so no POs are matched.`}
         </p>
       </header>
 
-      <nav aria-label="Month" className="flex flex-wrap gap-1.5">
-        {model.months.map((m) => (
-          <button
-            key={m}
-            type="button"
-            aria-pressed={m === month}
-            onClick={() => setChosen(m)}
-            className={`min-h-[40px] rounded-full border px-4 text-table font-semibold ${m === month ? 'border-press bg-press text-sheet' : 'border-rule bg-sheet hover:border-press-2'}`}
-          >
-            {monthName(m)}
-          </button>
-        ))}
-      </nav>
-
       <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Forming machines running" value={`${running} of ${forming.length}`} />
-        <Stat label={`Stopping in ${monthName(month)}`} value={stopping.length ? stopping.map((x) => `${x.machine.name.replace('Machine ', 'M')} on ${x.stopDay}`).join(', ') : 'None'} />
-        <Stat label="Open orders with no machine planned" value={String(activeUnplanned.length)} tone={activeUnplanned.length ? 'caution' : 'plain'} />
+        <Stat label="Running today" value={`${running} of ${model.machines.length} machines`} />
+        <Stat label="Next to stop" value={nextStop ? `${nextStop.name}, ${dayMonth(nextStop.stops!)}` : 'None planned'} />
+        <Stat label="Open orders with no forming machine" value={String(activeUnplanned.length)} tone={activeUnplanned.length ? 'caution' : 'plain'} />
       </div>
 
-      {families.length > 0 && (
-        <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-small text-press-2" aria-label="Product colours">
+      <section aria-labelledby="gantt" className="rounded-card bg-sheet p-4 shadow-card sm:p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="gantt" className="text-title font-bold">When each machine runs until</h2>
+          <p className="text-small text-press-2">Hover or tap a bar for the product, dates and POs</p>
+        </div>
+        <ul className="mb-4 mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-small text-press-2" aria-label="Key">
           {families.map((f) => (
             <li key={f} className="flex items-center gap-1.5">
               <span className={`inline-block h-3 w-3 rounded-sm ${FAMILY_BG[f]}`} aria-hidden /> {FAMILY_LABEL[f]}
@@ -96,25 +90,47 @@ export default function MachinesTab() {
             <span className="inline-block h-3 w-0.5 bg-marking" aria-hidden /> Today
           </li>
           <li className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-0.5 bg-press" aria-hidden /> Machine stops
+            <span className="inline-block h-3.5 w-[3px] rounded-sm bg-press" aria-hidden /> Machine stops
           </li>
         </ul>
-      )}
+        <Gantt groups={groups} span={model.range} months={model.months} today={today} />
+      </section>
 
-      {SECTIONS.map(({ type, title, Icon }) => {
-        const list = months.filter((x) => x.machine.type === type)
-        if (!list.length) return null
-        const source = sourceOf(new Set(list.map((x) => x.machine.source)))
+      <nav aria-label="Machine kinds" className="flex flex-wrap gap-1.5">
+        {groups.map(({ type, title, Icon, machines }) => (
+          <a
+            key={type}
+            href={`#sec-${type}`}
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-rule bg-sheet px-4 text-table font-semibold hover:border-press-2"
+          >
+            <Icon size={16} aria-hidden /> {title}
+            <span className="text-press-2">{machines.length}</span>
+          </a>
+        ))}
+      </nav>
+
+      {groups.map(({ type, title, machines }) => {
+        const autos = machines.some((m) => /auto/i.test(m.name))
+        const manuals = machines.some((m) => !/auto/i.test(m.name))
         return (
-          <section key={type} aria-labelledby={`sec-${type}`}>
-            <h2 id={`sec-${type}`} className="flex items-baseline gap-2 text-title font-bold">
-              <Icon size={20} aria-hidden className="self-center" /> {title}
-              <span className="text-small font-normal text-press-2">{source}</span>
-            </h2>
-            <ul className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {list.map((x) => (
-                <li key={x.machine.id}>
-                  <MachineCard mm={x} month={month} today={model.asAt} />
+          <section key={type} id={`sec-${type}`} aria-labelledby={`h-${type}`} className="scroll-mt-4">
+            <div className="flex items-center gap-3">
+              <span className="flex shrink-0 gap-1 rounded-card bg-sheet p-1.5 shadow-card">
+                {manuals && <MachineArt type={type} status="running" family={null} className="h-12 w-20" />}
+                {type === 'trimming' && autos && <MachineArt type={type} status="running" family={null} auto className="h-12 w-20" />}
+              </span>
+              <div>
+                <h2 id={`h-${type}`} className="text-title font-bold">{title}</h2>
+                <p className="text-small text-press-2">
+                  {machines.length} {machines.length === 1 ? 'machine' : 'machines'}, {machines.filter((m) => runningNow(m.id)).length}{' '}
+                  running today · {sourceOf(new Set(machines.map((m) => m.source)))}
+                </p>
+              </div>
+            </div>
+            <ul className="mt-3 grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {machines.map((m) => (
+                <li key={m.id}>
+                  <MachineRow machine={m} today={today} />
                 </li>
               ))}
             </ul>

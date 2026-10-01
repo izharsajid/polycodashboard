@@ -21,18 +21,15 @@ const SECTIONS: { type: MachineType; title: string; Icon: LucideIcon }[] = [
   { type: 'xray', title: 'X-ray', Icon: ScanLine },
 ]
 
-const sourceOf = (sources: Set<string>) =>
-  sources.size > 1 ? 'Plan, and live from efdashboard.com' : sources.has('plan') ? 'From the plan' : 'Live from efdashboard.com'
-
 /** Today in Bahrain, as YYYY-MM-DD. */
 const todayIso = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bahrain' })
 
 export default function MachinesTab() {
   const plan = useApiData('/api/machines', MachinesPayload, 'machine plan')
-  const { tracker, lineUsage, error, loading } = useTracker()
+  const { tracker, error, loading } = useTracker()
   const model = useMemo(
-    () => (plan.status === 'ready' ? buildMachines(plan.data.plan, tracker, lineUsage) : null),
-    [plan, tracker, lineUsage],
+    () => (plan.status === 'ready' ? buildMachines(plan.data.plan, tracker) : null),
+    [plan, tracker],
   )
 
   if (plan.status === 'loading' || loading) return <p className="mt-8 text-body text-press-2" aria-busy="true">Loading the machines.</p>
@@ -63,8 +60,8 @@ export default function MachinesTab() {
       <header>
         <h1 className="condensed text-figure font-bold">Machines</h1>
         <p className="mt-1 max-w-prose text-table text-press-2">
-          When each machine runs until, and the open POs it is making. Thermoforming, lamination and the manual trimmers
-          follow the plans of {day(model.asAt)}; the auto trimmers and X-ray are live from efdashboard.com.
+          When each machine runs until, and the open POs it is making, from the production and finishing plans of{' '}
+          {day(model.asAt)}.
           {error && ` efdashboard.com could not be read just now (${error}), so no POs are matched.`}
         </p>
       </header>
@@ -123,7 +120,7 @@ export default function MachinesTab() {
                 <h2 id={`h-${type}`} className="text-title font-bold">{title}</h2>
                 <p className="text-small text-press-2">
                   {machines.length} {machines.length === 1 ? 'machine' : 'machines'}, {machines.filter((m) => runningNow(m.id)).length}{' '}
-                  running today · {sourceOf(new Set(machines.map((m) => m.source)))}
+                  running today
                 </p>
               </div>
             </div>
@@ -158,27 +155,6 @@ export default function MachinesTab() {
         </section>
       )}
 
-      {model.differences.length > 0 && (
-        <section aria-labelledby="differences" className="rounded-card bg-sheet p-5 shadow-card">
-          <h2 id="differences" className="text-title font-bold">Where efdashboard.com's Line Usage differs from the plan</h2>
-          <p className="mt-1 text-small text-press-2">Update one or the other so both show the same machine.</p>
-          <ul className="mt-3 divide-y divide-rule">
-            {model.differences.map((d) => (
-              <li key={d.machine} className="grid gap-1 py-2 text-table sm:grid-cols-[8rem_1fr_1fr]">
-                <span className="font-semibold">{d.machine}</span>
-                <span>
-                  <span className="text-small text-press-2">Plan: </span>
-                  {d.plan}
-                </span>
-                <span>
-                  <span className="text-small text-press-2">Line Usage: </span>
-                  {d.lineUsage}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 /**
- * Machine utilisation against the plan of 1 October 2026 and the efdashboard.com
- * snapshot of 30 September.
+ * Machine utilisation against the plans of 1 October 2026 and the efdashboard.com
+ * PO snapshot of 30 September.
  */
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
@@ -10,7 +10,7 @@ import { TrackerPayload } from '../src/engine/trackerSchema'
 
 const read = (p: string) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'))
 const payload = TrackerPayload.parse(read('./fixtures/tracker-2026-09-30.json'))
-const model = buildMachines(MachinePlan.parse(read('../data/machine-plan.json')), buildTracker(payload), payload.line_usage)
+const model = buildMachines(MachinePlan.parse(read('../data/machine-plan.json')), buildTracker(payload))
 const machine = (name: string) => model.machines.find((m) => m.name === name)!
 const pos = (name: string) => [...new Set(machine(name).runs.flatMap((r) => r.serves.map((s) => s.po.po)))].sort()
 
@@ -38,12 +38,17 @@ describe('what each machine runs', () => {
     expect(machineMonth(machine('Machine 4'), '2026-12').segments[0].runsOn).toBe(true)
   })
 
-  it('takes lamination and the manual trimmers from the finishing plan, the auto trimmers live', () => {
-    expect(machine('Lamination Machine 1').source).toBe('plan')
-    expect(model.machines.find((m) => m.name === 'Laminator 1')).toBeUndefined()
+  it('takes every machine from the plans, and nothing else', () => {
+    expect(model.machines).toHaveLength(15)
+    expect(model.machines.filter((m) => m.type === 'xray')).toEqual([])
     expect(machine('Manual Trimmer 2').type).toBe('trimming')
-    expect(machine('Auto Trimmer 1').type).toBe('trimming')
-    expect(machine('Auto Trimmer 1').source).toBe('efdashboard.com')
+  })
+
+  it('lists the two auto trimmers with no runs until a plan is given', () => {
+    for (const name of ['Auto Trimmer 1', 'Auto Trimmer 2']) {
+      expect(machine(name).status).toBe('unscheduled')
+      expect(timeline(machine(name), model.range)).toEqual([])
+    }
   })
 
   it('runs Lamination Machine 1 on Platinum 2, 3, then 2, and stops it after 25 October', () => {
@@ -103,17 +108,9 @@ describe('matching machines to open POs', () => {
     expect(served.quantities.map((q) => q.label)).toEqual(['Aspen Single Cycle Tray Medium (PHTRASCM)'])
   })
 
-  it('matches a trimmer on an internal code to the order it trims', () => {
-    expect(pos('Auto Trimmer 2')).toEqual(['2466123-3'])
-  })
-
   it('lists open orders no forming run is planned for', () => {
     expect(model.unplanned.map((p) => p.po)).toEqual(expect.arrayContaining(['2466123-3', '2573712']))
     expect(model.unplanned.map((p) => p.po)).not.toContain('2679868')
-  })
-
-  it('names where efdashboard.com Line Usage disagrees with the plan', () => {
-    expect(model.differences.map((d) => d.machine)).toEqual(['Machine 1', 'Machine 7', 'Machine 8', 'Lamination Machine 1', 'Lamination Machine 2'])
   })
 
   it('groups products into families for colour', () => {

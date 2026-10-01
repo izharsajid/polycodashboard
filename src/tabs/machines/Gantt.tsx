@@ -86,7 +86,7 @@ export default function Gantt({
                       {grid}
                       {bars.length === 0 && (
                         <span className="absolute inset-0 flex items-center pl-2 text-small text-press-2">
-                          {m.status === 'offline' ? 'Offline' : 'Nothing planned'}
+                          {m.status === 'offline' ? 'Offline' : 'No plan yet'}
                         </span>
                       )}
                       {bars.map((b, i) => {

@@ -1,16 +1,13 @@
 /**
  * Machine utilisation, month by month. No React.
  *
- * Forming, lamination and the manual trimmers follow the production and
- * finishing plans (data/machine-plan.json): what each runs, from when, until
- * when, and when it stops. Machines the plan does not list, the auto trimmers
- * and the X-ray, follow efdashboard.com's Line Usage live, with no end dates. Each
- * run is matched to open POs on efdashboard.com by the product codes in the
- * plan, and open orders no run covers are listed.
+ * Every machine follows the production and finishing plans Izhar gave
+ * (data/machine-plan.json): what each runs, from when, until when, and when it
+ * stops. Each run is matched to open POs on efdashboard.com by the product codes
+ * or PO numbers in the plan, and open orders no forming run covers are listed.
  */
 import { z } from 'zod'
 import type { Tracker, TrackerPo } from './tracker'
-import type { LineUsageRowT } from './trackerSchema'
 
 const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 
@@ -23,9 +20,8 @@ export const MachinePlan = z.object({
       id: z.string(),
       name: z.string(),
       type: z.enum(['forming', 'lamination', 'trimming', 'xray']),
-      status: z.enum(['running', 'changing', 'stopped', 'offline']),
-      /** The same machine's name in efdashboard.com's Line Usage, where it differs. */
-      line_usage: z.string().optional(),
+      /** `unscheduled`: the machine exists but the plan gives it no runs yet. */
+      status: z.enum(['running', 'changing', 'stopped', 'offline', 'unscheduled']),
       runs: z.array(
         z.object({
           product: z.string(),
@@ -86,8 +82,6 @@ export type Machine = {
   name: string
   type: MachineType
   status: MachineStatus
-  /** Where the machine's picture comes from: the plan, or efdashboard.com live. */
-  source: 'plan' | 'efdashboard.com'
   runs: Run[]
   stops: string | null
   stopNote: string | null
@@ -124,50 +118,6 @@ export function serves(match: string[], tracker: Tracker | null, pos?: string[])
     })
 }
 
-const TYPE_OF_SECTION: Record<string, MachineType> = { thermoforming: 'forming', lamination: 'lamination', xray: 'xray' }
-
-/** A Line Usage machine, as a machine with one open-ended run. */
-function fromLineUsage(r: LineUsageRowT, tracker: Tracker | null): Machine {
-  const type: MachineType = /trim/i.test(r.machine) ? 'trimming' : TYPE_OF_SECTION[r.section] ?? 'lamination'
-  const product = r.product.trim()
-  return {
-    id: `line-${r.id}`,
-    name: r.machine,
-    type,
-    status: r.running ? 'running' : 'offline',
-    source: 'efdashboard.com',
-    runs:
-      r.running && product
-        ? [{ product, family: familyOf(product), from: null, until: null, serves: serves(codesFor(product), tracker), stopsAfter: false, note: null }]
-        : [],
-    stops: null,
-    stopNote: null,
-    note: [r.running ? (r.schedule ? `Running ${r.schedule}` : 'Running') : 'Offline', r.notes].filter(Boolean).join('. ') || null,
-  }
-}
-
-/**
- * The words efdashboard.com's orders use for each family, for Line Usage
- * products that name only an internal code (TFTRA7X7 is the Destiny 7x7 tray).
- * Platinum and medical trays are matched by their exact tray code instead,
- * because one family covers several different trays.
- */
-const FAMILY_WORDS: Partial<Record<Family, string[]>> = {
-  oasis: ['OT1230', 'Oasis'],
-  pointfive: ['Point Five', 'PointFive'],
-  destiny: ['7x7', 'Destiny'],
-}
-
-/** Product codes to match a Line Usage product by, taken from its own text. */
-function codesFor(product: string): string[] {
-  const code = product.match(/\(([^)]+)\)/)?.[1]
-  const out = [product, ...(FAMILY_WORDS[familyOf(product)] ?? [])]
-  if (code) out.push(code)
-  const tray = product.match(/TFPP\/TRAY\s?(\d)/i)
-  if (tray) out.push(`TFPP/TRAY${tray[1]}`)
-  return out
-}
-
 export type MachinesModel = {
   asAt: string
   source: string
@@ -175,24 +125,16 @@ export type MachinesModel = {
   months: string[]
   /** The whole span the months cover, first day to last, for the Gantt chart. */
   range: { from: string; to: string }
-  /** Open POs on efdashboard.com no planned run serves. */
+  /** Open POs on efdashboard.com no planned forming run serves. */
   unplanned: TrackerPo[]
-  /** Where efdashboard.com's Line Usage disagrees with the plan for a forming machine. */
-  differences: { machine: string; plan: string; lineUsage: string }[]
 }
 
-const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()
-
-const runningOn = (run: { from: string | null; until: string | null }, d: string) =>
-  (run.from === null || run.from <= d) && (run.until === null || d < run.until)
-
-export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineUsage: LineUsageRowT[]): MachinesModel {
-  const planned: Machine[] = plan.machines.map((m) => ({
+export function buildMachines(plan: MachinePlanT, tracker: Tracker | null): MachinesModel {
+  const machines: Machine[] = plan.machines.map((m) => ({
     id: m.id,
     name: m.name,
     type: m.type,
     status: m.status,
-    source: 'plan',
     runs: m.runs.map((r) => ({
       product: r.product,
       family: familyOf(r.product),
@@ -206,15 +148,6 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineU
     stopNote: m.stop_note,
     note: m.note,
   }))
-  // Line Usage rows for machines the plan lists are compared, not shown twice.
-  const luName = new Map(plan.machines.map((m) => [m.id, m.line_usage ?? m.name]))
-  const claimed = [...luName.values()]
-  const planForms = planned.some((m) => m.type === 'forming')
-  const live = lineUsage.filter(
-    (r) => !claimed.some((n) => sameName(n, r.machine)) && !(planForms && r.section === 'thermoforming'),
-  )
-  const machines = [...planned, ...live.map((r) => fromLineUsage(r, tracker))]
-
   // Months: from the month before the plan's date to the last date anything
   // runs until, so the month just finished is there to compare against.
   const ends = machines.flatMap((m) => [m.stops, ...m.runs.map((r) => r.until)]).filter((d): d is string => Boolean(d))
@@ -225,24 +158,12 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineU
 
   // Every open order a forming run will make, at the plan date or later.
   const covered = new Set(
-    planned.filter((m) => m.type === 'forming').flatMap((m) => m.runs.filter((r) => r.until === null || r.until >= plan.as_at).flatMap((r) => r.serves.map((s) => s.po.po))),
+    machines.filter((m) => m.type === 'forming').flatMap((m) => m.runs.filter((r) => r.until === null || r.until >= plan.as_at).flatMap((r) => r.serves.map((s) => s.po.po))),
   )
   const unplanned = tracker ? tracker.pos.filter(OPEN).filter((p) => !covered.has(p.po)) : []
 
-  const differences = planned.flatMap((m) => {
-    const lu = lineUsage.find((r) => sameName(r.machine, luName.get(m.id)!))
-    if (!lu) return []
-    const now = m.runs.find((r) => runningOn(r, plan.as_at))
-    const planText = m.status === 'changing' ? `Mould changing, ${now?.product ?? 'no product'}` : now ? now.product : 'Stopped'
-    const luText =
-      (sameName(lu.machine, m.name) ? '' : `${lu.machine}: `) +
-      (lu.running ? lu.product || 'Running' : `Offline${lu.notes ? ` (${lu.notes})` : ''}`)
-    const agree = lu.running && now && familyOf(lu.product) === now.family && familyOf(lu.product) !== 'other'
-    return agree ? [] : [{ machine: m.name, plan: planText, lineUsage: luText }]
-  })
-
   const range = { from: `${months[0]}-01`, to: `${months.at(-1)}-${String(daysIn(months.at(-1)!)).padStart(2, '0')}` }
-  return { asAt: plan.as_at, source: plan.source, machines, months, range, unplanned, differences }
+  return { asAt: plan.as_at, source: plan.source, machines, months, range, unplanned }
 }
 
 export function shiftMonth(month: string, by: number): string {

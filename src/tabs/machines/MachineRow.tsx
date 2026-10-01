@@ -14,6 +14,7 @@ const STATUS: Record<string, { label: string; tone: string }> = {
   changing: { label: 'Mould changing', tone: 'bg-caution-wash text-caution' },
   stopped: { label: 'Stopped', tone: 'bg-mist text-press-2' },
   offline: { label: 'Offline', tone: 'bg-mist text-press-2' },
+  unscheduled: { label: 'No plan yet', tone: 'bg-mist text-press-2' },
 }
 
 /** POs listed per run before the rest fold behind a button. */
@@ -31,13 +32,12 @@ export default function MachineRow({ machine: m, today }: { machine: Machine; to
       <header className="flex items-start justify-between gap-2">
         <div>
           <h3 className="condensed text-title font-bold leading-tight">{m.name}</h3>
-          <p className="text-small text-press-2">{m.source === 'plan' ? 'From the plan' : 'Live from efdashboard.com'}</p>
         </div>
         <span className={`shrink-0 rounded-full px-2.5 py-1 text-small font-semibold ${status.tone}`}>{status.label}</span>
       </header>
 
       {bars.length === 0 && (
-        <p className="mt-3 text-small text-press-2">{m.note ?? (m.stops ? `Stopped ${day(m.stops)}` : 'Nothing planned')}</p>
+        <p className="mt-3 text-small text-press-2">{m.note ?? (m.stops ? `Stopped ${day(m.stops)}` : 'No runs on the plan yet')}</p>
       )}
 
       <ol className="mt-3 space-y-3">

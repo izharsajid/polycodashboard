@@ -5,7 +5,6 @@ describe("efdashboard.com's feed, less the POs removed from the dashboard", () =
   const feed = {
     rows: [{ po_number: '2679682' }, { po_number: '2679682-1' }, { po_number: '2679683-3' }, { po_number: ' 2676085 ' }],
     documents: [{ po: '2678302' }, { po: '2679969' }],
-    line_usage: [],
   }
 
   it('drops every row and file for a removed PO, its suffixed lots included', () => {

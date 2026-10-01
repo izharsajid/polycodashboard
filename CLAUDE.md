@@ -90,15 +90,18 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   downloadable through `/api/po-document`. The Supabase URL and public key are
   `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
 - **Machines**: a Gantt chart of when every machine runs until, September to
-  December 2026, then thermoforming, trimming, lamination and X-ray in turn, each
-  machine with what it runs from today and which open POs it is making. Thermoforming,
-  lamination and the manual trimmers follow `data/machine-plan.json`, typed from
-  Izhar's production and finishing department plans of 1 October 2026; change a date
-  there through a PR. The auto trimmers and X-ray come live from efdashboard.com's Line
-  Usage, which has no end dates. On the finishing sheet the Potato tray is the Destiny
-  7x7 tray and Every Table is Point Five ET. Each run is matched to open POs
-  by the product codes in its `match` list. Where Line Usage disagrees with the plan for
-  a forming machine, the tab lists it.
+  December 2026, then thermoforming, trimming and lamination in turn, each machine
+  with what it runs from today and which open POs it is making. Every machine follows
+  `data/machine-plan.json`, typed from Izhar's production and finishing department
+  plans of 1 October 2026, and nothing else: efdashboard.com's Line Usage is out of
+  date and is not read or mentioned, by Izhar's direction. Change a date through a
+  PR. On the finishing sheet the Potato tray is the Destiny 7x7 tray and Every Table
+  is Point Five ET. Each run is matched to open POs by the codes in its `match` list
+  or the PO numbers in `pos`. The auto trimmers have no runs until Izhar gives them.
+- **Removed POs.** POs Polyco cancelled are listed in `data/removed-pos.json` and
+  removed from the dashboard entirely: dropped from efdashboard.com's feed
+  server-side, kept out of the statement data and its importer, and never named in
+  the UI. Add a PO there through a PR.
 
 Engines are in `src/engine/`, pages in `src/tabs/`, shared components in
 `src/components/`, tests in `tests/`. Add a tab through `src/tabs/index.ts`.

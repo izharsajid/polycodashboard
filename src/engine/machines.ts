@@ -1,9 +1,10 @@
 /**
  * Machine utilisation, month by month. No React.
  *
- * Forming machines follow the production plan (data/machine-plan.json): what
- * each runs, from when, until when, and when it stops. Lamination, trimming and
- * X-ray follow efdashboard.com's Line Usage live, which has no end dates. Each
+ * Forming, lamination and the manual trimmers follow the production and
+ * finishing plans (data/machine-plan.json): what each runs, from when, until
+ * when, and when it stops. Machines the plan does not list, the auto trimmers
+ * and the X-ray, follow efdashboard.com's Line Usage live, with no end dates. Each
  * run is matched to open POs on efdashboard.com by the product codes in the
  * plan, and open orders no run covers are listed.
  */
@@ -23,7 +24,21 @@ export const MachinePlan = z.object({
       name: z.string(),
       type: z.enum(['forming', 'lamination', 'trimming', 'xray']),
       status: z.enum(['running', 'changing', 'stopped', 'offline']),
-      runs: z.array(z.object({ product: z.string(), from: IsoDate.nullable(), until: IsoDate.nullable(), match: z.array(z.string()) })),
+      /** The same machine's name in efdashboard.com's Line Usage, where it differs. */
+      line_usage: z.string().optional(),
+      runs: z.array(
+        z.object({
+          product: z.string(),
+          from: IsoDate.nullable(),
+          until: IsoDate.nullable(),
+          match: z.array(z.string()),
+          /** POs the plan names for this run; when given, only these are matched. */
+          pos: z.array(z.string()).optional(),
+          /** The machine stands idle after this run's last day, `until`. */
+          stops_after: z.boolean().optional(),
+          note: z.string().optional(),
+        }),
+      ),
       stops: IsoDate.nullable(),
       stop_note: z.string().nullable(),
       note: z.string().nullable(),
@@ -36,15 +51,17 @@ export type MachineType = MachinePlanT['machines'][number]['type']
 export type MachineStatus = MachinePlanT['machines'][number]['status']
 
 /** Product families, for colour: one hue per family wherever it appears. */
-export type Family = 'medical' | 'platinum' | 'oasis' | 'pointfive' | 'destiny' | 'other'
+export type Family = 'medical' | 'platinum' | 'oasis' | 'pointfive' | 'destiny' | 'halfm' | 'other'
 
 export function familyOf(product: string): Family {
   const p = product.toLowerCase()
   if (/medical|phtrasc|clamshell/.test(p)) return 'medical'
   if (/platinum|tfpp/.test(p)) return 'platinum'
   if (/oasis|ot1230|ot1530/.test(p)) return 'oasis'
-  if (/point\s?five|pointfive/.test(p)) return 'pointfive'
-  if (/7x7|destiny|tftra7x7/.test(p)) return 'destiny'
+  if (/point\s?five|pointfive|every table/.test(p)) return 'pointfive'
+  // The Potato tray is the Destiny 7x7 tray (TFTRA7X7) on the finishing sheet.
+  if (/7x7|destiny|tftra7x7|potato/.test(p)) return 'destiny'
+  if (/1\/2\s?m\b/.test(p)) return 'halfm'
   return 'other'
 }
 
@@ -60,6 +77,8 @@ export type Run = {
   from: string | null
   until: string | null
   serves: ServedPo[]
+  stopsAfter: boolean
+  note: string | null
 }
 
 export type Machine = {
@@ -83,6 +102,8 @@ export type MachineMonth = {
   segments: Segment[]
   /** The day it stops, if that falls in this month. */
   stopDay: number | null
+  /** Last days before it stands idle for a while, in this month. */
+  pauseDays: number[]
   /** Running at any point in the month. */
   active: boolean
   runs: Run[]
@@ -91,12 +112,12 @@ export type MachineMonth = {
 const OPEN = (p: TrackerPo) => !p.isDispatched && p.state.key !== 'cancelled' && !p.isInternal
 
 /** Open POs a run's product codes match, by product name or ordered item. */
-export function serves(match: string[], tracker: Tracker | null): ServedPo[] {
-  if (!tracker || match.length === 0) return []
+export function serves(match: string[], tracker: Tracker | null, pos?: string[]): ServedPo[] {
+  if (!tracker || (match.length === 0 && !pos?.length)) return []
   const hit = (text: string) => match.some((m) => text.toLowerCase().includes(m.toLowerCase()))
   return tracker.pos
     .filter(OPEN)
-    .filter((p) => hit(p.product) || p.orderedQuantities.some((q) => hit(q.label)))
+    .filter((p) => (pos?.length ? pos.includes(p.po) : hit(p.product) || p.orderedQuantities.some((q) => hit(q.label))))
     .map((p) => {
       const items = p.orderedQuantities.filter((q) => hit(q.label))
       return { po: p, quantities: items.length ? items : p.orderedQuantities }
@@ -115,7 +136,10 @@ function fromLineUsage(r: LineUsageRowT, tracker: Tracker | null): Machine {
     type,
     status: r.running ? 'running' : 'offline',
     source: 'efdashboard.com',
-    runs: r.running && product ? [{ product, family: familyOf(product), from: null, until: null, serves: serves(codesFor(product), tracker) }] : [],
+    runs:
+      r.running && product
+        ? [{ product, family: familyOf(product), from: null, until: null, serves: serves(codesFor(product), tracker), stopsAfter: false, note: null }]
+        : [],
     stops: null,
     stopNote: null,
     note: [r.running ? (r.schedule ? `Running ${r.schedule}` : 'Running') : 'Offline', r.notes].filter(Boolean).join('. ') || null,
@@ -155,6 +179,8 @@ export type MachinesModel = {
   differences: { machine: string; plan: string; lineUsage: string }[]
 }
 
+const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()
+
 const runningOn = (run: { from: string | null; until: string | null }, d: string) =>
   (run.from === null || run.from <= d) && (run.until === null || d < run.until)
 
@@ -165,13 +191,26 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineU
     type: m.type,
     status: m.status,
     source: 'plan',
-    runs: m.runs.map((r) => ({ product: r.product, family: familyOf(r.product), from: r.from, until: r.until, serves: serves(r.match, tracker) })),
+    runs: m.runs.map((r) => ({
+      product: r.product,
+      family: familyOf(r.product),
+      from: r.from,
+      until: r.until,
+      serves: serves(r.match, tracker, r.pos),
+      stopsAfter: r.stops_after ?? false,
+      note: r.note ?? null,
+    })),
     stops: m.stops,
     stopNote: m.stop_note,
     note: m.note,
   }))
-  const planTypes = new Set(planned.map((m) => m.type))
-  const live = lineUsage.filter((r) => !planTypes.has(TYPE_OF_SECTION[r.section] ?? 'lamination') || /trim/i.test(r.machine) && !planTypes.has('trimming'))
+  // Line Usage rows for machines the plan lists are compared, not shown twice.
+  const luName = new Map(plan.machines.map((m) => [m.id, m.line_usage ?? m.name]))
+  const claimed = [...luName.values()]
+  const planForms = planned.some((m) => m.type === 'forming')
+  const live = lineUsage.filter(
+    (r) => !claimed.some((n) => sameName(n, r.machine)) && !(planForms && r.section === 'thermoforming'),
+  )
   const machines = [...planned, ...live.map((r) => fromLineUsage(r, tracker))]
 
   // Months: from the month before the plan's date to the last date anything
@@ -184,21 +223,21 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null, lineU
 
   // Every open order a forming run will make, at the plan date or later.
   const covered = new Set(
-    planned.flatMap((m) => m.runs.filter((r) => r.until === null || r.until >= plan.as_at).flatMap((r) => r.serves.map((s) => s.po.po))),
+    planned.filter((m) => m.type === 'forming').flatMap((m) => m.runs.filter((r) => r.until === null || r.until >= plan.as_at).flatMap((r) => r.serves.map((s) => s.po.po))),
   )
   const unplanned = tracker ? tracker.pos.filter(OPEN).filter((p) => !covered.has(p.po)) : []
 
-  const differences = planned
-    .filter((m) => m.type === 'forming')
-    .flatMap((m) => {
-      const lu = lineUsage.find((r) => r.section === 'thermoforming' && r.machine.trim().toLowerCase() === m.name.toLowerCase())
-      if (!lu) return []
-      const now = m.runs.find((r) => runningOn(r, plan.as_at))
-      const planText = m.status === 'changing' ? `Mould changing, ${now?.product ?? 'no product'}` : now ? now.product : 'Stopped'
-      const luText = lu.running ? lu.product || 'Running' : `Offline${lu.notes ? ` (${lu.notes})` : ''}`
-      const agree = lu.running && now && familyOf(lu.product) === now.family && familyOf(lu.product) !== 'other'
-      return agree ? [] : [{ machine: m.name, plan: planText, lineUsage: luText }]
-    })
+  const differences = planned.flatMap((m) => {
+    const lu = lineUsage.find((r) => sameName(r.machine, luName.get(m.id)!))
+    if (!lu) return []
+    const now = m.runs.find((r) => runningOn(r, plan.as_at))
+    const planText = m.status === 'changing' ? `Mould changing, ${now?.product ?? 'no product'}` : now ? now.product : 'Stopped'
+    const luText =
+      (sameName(lu.machine, m.name) ? '' : `${lu.machine}: `) +
+      (lu.running ? lu.product || 'Running' : `Offline${lu.notes ? ` (${lu.notes})` : ''}`)
+    const agree = lu.running && now && familyOf(lu.product) === now.family && familyOf(lu.product) !== 'other'
+    return agree ? [] : [{ machine: m.name, plan: planText, lineUsage: luText }]
+  })
 
   return { asAt: plan.as_at, source: plan.source, machines, months, unplanned, differences }
 }
@@ -230,12 +269,13 @@ export function machineMonth(machine: Machine, month: string): MachineMonth {
     if (from > end || (r.until !== null && r.until < start)) continue
     const stopHere = machine.stops !== null && machine.stops >= start && machine.stops <= end
     let toDay = dayOf(lastDay)
-    if (r.until !== null && r.until <= end && !(stopHere && machine.stops === r.until)) toDay -= 1
+    if (r.until !== null && r.until <= end && !r.stopsAfter && !(stopHere && machine.stops === r.until)) toDay -= 1
     const fromDay = dayOf(from)
     if (toDay < fromDay) continue
     segments.push({ product: r.product, family: r.family, fromDay, toDay, startsBefore: r.from === null || r.from < start, runsOn: r.until === null || r.until > end })
     runs.push(r)
   }
   const stopDay = machine.stops && machine.stops.startsWith(month) ? dayOf(machine.stops) : null
-  return { machine, segments, stopDay, active: segments.length > 0, runs }
+  const pauseDays = runs.filter((r) => r.stopsAfter && r.until?.startsWith(month)).map((r) => dayOf(r.until!))
+  return { machine, segments, stopDay, pauseDays, active: segments.length > 0, runs }
 }

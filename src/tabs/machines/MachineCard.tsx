@@ -20,7 +20,7 @@ const STATUS: Record<string, { label: string; tone: string }> = {
 const FIRST = 3
 
 export default function MachineCard({ mm, month, today }: { mm: MachineMonth; month: string; today: string }) {
-  const [open, setOpen] = useState<Record<string, boolean>>({})
+  const [open, setOpen] = useState<Record<number, boolean>>({})
   const m = mm.machine
   const n = daysIn(month)
   const pct = (d: number) => `${((d - 1) / n) * 100}%`
@@ -35,7 +35,7 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3 className="condensed text-title font-bold">{m.name}</h3>
-          <p className="text-small text-press-2">{m.source === 'plan' ? 'Production plan' : 'Live from efdashboard.com'}</p>
+          <p className="text-small text-press-2">{m.source === 'plan' ? 'From the plan' : 'Live from efdashboard.com'}</p>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-small font-semibold ${status.tone}`}>{status.label}</span>
       </div>
@@ -53,7 +53,9 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
               title={`${s.product}, ${s.fromDay} to ${s.toDay}`}
             />
           ))}
-          {mm.stopDay && <span className="absolute inset-y-0 w-0.5 bg-press" style={{ left: pct(mm.stopDay + 1) }} />}
+          {[...mm.pauseDays, ...(mm.stopDay ? [mm.stopDay] : [])].map((d) => (
+            <span key={d} className="absolute inset-y-0 w-0.5 bg-press" style={{ left: pct(d + 1) }} />
+          ))}
           {todayDay && <span className="absolute -top-0 bottom-0 w-0.5 bg-marking" style={{ left: pct(todayDay) }} />}
         </div>
         <div className="mt-0.5 flex justify-between text-small text-press-2">
@@ -65,8 +67,8 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
 
       {/* Runs in words */}
       <ul className="mt-3 space-y-3 text-table">
-        {mm.runs.map((r) => (
-          <li key={r.product}>
+        {mm.runs.map((r, i) => (
+          <li key={`${r.product}-${r.from}`}>
             <p className="flex items-center gap-2 font-semibold">
               <span className={`inline-block h-3 w-3 shrink-0 rounded-sm ${FAMILY_BG[r.family]}`} aria-hidden />
               {r.product}
@@ -75,9 +77,12 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
               {r.from ? `From ${day(r.from)}` : 'Already running'}
               {r.until ? `, until ${day(r.until)}` : ', no end date'}
             </p>
+            {r.note && (
+              <p className={`ml-5 mt-0.5 text-small font-semibold ${/no po|po required/i.test(r.note) ? 'text-caution' : 'text-press-2'}`}>{r.note}</p>
+            )}
             {r.serves.length > 0 ? (
               <ul className="ml-5 mt-1.5 space-y-1">
-                {(open[r.product] ? r.serves : r.serves.slice(0, FIRST)).map((s) => (
+                {(open[i] ? r.serves : r.serves.slice(0, FIRST)).map((s) => (
                   <li key={s.po.po} className="rounded bg-mist px-2 py-1.5">
                     <span className="flex flex-wrap items-center gap-1.5">
                       <span className="font-semibold">PO {s.po.po}</span>
@@ -95,16 +100,16 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
                   <li>
                     <button
                       type="button"
-                      aria-expanded={Boolean(open[r.product])}
-                      onClick={() => setOpen((o) => ({ ...o, [r.product]: !o[r.product] }))}
+                      aria-expanded={Boolean(open[i])}
+                      onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
                       className="min-h-[36px] text-small font-semibold text-info underline underline-offset-2"
                     >
-                      {open[r.product] ? 'Show fewer' : `Show all ${r.serves.length} POs`}
+                      {open[i] ? 'Show fewer' : `Show all ${r.serves.length} POs`}
                     </button>
                   </li>
                 )}
               </ul>
-            ) : (
+            ) : /no po|po required/i.test(r.note ?? '') ? null : (
               <p className="ml-5 mt-1 flex items-center gap-1.5 text-small text-press-2">
                 <Info size={13} aria-hidden /> No open Polyco PO on efdashboard.com for this product
               </p>

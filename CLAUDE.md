@@ -90,10 +90,12 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   downloadable through `/api/po-document`. The Supabase URL and public key are
   `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
 - **Machines**, month by month: what each thermoforming, lamination, trimming and
-  X-ray machine runs, until when, and which open POs it is making. Thermoforming
-  follows `data/machine-plan.json`, typed from Izhar's production plan of 1 October
-  2026; change a date there through a PR. Lamination, trimming and X-ray come live from
-  efdashboard.com's Line Usage, which has no end dates. Each run is matched to open POs
+  X-ray machine runs, until when, and which open POs it is making. Thermoforming,
+  lamination and the manual trimmers follow `data/machine-plan.json`, typed from
+  Izhar's production and finishing department plans of 1 October 2026; change a date
+  there through a PR. The auto trimmers and X-ray come live from efdashboard.com's Line
+  Usage, which has no end dates. On the finishing sheet the Potato tray is the Destiny
+  7x7 tray and Every Table is Point Five ET. Each run is matched to open POs
   by the product codes in its `match` list. Where Line Usage disagrees with the plan for
   a forming machine, the tab lists it.
 

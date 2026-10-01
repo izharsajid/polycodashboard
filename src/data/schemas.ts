@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { FundsRequested } from '../engine/schema'
 import { Entry, LedgerDisputes, NO_RULES, StatementFile, StatementRules, Workbook } from '../engine/statementSchema'
 import { TrackerPayload } from '../engine/trackerSchema'
+import { MachinePlan } from '../engine/machines'
 
 /** What each endpoint returns, as the tabs validate it. */
 export const FundsPayload = z.object({ funds: FundsRequested })
@@ -17,3 +18,5 @@ export const StatementPayload = z.object({
 export type StatementPayloadT = z.infer<typeof StatementPayload>
 
 export { TrackerPayload }
+
+export const MachinesPayload = z.object({ plan: MachinePlan })

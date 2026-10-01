@@ -72,8 +72,8 @@ Report in **US$**. Where a BHD figure is the source, convert at the single const
 
 ## Status
 
-Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard has three
-tabs, both built as month cards that open into a panel (see `DESIGN.md`):
+Rebuilt from scratch on 1 October 2026 to `BRIEF-TAB1.md`. The dashboard has four
+tabs; the first two are built as month cards that open into a panel (see `DESIGN.md`):
 
 - **Funds requested**, from `data/funds-requested.json`, cards colour-coded by cost
   category.
@@ -89,6 +89,13 @@ tabs, both built as month cards that open into a panel (see `DESIGN.md`):
   own rules ported to `src/engine/tracker.ts`, and every PO file viewable and
   downloadable through `/api/po-document`. The Supabase URL and public key are
   `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
+- **Machines**, month by month: what each thermoforming, lamination, trimming and
+  X-ray machine runs, until when, and which open POs it is making. Thermoforming
+  follows `data/machine-plan.json`, typed from Izhar's production plan of 1 October
+  2026; change a date there through a PR. Lamination, trimming and X-ray come live from
+  efdashboard.com's Line Usage, which has no end dates. Each run is matched to open POs
+  by the product codes in its `match` list. Where Line Usage disagrees with the plan for
+  a forming machine, the tab lists it.
 
 Engines are in `src/engine/`, pages in `src/tabs/`, shared components in
 `src/components/`, tests in `tests/`. Add a tab through `src/tabs/index.ts`.
@@ -113,5 +120,6 @@ The site stays out of search results through robots.txt, a noindex meta tag and 
 `X-Robots-Tag` header. Anything added to `/data` is public the moment it deploys; check
 `partner-disclosure` before adding a file.
 
-Machine, headcount and configuration work stays blocked pending that data. Do not
-fabricate machine data to get moving.
+Headcount, cost and configuration work stays blocked pending that data. Do not
+fabricate machine dates, rates or costs to get moving; the machine plan holds only what
+the production plan states.

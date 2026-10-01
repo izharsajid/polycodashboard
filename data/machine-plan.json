@@ -1,0 +1,57 @@
+{
+  "source": "EcoFibre production flow and machine status sheet",
+  "as_at": "2026-10-01",
+  "note": "The thermoforming plan as Izhar sent it on 1 October 2026. A run with no 'from' was already running before the sheet; one with no 'until' has no end date. 'match' lists the product codes that tie a run to open POs on efdashboard.com.",
+  "machines": [
+    {
+      "id": "forming-1", "name": "Machine 1", "type": "forming", "status": "running",
+      "runs": [
+        { "product": "Large Medical Tray", "from": null, "until": "2026-09-29", "match": ["PHTRASCL"] },
+        { "product": "Platinum C3", "from": "2026-09-29", "until": "2026-10-10", "match": ["TFPP/TRAY3", "TRAY 3"] },
+        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-30", "match": [] }
+      ],
+      "stops": "2026-12-30", "stop_note": "POs will be completed", "note": null
+    },
+    {
+      "id": "forming-2", "name": "Machine 2", "type": "forming", "status": "running",
+      "runs": [
+        { "product": "Platinum C2", "from": null, "until": "2026-11-20", "match": ["TFPP/TRAY2", "2-Comp", "2 Comp"] },
+        { "product": "Platinum C1", "from": "2026-11-20", "until": "2026-12-25", "match": ["TFPP/TRAY1", "1-Comp", "1 Comp"] }
+      ],
+      "stops": "2026-12-25", "stop_note": "POs completed", "note": null
+    },
+    {
+      "id": "forming-3", "name": "Machine 3", "type": "forming", "status": "running",
+      "runs": [{ "product": "Oasis Tray #1", "from": null, "until": null, "match": ["OT1230"] }],
+      "stops": null, "stop_note": null, "note": null
+    },
+    {
+      "id": "forming-4", "name": "Machine 4", "type": "forming", "status": "running",
+      "runs": [{ "product": "Oasis Tray #2", "from": null, "until": null, "match": ["OT1230"] }],
+      "stops": null, "stop_note": null, "note": "Regular: runs even after the POs, as one is required each month"
+    },
+    {
+      "id": "forming-5", "name": "Machine 5", "type": "forming", "status": "running",
+      "runs": [{ "product": "Point Five ET Tray", "from": null, "until": "2026-10-30", "match": ["Point Five", "PointFive"] }],
+      "stops": "2026-10-30", "stop_note": "POs completed", "note": null
+    },
+    {
+      "id": "forming-6", "name": "Machine 6", "type": "forming", "status": "running",
+      "runs": [{ "product": "Medium Medical Tray", "from": null, "until": "2026-10-25", "match": ["PHTRASCM"] }],
+      "stops": "2026-10-25", "stop_note": "POs completed", "note": null
+    },
+    {
+      "id": "forming-7", "name": "Machine 7", "type": "forming", "status": "changing",
+      "runs": [
+        { "product": "Small Medical", "from": null, "until": "2026-10-10", "match": ["PHTRASCS"] },
+        { "product": "1/2M Bowl", "from": "2026-10-10", "until": "2026-12-30", "match": [] }
+      ],
+      "stops": "2026-12-30", "stop_note": "POs will be completed", "note": "Mould changing"
+    },
+    {
+      "id": "forming-8", "name": "Machine 8", "type": "forming", "status": "running",
+      "runs": [{ "product": "Point Five ET Lid", "from": null, "until": "2026-10-20", "match": ["Point Five", "PointFive"] }],
+      "stops": "2026-10-20", "stop_note": null, "note": null
+    }
+  ]
+}

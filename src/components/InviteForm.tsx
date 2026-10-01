@@ -38,7 +38,7 @@ export default function InviteForm({
     setCopied(false)
     setBusy(true)
 
-    const result = await api.post<{ user: PublicUser; link: string | null; expiresAt: string }>('/api/users/invite', {
+    const result = await api.post<{ user: PublicUser; link: string | null; emailed?: boolean; expiresAt: string }>('/api/users/invite', {
       email,
       name,
       ...(isAdmin ? { role } : {}),
@@ -52,9 +52,10 @@ export default function InviteForm({
 
     const who = result.data.user
     setDone(
-      result.data.link
-        ? `${who.name} is added as ${who.role === 'admin' ? 'an administrator' : 'a member'}. Send them the link below; they open it to choose their own password.`
-        : `${who.name} is added as ${who.role === 'admin' ? 'an administrator' : 'a member'}, and has been emailed a link to choose their password.`,
+      `${who.name} is added as ${who.role === 'admin' ? 'an administrator' : 'a member'}. ` +
+        (result.data.emailed
+          ? 'They have been emailed a link to choose their password, and you can also send them the one below.'
+          : 'Send them the link below; they open it to choose their own password.'),
     )
     if (result.data.link) setLink({ url: result.data.link, expiresAt: result.data.expiresAt })
     setEmail('')

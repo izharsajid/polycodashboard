@@ -40,7 +40,13 @@ export default function MachineCard({ mm, month, today }: { mm: MachineMonth; mo
         <span className={`rounded-full px-2.5 py-1 text-small font-semibold ${status.tone}`}>{status.label}</span>
       </div>
 
-      <MachineArt type={m.type} status={idleAll ? 'stopped' : m.status} family={nowFamily} className="my-2 w-full" />
+      <MachineArt
+        type={m.type}
+        status={idleAll ? 'stopped' : m.status}
+        family={nowFamily}
+        auto={/auto/i.test(m.name)}
+        className="my-2 w-full"
+      />
 
       {/* The month, day by day */}
       <div aria-hidden>

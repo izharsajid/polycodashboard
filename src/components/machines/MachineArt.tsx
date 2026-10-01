@@ -2,7 +2,8 @@ import type { Family, MachineStatus, MachineType } from '../../engine/machines'
 
 /**
  * Line drawings of the plant's machines, front on: the twin-station fibre
- * forming press, a laminator, the hydraulic trimming press and an X-ray tunnel. Each carries a stack light
+ * forming press, a laminator, the manual hydraulic trimming press, the automatic
+ * travelling-head trimmer and an X-ray tunnel. Each carries a stack light
  * showing its status, and the product it is running in that product's colour.
  * Decorative: the card beside each says everything in words.
  */
@@ -34,9 +35,16 @@ export const FAMILY_LABEL: Record<Family, string> = {
   other: 'Other work',
 }
 
-type Props = { type: MachineType; status: MachineStatus; family: Family | null; className?: string }
+type Props = {
+  type: MachineType
+  status: MachineStatus
+  family: Family | null
+  /** An automatic trimmer, drawn as the travelling-head press rather than the manual one. */
+  auto?: boolean
+  className?: string
+}
 
-export default function MachineArt({ type, status, family, className }: Props) {
+export default function MachineArt({ type, status, family, auto = false, className }: Props) {
   const product = family ? FAMILY_FILL[family] : 'fill-rule'
   const on = status === 'running' || status === 'changing'
   return (
@@ -44,9 +52,9 @@ export default function MachineArt({ type, status, family, className }: Props) {
       <line x1="4" x2="256" y1="136" y2="136" className="stroke-rule" strokeWidth="2" />
       {type === 'forming' && <Thermoformer product={product} on={on} />}
       {type === 'lamination' && <Laminator product={product} on={on} />}
-      {type === 'trimming' && <Trimmer product={product} on={on} />}
+      {type === 'trimming' && (auto ? <AutoTrimmer product={product} on={on} /> : <Trimmer product={product} on={on} />)}
       {type === 'xray' && <Xray product={product} on={on} />}
-      <StackLight status={status} x={type === 'xray' ? 214 : type === 'forming' ? 126 : 205} />
+      <StackLight status={status} x={type === 'xray' ? 214 : type === 'forming' ? 126 : type === 'trimming' && auto ? 225 : 205} />
     </svg>
   )
 }
@@ -219,6 +227,47 @@ function Trimmer({ product, on }: { product: string; on: boolean }) {
       <circle cx="213" cy="56" r="2.2" className="fill-alert" />
       <rect x="203" y="63" width="12" height="6" rx="1" className="fill-marking stroke-press-2" />
       <line x1="194" x2="198" y1="52" y2="52" className="stroke-press-2" strokeWidth="2" />
+    </g>
+  )
+}
+
+/** Automatic travelling-head cutting press: feed table through the press, hydraulic pack below, control cabinet beside. */
+function AutoTrimmer({ product, on }: { product: string; on: boolean }) {
+  return (
+    <g>
+      {/* Hydraulic pack: tank and motor */}
+      <rect x="16" y="112" width="40" height="18" rx="1.5" className="fill-info stroke-press" strokeWidth="1.2" />
+      <rect x="22" y="98" width="24" height="14" rx="3" className="fill-marking stroke-press" strokeWidth="1.2" />
+      <path d="M46 104 C 54 104, 56 96, 62 96" className="stroke-press-2" strokeWidth="1.5" fill="none" />
+      {/* Press body: base, side columns and top beam */}
+      <rect x="60" y="78" width="120" height="50" rx="2" className="fill-info stroke-press" strokeWidth="1.5" />
+      <rect x="72" y="88" width="96" height="30" rx="1.5" className="fill-info-wash" opacity="0.35" />
+      {[62, 170].map((x) => (
+        <rect key={x} x={x} y="128" width="8" height="8" className="fill-press-2" />
+      ))}
+      <rect x="60" y="30" width="14" height="48" className="fill-info stroke-press" strokeWidth="1.2" />
+      <rect x="166" y="30" width="14" height="48" className="fill-info stroke-press" strokeWidth="1.2" />
+      <rect x="56" y="20" width="128" height="16" rx="2" className="fill-info stroke-press" strokeWidth="1.5" />
+      <rect x="112" y="24" width="16" height="8" rx="1" className="fill-sheet" />
+      {/* Travelling cutting head, lowered while it runs */}
+      <rect x="78" y={on ? 50 : 38} width="84" height="10" rx="1" className="fill-press-2 stroke-press" strokeWidth="1" />
+      {/* Feed table running through the press, with white side guards */}
+      <rect x="10" y="70" width="196" height="6" className="fill-sheet stroke-press" strokeWidth="1.2" />
+      <rect x="12" y="58" width="30" height="12" rx="1.5" className="fill-sheet stroke-press-2" />
+      <rect x="182" y="58" width="22" height="12" rx="1.5" className="fill-sheet stroke-press-2" />
+      <rect x="46" y="62" width="30" height="8" rx="1" className={product} opacity="0.55" />
+      {[86, 104, 122, 140].map((x) => (
+        <rect key={x} x={x} y="62" width="14" height="8" rx="2" className={product} />
+      ))}
+      {/* Free-standing control cabinet with its screen */}
+      <path d="M180 120 C 196 120, 200 126, 212 126" className="stroke-press-2" strokeWidth="1.5" fill="none" />
+      <rect x="212" y="42" width="34" height="90" rx="2" className="fill-mist stroke-press" strokeWidth="1.5" />
+      <rect x="217" y="48" width="24" height="16" rx="1.5" className="fill-info-wash stroke-press-2" />
+      <circle cx="222" cy="72" r="2.4" className="fill-cat-compliance" />
+      <circle cx="229" cy="72" r="2.4" className="fill-alert" />
+      <circle cx="236" cy="72" r="2.4" className="fill-marking" />
+      <line x1="218" x2="240" y1="84" y2="84" className="stroke-rule" strokeWidth="2" />
+      <line x1="218" x2="240" y1="92" y2="92" className="stroke-rule" strokeWidth="2" />
     </g>
   )
 }

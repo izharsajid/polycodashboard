@@ -2,7 +2,7 @@ import type { Family, MachineStatus, MachineType } from '../../engine/machines'
 
 /**
  * Line drawings of the plant's machines, front on: the twin-station fibre
- * forming press, a laminator, the manual hydraulic trimming press, the automatic
+ * forming press, the laminating press, the manual hydraulic trimming press, the automatic
  * travelling-head trimmer and an X-ray tunnel. Each carries a stack light
  * showing its status, and the product it is running in that product's colour.
  * Decorative: the card beside each says everything in words.
@@ -54,7 +54,7 @@ export default function MachineArt({ type, status, family, auto = false, classNa
       {type === 'lamination' && <Laminator product={product} on={on} />}
       {type === 'trimming' && (auto ? <AutoTrimmer product={product} on={on} /> : <Trimmer product={product} on={on} />)}
       {type === 'xray' && <Xray product={product} on={on} />}
-      <StackLight status={status} x={type === 'xray' ? 214 : type === 'forming' ? 126 : type === 'trimming' && auto ? 225 : 205} />
+      <StackLight status={status} x={type === 'xray' ? 214 : type === 'forming' ? 126 : type === 'trimming' && auto ? 225 : type === 'lamination' ? 156 : 205} />
     </svg>
   )
 }
@@ -69,22 +69,6 @@ function StackLight({ status, x }: { status: MachineStatus; x: number }) {
       <rect x={x} y="6" width="8" height="8" rx="1.5" className={status === 'offline' || status === 'stopped' ? 'fill-press-2' : 'fill-mist stroke-rule'} />
       <rect x={x} y="14" width="8" height="8" rx="1.5" className={lit('amber') ? 'fill-marking' : 'fill-mist stroke-rule'} />
       <rect x={x} y="22" width="8" height="8" rx="1.5" className={lit('green') ? 'fill-cat-compliance' : 'fill-mist stroke-rule'} />
-    </g>
-  )
-}
-
-function Cabinet({ x = 186 }: { x?: number }) {
-  return (
-    <g>
-      <rect x={x} y="44" width="42" height="74" rx="3" className="fill-sheet stroke-press" strokeWidth="1.5" />
-      <rect x={x + 6} y="52" width="30" height="18" rx="2" className="fill-info-wash stroke-press-2" />
-      <circle cx={x + 12} cy="82" r="3.5" className="fill-cat-compliance" />
-      <circle cx={x + 22} cy="82" r="3.5" className="fill-press-2" />
-      <circle cx={x + 32} cy="82" r="3.5" className="fill-caution" />
-      <line x1={x + 8} x2={x + 34} y1="96" y2="96" className="stroke-rule" strokeWidth="2" />
-      <line x1={x + 8} x2={x + 34} y1="104" y2="104" className="stroke-rule" strokeWidth="2" />
-      <rect x={x + 4} y="118" width="6" height="18" className="fill-press-2" />
-      <rect x={x + 32} y="118" width="6" height="18" className="fill-press-2" />
     </g>
   )
 }
@@ -148,35 +132,51 @@ function Station({ x, product, on }: { x: number; product: string; on: boolean }
   )
 }
 
+/** Laminating press: film tray sliding in from the side, press housing on a cylinder, roller conveyors out. */
 function Laminator({ product, on }: { product: string; on: boolean }) {
   return (
     <g>
-      {/* Film reel feeding down */}
-      <circle cx="46" cy="34" r="16" className={`${product} stroke-press`} strokeWidth="1.5" />
-      <circle cx="46" cy="34" r="5" className="fill-sheet stroke-press" strokeWidth="1.5" />
-      <path d="M58 44 Q 90 60 100 66" className="stroke-press-2" strokeWidth="1.5" fill="none" />
-      {/* Frame */}
-      <rect x="40" y="96" width="140" height="22" rx="2" className="fill-mist stroke-press" strokeWidth="1.5" />
-      <rect x="46" y="118" width="8" height="18" className="fill-press-2" />
-      <rect x="166" y="118" width="8" height="18" className="fill-press-2" />
-      <rect x="84" y="40" width="6" height="56" className="fill-press-2" />
-      <rect x="146" y="40" width="6" height="56" className="fill-press-2" />
-      {/* Heated nip rollers */}
-      <circle cx="118" cy="56" r="18" className={on ? 'fill-caution-wash stroke-press' : 'fill-sheet stroke-press'} strokeWidth="1.5" />
-      <circle cx="118" cy="56" r="4" className="fill-press-2" />
-      <circle cx="118" cy="82" r="10" className="fill-sheet stroke-press" strokeWidth="1.5" />
-      <circle cx="118" cy="82" r="3" className="fill-press-2" />
-      {/* Trays passing through, laminated */}
-      <line x1="24" x2="186" y1="92" y2="92" className="stroke-press" strokeWidth="1.5" />
-      {[40, 62, 140, 162].map((x) => (
-        <rect key={x} x={x} y="84" width="16" height="8" rx="2" className={product} />
+      {/* Base platform */}
+      <rect x="14" y="92" width="222" height="40" rx="2" className="fill-rule stroke-press" strokeWidth="1.5" />
+      <line x1="14" x2="236" y1="100" y2="100" className="stroke-press-2" strokeWidth="1" opacity="0.5" />
+      {/* Film tray on its rails, sliding in from the left */}
+      <path d="M8 56 L84 56 L84 66 L16 66 Z" className="fill-info-wash stroke-press-2" strokeWidth="1.2" />
+      {[24, 40, 56, 72].map((x) => (
+        <line key={x} x1={x} x2={x - 3} y1="57" y2="65" className="stroke-press-2" strokeWidth="0.8" opacity="0.6" />
       ))}
-      <Cabinet />
+      <rect x="18" y="66" width="66" height="4" className="fill-mist stroke-press-2" />
+      {[22, 76].map((x) => (
+        <rect key={x} x={x} y="70" width="4" height="22" className="fill-press-2" />
+      ))}
+      {/* Press housing with its grid top, cylinder and rod */}
+      <rect x="84" y="40" width="84" height="52" rx="1.5" className="fill-mist stroke-press" strokeWidth="1.5" />
+      <rect x="80" y="34" width="92" height="8" rx="1" className="fill-sheet stroke-press" strokeWidth="1.2" />
+      {[103, 126, 149].map((x) => (
+        <line key={x} x1={x} x2={x} y1="34" y2="42" className="stroke-press-2" strokeWidth="1" />
+      ))}
+      <rect x="112" y="16" width="3" height="18" className="fill-press-2" />
+      <rect x="137" y="16" width="3" height="18" className="fill-press-2" />
+      <rect x="110" y="14" width="32" height="4" className="fill-press-2" />
+      <rect x="120" y="18" width="12" height="16" rx="1.5" className="fill-sheet stroke-press" strokeWidth="1.2" />
+      <line x1="126" x2="126" y1="2" y2="14" className="stroke-press-2" strokeWidth="2" />
+      {/* The opening: heated platen over trays being sealed */}
+      <rect x="92" y="58" width="68" height="34" className="fill-press-2" />
+      <rect x="96" y="62" width="60" height="6" rx="1" className={on ? 'fill-cat-logistics' : 'fill-rule'} />
+      {[100, 116, 132].map((x) => (
+        <rect key={x} x={x} y="82" width="12" height="8" rx="2" className={product} />
+      ))}
+      {/* Roller conveyors carrying sealed trays out */}
+      <rect x="168" y="84" width="64" height="8" className="fill-mist stroke-press-2" />
+      {[174, 184, 194, 204, 214, 224].map((x) => (
+        <circle key={x} cx={x} cy="88" r="2.5" className="fill-sheet stroke-press-2" />
+      ))}
+      {[176, 196, 216].map((x) => (
+        <rect key={x} x={x} y="76" width="12" height="8" rx="2" className={product} />
+      ))}
     </g>
   )
 }
 
-/** Hydraulic four-post trimming press behind its guards, with the control box beside it. */
 function Trimmer({ product, on }: { product: string; on: boolean }) {
   return (
     <g>

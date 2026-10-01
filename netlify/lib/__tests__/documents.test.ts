@@ -287,7 +287,7 @@ describe('GET /api/orders', () => {
     const res = await call(undefined, await sessionFor(SAMUEL))
 
     expect(res.status).toBe(200)
-    expect((await res.json()).tracker.orders.length).toBe(102)
+    expect((await res.json()).tracker.orders.length).toBe(97)
   })
 
   it('serves one order with its documents', async () => {

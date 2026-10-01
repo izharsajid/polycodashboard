@@ -1,7 +1,7 @@
 {
   "source": "EcoFibre production flow, machine status and finishing department sheets",
   "as_at": "2026-10-01",
-  "note": "The thermoforming and finishing department plans as Izhar sent them on 1 October 2026. Lamination and manual trimming are from the finishing sheet; 'line_usage' names the same machine on efdashboard.com. 'pos' ties a run to the POs the sheet names; 'stops_after' means the machine stands idle after that run's last day. A run with no 'from' was already running before the sheet; one with no 'until' has no end date. 'match' lists the product codes that tie a run to open POs on efdashboard.com.",
+  "note": "The thermoforming and finishing department plans as Izhar sent them on 1 October 2026. Lamination and manual trimming are from the finishing sheet; 'pos' ties a run to the POs the sheet names; 'stops_after' means the machine stands idle after that run's last day. A run with no 'from' was already running before the sheet; one with no 'until' has no end date. 'match' lists the product codes that tie a run to open POs on efdashboard.com.",
   "machines": [
     {
       "id": "forming-1", "name": "Machine 1", "type": "forming", "status": "running",
@@ -54,7 +54,7 @@
       "stops": "2026-10-20", "stop_note": null, "note": null
     },
     {
-      "id": "lamination-1", "name": "Lamination Machine 1", "type": "lamination", "status": "running", "line_usage": "Laminator 1",
+      "id": "lamination-1", "name": "Lamination Machine 1", "type": "lamination", "status": "running",
       "runs": [
         { "product": "Platinum 2", "from": null, "until": "2026-10-10", "match": ["TFPP/TRAY2", "2 Comp", "2-Comp"], "pos": ["2679969"] },
         { "product": "Platinum 3", "from": "2026-10-10", "until": "2026-10-17", "match": ["TFPP/TRAY3", "TRAY 3"], "pos": ["2679969"] },
@@ -65,10 +65,10 @@
       "stops": "2026-12-20", "stop_note": "Machine stopped", "note": null
     },
     {
-      "id": "lamination-2", "name": "Lamination Machine 2", "type": "lamination", "status": "running", "line_usage": "Laminator 2",
+      "id": "lamination-2", "name": "Lamination Machine 2", "type": "lamination", "status": "running",
       "runs": [
         { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "match": ["7x7", "Destiny"], "pos": ["2466123-3"], "note": "Then the monthly Potato tray, no PO, before Every Table starts" },
-        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "match": ["Point Five", "PointFive"], "pos": ["2679682"] },
+        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "match": [] },
         { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "match": [], "note": "1/2M PO required" },
         { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "match": [], "note": "Monthly one, no PO" },
         { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "match": [], "note": "1/2M PO required" },
@@ -94,6 +94,14 @@
       "id": "trimmer-manual-3", "name": "Manual Trimmer 3", "type": "trimming", "status": "running",
       "runs": [{ "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-31", "match": [], "note": "Starts 10 October, parallel with forming, until the end of December" }],
       "stops": "2026-12-31", "stop_note": "End of December", "note": null
+    },
+    {
+      "id": "trimmer-auto-1", "name": "Auto Trimmer 1", "type": "trimming", "status": "unscheduled",
+      "runs": [], "stops": null, "stop_note": null, "note": null
+    },
+    {
+      "id": "trimmer-auto-2", "name": "Auto Trimmer 2", "type": "trimming", "status": "unscheduled",
+      "runs": [], "stops": null, "stop_note": null, "note": null
     }
   ]
 }

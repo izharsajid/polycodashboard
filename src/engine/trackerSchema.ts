@@ -32,27 +32,13 @@ export const TrackerDocument = z.object({
   updated_at: z.string().nullable().optional(),
 })
 
-/** efdashboard.com's Line Usage: what each machine is on now. */
-export const LineUsageRow = z.object({
-  id: z.number(),
-  section: z.string(),
-  machine: z.string(),
-  running: z.boolean().nullable().transform((v) => v ?? false),
-  product: Text,
-  schedule: Text,
-  notes: Text,
-  sort_order: z.number().nullable().optional(),
-})
-
 export const TrackerPayload = z.object({
   rows: z.array(TrackerRow),
   settings: z.array(z.object({ key: z.string(), value: z.string().nullable() })),
   documents: z.array(TrackerDocument),
-  line_usage: z.array(LineUsageRow).default([]),
   fetched_at: z.string(),
 })
 
 export type TrackerRowT = z.infer<typeof TrackerRow>
 export type TrackerDocumentT = z.infer<typeof TrackerDocument>
 export type TrackerPayloadT = z.infer<typeof TrackerPayload>
-export type LineUsageRowT = z.infer<typeof LineUsageRow>

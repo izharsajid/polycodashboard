@@ -2788,22 +2788,6 @@
    "delivery_date": null
   },
   {
-   "row": 181,
-   "sno": 173,
-   "ref": 2679682.0,
-   "product": "Point Five ET# 3 Tray + Lid ",
-   "po_amount": 31471.2,
-   "proforma": null,
-   "proforma_amount": 31471.2,
-   "delivered": null,
-   "received": null,
-   "received_date": null,
-   "loaded": "Processing - Dispatching November 2026",
-   "delivered_k": null,
-   "pending_l": null,
-   "delivery_date": null
-  },
-  {
    "row": 182,
    "sno": 174,
    "ref": 2679683.0,

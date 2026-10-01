@@ -45,7 +45,7 @@ try {
       if (r.from && r.until && r.from > r.until) throw new Error(`${m.name}: ${r.product} ends before it starts`)
     }
   }
-  const machines = buildMachines(plan, null, [])
+  const machines = buildMachines(plan, null)
   console.log(`Machine plan: ${machines.machines.length} machines, ${machines.months[0]} to ${machines.months.at(-1)}`)
 } catch (error) {
   console.error('\nData validation failed:')

@@ -56,8 +56,10 @@ export default function MachinesTab() {
   const families = [...new Set(model.machines.flatMap((m) => timeline(m, model.range).map((b) => b.family)))] as Family[]
   const noPo = withoutPo(model.machines, today)
   const month = view === 'all' ? null : view
-  const runningIn = (m: string) => model.machines.filter((x) => inMonth(x, m).running)
-  const stopsIn = (m: string) => model.machines.filter((x) => x.stops?.startsWith(m)).sort((a, b) => a.stops!.localeCompare(b.stops!))
+  // The month tabs count thermoforming only: the formers set the plant's output.
+  const formers = model.machines.filter((x) => x.type === 'forming')
+  const runningIn = (m: string) => formers.filter((x) => inMonth(x, m).running)
+  const stopsIn = (m: string) => formers.filter((x) => x.stops?.startsWith(m)).sort((a, b) => a.stops!.localeCompare(b.stops!))
 
   return (
     <div className="space-y-8 pt-6">
@@ -102,7 +104,7 @@ export default function MachinesTab() {
           )}
         </ul>
         {/* Every month at once, or one month on its own */}
-        <div role="group" aria-label="Months" className="mb-3 flex flex-wrap gap-1.5">
+        <div role="group" aria-label="Months, with how many thermoforming machines run in each" className="mb-3 flex flex-wrap gap-1.5">
           {(['all', ...model.months] as const).map((v) => (
             <button
               key={v}
@@ -112,14 +114,14 @@ export default function MachinesTab() {
               className={`min-h-[40px] rounded-full border px-3.5 text-table font-semibold ${view === v ? 'border-press bg-press text-sheet' : 'border-rule bg-sheet hover:border-press-2'}`}
             >
               {v === 'all' ? 'All months' : monthOnly(v)}
-              {v !== 'all' && <span className={`ml-1.5 text-small ${view === v ? 'text-sheet/80' : 'text-press-2'}`}>{runningIn(v).length}</span>}
+              {v !== 'all' && <span className={`ml-1.5 text-small ${view === v ? 'text-sheet/80' : 'text-press-2'}`}>{runningIn(v).length}/{formers.length}</span>}
             </button>
           ))}
         </div>
         {month && (
           <p className="mb-3 text-table">
             <span className="font-bold">
-              {runningIn(month).length} of {model.machines.length} machines run in {monthLong(month)}
+              {runningIn(month).length} of {formers.length} thermoforming machines run in {monthLong(month)}
             </span>
             {stopsIn(month).length > 0 && (
               <span className="text-press-2">

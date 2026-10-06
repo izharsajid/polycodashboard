@@ -30,7 +30,7 @@ export const FAMILY_LABEL: Record<Family, string> = {
   platinum: 'Platinum trays',
   oasis: 'Oasis trays',
   pointfive: 'Point Five',
-  destiny: 'Destiny 7x7 (Potato)',
+  destiny: 'Destiny 7x7 Tray',
   halfm: '1/2M lids and bowls',
   other: 'Other work',
 }

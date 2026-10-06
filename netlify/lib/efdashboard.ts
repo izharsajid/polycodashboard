@@ -7,8 +7,10 @@
  * the files themselves come from efdashboard.com's own /api/po-documents.
  *
  * Read only. This site never writes to efdashboard.com. POs listed in
- * data/removed-pos.json are dropped here, before anything reaches the browser.
+ * data/removed-pos.json are dropped here, and products are written by the names in
+ * data/product-names.json, before anything reaches the browser.
  */
+import names from '../../data/product-names.json' with { type: 'json' }
 import removed from '../../data/removed-pos.json' with { type: 'json' }
 
 export const EFDASHBOARD = 'https://efdashboard.com'
@@ -42,9 +44,12 @@ export async function readTracker(): Promise<unknown> {
     po: d.po, name: d.name, title: d.title, note: d.note, size: d.size, updated_at: d.updated_at,
   }))
 
-  const payload = withoutRemoved(
-    { rows: rows as { po_number?: unknown }[], settings, documents, fetched_at: new Date().toISOString() },
-    removed.pos,
+  const payload = renamed(
+    withoutRemoved(
+      { rows: rows as Record<string, unknown>[], settings, documents, fetched_at: new Date().toISOString() },
+      removed.pos,
+    ),
+    names.renames,
   )
   cached = { at: Date.now(), payload }
   return payload
@@ -62,5 +67,30 @@ export function withoutRemoved<T extends { rows: { po_number?: unknown }[]; docu
     ...feed,
     rows: feed.rows.filter((r) => !isRemoved(r.po_number, list)),
     documents: feed.documents.filter((d) => !isRemoved(d.po, list)),
+  }
+}
+
+type Rename = { from: string; to: string }
+
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** Text with every old product name replaced, longest first, ignoring case. */
+export function rename(text: string, renames: Rename[]): string {
+  return [...renames]
+    .sort((a, b) => b.from.length - a.from.length)
+    .reduce((t, { from, to }) => t.replace(new RegExp(escape(from), 'gi'), to), text)
+}
+
+const renameFields = <T extends Record<string, unknown>>(row: T, renames: Rename[], keep: string[] = []): T =>
+  Object.fromEntries(
+    Object.entries(row).map(([k, v]) => [k, typeof v === 'string' && !keep.includes(k) ? rename(v, renames) : v]),
+  ) as T
+
+/** The feed with products written by the dashboard's names. A file's `name` is how it is fetched, so it stays. */
+export function renamed<T extends { rows: Record<string, unknown>[]; documents: Record<string, unknown>[] }>(feed: T, renames: Rename[]): T {
+  return {
+    ...feed,
+    rows: feed.rows.map((r) => renameFields(r, renames)),
+    documents: feed.documents.map((d) => renameFields(d, renames, ['name', 'po'])),
   }
 }

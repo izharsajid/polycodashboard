@@ -5,7 +5,8 @@ exactly as issued.
     python3 scripts/import-statement.py "<workbook.xlsx>" <as-at YYYY-MM-DD>
 
 Nothing is corrected or interpreted here, except that lines for POs in
-data/removed-pos.json (cancelled, removed from the dashboard) are left out. Every cell is kept as the workbook
+data/removed-pos.json (cancelled, removed from the dashboard) are left out, and
+products are written by the names in data/product-names.json (Izhar, 6 October 2026). Every cell is kept as the workbook
 holds it: a date cell becomes YYYY-MM-DD, a text cell stays text, "#REF!" stays
 "#REF!". Parsing, matching to efdashboard.com and finding discrepancies all
 happen in src/engine/statement.ts, where they are tested. The as-at date is
@@ -34,6 +35,16 @@ def cell(v):
 here = os.path.dirname(__file__)
 with open(os.path.join(here, '..', 'data', 'removed-pos.json')) as f:
     removed = json.load(f)['pos']
+with open(os.path.join(here, '..', 'data', 'product-names.json')) as f:
+    renames = sorted(json.load(f)['renames'], key=lambda n: -len(n['from']))
+
+def renamed(v):
+    if not isinstance(v, str):
+        return v
+    for n in renames:
+        v = re.sub(re.escape(n['from']), n['to'], v, flags=re.I)
+    return v
+
 is_removed = lambda v: v is not None and re.fullmatch(r'(%s)(-\d+)?' % '|'.join(removed), str(v).strip().removesuffix('.0')) is not None
 
 rows, summary = [], []
@@ -44,11 +55,12 @@ for r in range(7, ws.max_row + 1):
         if values['po_amount'] is not None and not isinstance(values['po_amount'], str):
             summary.append({'row': r, 'kind': 'totals', **{k: values[k] for k in ('po_amount', 'proforma_amount', 'delivered', 'received', 'delivered_k', 'pending_l')}})
         elif isinstance(values['po_amount'], str):
-            summary.append({'row': r, 'kind': 'line', 'label': ' '.join(values['po_amount'].split()), 'value': values['proforma_amount']})
+            label = renamed(' '.join(values['po_amount'].split()))
+            summary.append({'row': r, 'kind': 'line', 'label': label, 'value': values['proforma_amount']})
         continue
     if is_removed(values['ref']):
         continue
-    rows.append({'row': r, **values})
+    rows.append({'row': r, **{k: renamed(v) for k, v in values.items()}})
 
 out = {
     'source': 'EcoFibre x Polyco statement workbook',

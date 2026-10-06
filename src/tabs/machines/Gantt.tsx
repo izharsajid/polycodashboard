@@ -1,7 +1,7 @@
 import { Wrench, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { FAMILY_BG } from '../../components/machines/MachineArt'
-import { addDays, dayNumber, gaps, hasPo, timeline, type Bar, type Machine, type Order } from '../../engine/machines'
+import { addDays, dayNumber, gaps, hasPo, inMonth, shiftMonth, timeline, type Bar, type Machine, type Order } from '../../engine/machines'
 import { dayMonth, monthOnly } from '../../lib/format'
 import { shortName } from './parts'
 
@@ -26,17 +26,23 @@ export default function Gantt({
   span,
   months,
   today,
+  month,
 }: {
   groups: GanttGroup[]
   span: { from: string; to: string }
   months: string[]
   today: string
+  /** One month on its own: weekly ticks, and a column with the day each machine runs to. */
+  month?: string
 }) {
   const [tip, setTip] = useState<Tip | null>(null)
   const total = dayNumber(span.to) - dayNumber(span.from) + 1
   const at = (iso: string) => ((dayNumber(iso) - dayNumber(span.from)) / total) * 100
   const width = (from: string, to: string) => at(addDays(to, 1)) - at(from)
   const showToday = today >= span.from && today <= span.to
+  const cols = month ? 'grid-cols-[6.5rem_1fr_5rem] sm:grid-cols-[8.5rem_1fr_6rem]' : 'grid-cols-[6.5rem_1fr] sm:grid-cols-[8.5rem_1fr]'
+  // A month on its own is marked weekly; the whole plan, by month.
+  const ticks = month ? ['08', '15', '22', '29'].map((d) => `${month}-${d}`) : months.slice(1).map((m) => `${m}-01`)
 
   // On a narrow screen the chart scrolls sideways: open it at today.
   const scroller = useRef<HTMLDivElement>(null)
@@ -50,8 +56,8 @@ export default function Gantt({
 
   const grid = (
     <>
-      {months.slice(1).map((m) => (
-        <span key={m} className="absolute inset-y-0 w-px bg-rule" style={{ left: `${at(`${m}-01`)}%` }} aria-hidden />
+      {ticks.map((d) => (
+        <span key={d} className="absolute inset-y-0 w-px bg-rule" style={{ left: `${at(d)}%` }} aria-hidden />
       ))}
       {showToday && <span className="absolute -inset-y-1 z-[4] w-0.5 bg-marking" style={{ left: `${at(today)}%`, ...PRINT_EXACT }} aria-hidden />}
     </>
@@ -61,16 +67,23 @@ export default function Gantt({
     <div ref={scroller} className="-mx-1 overflow-x-auto px-1 pb-1">
       <div className="min-w-[680px]">
         {/* Month axis */}
-        <div className="grid grid-cols-[8.5rem_1fr] items-end gap-3 pb-1.5">
+        <div className={`grid ${cols} items-end gap-3 pb-1.5`}>
           <span />
           <div ref={track} className="relative h-5 text-small font-semibold text-press-2">
-            {months.map((m, i) => (
-              <span key={m} className="absolute pl-1.5" style={{ left: `${at(`${m}-01`)}%` }}>
-                {monthOnly(m)}
-                {i === 0 || m.endsWith('-01') ? ` ${m.slice(0, 4)}` : ''}
-              </span>
-            ))}
+            {month
+              ? [`${month}-01`, ...ticks].map((d, i) => (
+                  <span key={d} className="absolute pl-1.5" style={{ left: `${at(d)}%` }}>
+                    {i === 0 ? dayMonth(d) : Number(d.slice(8))}
+                  </span>
+                ))
+              : months.map((m, i) => (
+                  <span key={m} className="absolute pl-1.5" style={{ left: `${at(`${m}-01`)}%` }}>
+                    {monthOnly(m)}
+                    {i === 0 || m.endsWith('-01') ? ` ${m.slice(0, 4)}` : ''}
+                  </span>
+                ))}
           </div>
+          {month && <span className="text-small font-semibold text-press-2">Runs to</span>}
         </div>
 
         {groups.map(({ title, Icon, machines }) => (
@@ -87,7 +100,7 @@ export default function Gantt({
                 // After its last day the machine stands stopped to the chart's edge.
                 const stopped = m.stops && m.stops < span.to ? { from: m.stops < span.from ? span.from : addDays(m.stops, 1), to: span.to } : null
                 return (
-                  <li key={m.id} className="grid grid-cols-[8.5rem_1fr] items-center gap-3 py-1">
+                  <li key={m.id} className={`grid ${cols} items-center gap-3 py-1`}>
                     <span className="sticky left-0 z-[5] -my-1 flex items-center gap-1.5 self-stretch bg-sheet py-1 pr-1 text-table font-semibold leading-7">
                       <a href={`#m-${m.id}`} className="truncate hover:underline">
                         {shortName(m.name)}
@@ -142,6 +155,7 @@ export default function Gantt({
                       )}
                       {tip && tip.key.startsWith(`${m.id}-`) && <Tooltip tip={tip} />}
                     </div>
+                    {month && <RunsTo machine={m} month={month} />}
                   </li>
                 )
               })}
@@ -151,6 +165,13 @@ export default function Gantt({
       </div>
     </div>
   )
+}
+
+/** The day a machine runs to within the month, or that it carries on, or does not run. */
+function RunsTo({ machine, month }: { machine: Machine; month: string }) {
+  const { running, to, runsOn } = inMonth(machine, month)
+  if (!running) return <span className="text-small text-press-2">Not running</span>
+  return <span className="text-table font-semibold">{runsOn ? `Into ${monthOnly(shiftMonth(month, 1))}` : dayMonth(to!)}</span>
 }
 
 /** An idle or stopped stretch, named where there is room for the word. */

@@ -1,13 +1,13 @@
 import { AlertTriangle, Factory, Layers, Scissors, ScanLine, Wrench, type LucideIcon } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import MachineArt, { FAMILY_BG, FAMILY_LABEL } from '../../components/machines/MachineArt'
 import StatePill from '../../components/StatePill'
 import { MachinesPayload } from '../../data/schemas'
 import { useApiData } from '../../data/useApiData'
 import { useTracker } from '../../data/useTracker'
-import { buildMachines, timeline, withoutPo, type Family, type MachineType } from '../../engine/machines'
+import { buildMachines, inMonth, monthSpan, timeline, withoutPo, type Family, type MachineType } from '../../engine/machines'
 import type { TrackerPo } from '../../engine/tracker'
-import { day, dayMonth } from '../../lib/format'
+import { day, dayMonth, monthLong, monthOnly } from '../../lib/format'
 import Gantt, { NO_PO_STRIPES } from './Gantt'
 import MachineCard from './MachineCard'
 import NoPoPanel from './NoPoPanel'
@@ -35,6 +35,8 @@ export default function MachinesTab() {
     () => (plan.status === 'ready' ? buildMachines(plan.data.plan, tracker) : null),
     [plan, tracker],
   )
+  /** The Gantt chart's view: every month at once, or one month (`YYYY-MM`). */
+  const [view, setView] = useState<'all' | string>('all')
 
   if (plan.status === 'loading' || loading) return <p className="mt-8 text-body text-press-2" aria-busy="true">Loading the machines.</p>
   if (plan.status === 'failed' || !model) {
@@ -53,6 +55,9 @@ export default function MachinesTab() {
   ].filter((g) => g.machines.length)
   const families = [...new Set(model.machines.flatMap((m) => timeline(m, model.range).map((b) => b.family)))] as Family[]
   const noPo = withoutPo(model.machines, today)
+  const month = view === 'all' ? null : view
+  const runningIn = (m: string) => model.machines.filter((x) => inMonth(x, m).running)
+  const stopsIn = (m: string) => model.machines.filter((x) => x.stops?.startsWith(m)).sort((a, b) => a.stops!.localeCompare(b.stops!))
 
   return (
     <div className="space-y-8 pt-6">
@@ -96,7 +101,42 @@ export default function MachinesTab() {
             </li>
           )}
         </ul>
-        <Gantt groups={groups} span={model.range} months={model.months} today={today} />
+        {/* Every month at once, or one month on its own */}
+        <div role="group" aria-label="Months" className="mb-3 flex flex-wrap gap-1.5">
+          {(['all', ...model.months] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
+              className={`min-h-[40px] rounded-full border px-3.5 text-table font-semibold ${view === v ? 'border-press bg-press text-sheet' : 'border-rule bg-sheet hover:border-press-2'}`}
+            >
+              {v === 'all' ? 'All months' : monthOnly(v)}
+              {v !== 'all' && <span className={`ml-1.5 text-small ${view === v ? 'text-sheet/80' : 'text-press-2'}`}>{runningIn(v).length}</span>}
+            </button>
+          ))}
+        </div>
+        {month && (
+          <p className="mb-3 text-table">
+            <span className="font-bold">
+              {runningIn(month).length} of {model.machines.length} machines run in {monthLong(month)}
+            </span>
+            {stopsIn(month).length > 0 && (
+              <span className="text-press-2">
+                {' '}
+                · stopping: {stopsIn(month).map((x) => `${x.name} ${dayMonth(x.stops!)}`).join(', ')}
+              </span>
+            )}
+          </p>
+        )}
+        <Gantt
+          key={view}
+          groups={groups}
+          span={month ? monthSpan(month) : model.range}
+          months={month ? [month] : model.months}
+          today={today}
+          month={month ?? undefined}
+        />
       </section>
 
       {noPo.length > 0 && <NoPoPanel rows={noPo} />}

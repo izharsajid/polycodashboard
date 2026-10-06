@@ -17,8 +17,10 @@ const PlanOrder = z.union([
   z.object({ po: z.string().regex(/^\d{7}(-\d{1,2})?$/), note: z.string().optional() }).strict(),
   /** "PO Required": work planned for a PO not yet received, and how many the sheet lists. */
   z.object({ po_required: z.number().int().positive() }).strict(),
-  /** Work made with no PO: an extra container, the monthly Potato tray. */
+  /** Work made with no PO: an extra container, the monthly Destiny 7x7 Tray. */
   z.object({ no_po: z.string().min(1) }).strict(),
+  /** A PO received but not yet on efdashboard.com, in Izhar's words: `PO received, delivery October 2026`. */
+  z.object({ po_received: z.string().min(1) }).strict(),
 ])
 
 export const MachinePlan = z
@@ -33,6 +35,8 @@ export const MachinePlan = z
     }),
     source: z.string(),
     as_at: IsoDate,
+    /** The first month the charts show, `YYYY-MM`. Without it, the month before `as_at`. */
+    months_from: z.string().regex(/^\d{4}-\d{2}$/).optional(),
     note: z.string(),
     machines: z.array(
       z.object({
@@ -80,9 +84,8 @@ export function familyOf(product: string): Family {
   if (/medical|phtrasc|clamshell/.test(p)) return 'medical'
   if (/platinum|tfpp/.test(p)) return 'platinum'
   if (/oasis|ot1230|ot1530/.test(p)) return 'oasis'
-  if (/point\s?five|pointfive|every table/.test(p)) return 'pointfive'
-  // The Potato tray is the Destiny 7x7 tray (TFTRA7X7) on the finishing sheet.
-  if (/7x7|destiny|tftra7x7|potato/.test(p)) return 'destiny'
+  if (/point\s?five|pointfive/.test(p)) return 'pointfive'
+  if (/7x7|destiny|tftra7x7/.test(p)) return 'destiny'
   if (/1\/2\s?m\b/.test(p)) return 'halfm'
   return 'other'
 }
@@ -107,6 +110,8 @@ export type Order =
   | { kind: 'po'; ref: string; note: string | null; po: TrackerPo | null; quantities: Quantity[] }
   | { kind: 'required'; count: number }
   | { kind: 'no-po'; text: string }
+  /** A PO in hand that efdashboard.com does not list yet. */
+  | { kind: 'received'; text: string }
 
 export type MachineRef = { id: string; name: string }
 
@@ -190,6 +195,7 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null): Mach
       orders: r.orders.map((o): Order => {
         if ('po_required' in o) return { kind: 'required', count: o.po_required }
         if ('no_po' in o) return { kind: 'no-po', text: o.no_po }
+        if ('po_received' in o) return { kind: 'received', text: o.po_received }
         const po = tracker ? findPo(o.po, tracker) : null
         return { kind: 'po', ref: o.po, note: o.note ?? null, po, quantities: po ? quantitiesFor(po, r.codes ?? []) : [] }
       }),
@@ -214,10 +220,10 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null): Mach
     }
   }
 
-  // Months: from the month before the plan's date to the last date anything
-  // runs until, so the month just finished is there to compare against.
+  // Months: from the plan's first month (or the month before its date) to the
+  // last date anything runs until.
   const ends = machines.flatMap((m) => [m.stops, ...m.runs.map((r) => r.until)]).filter((d): d is string => Boolean(d))
-  const first = shiftMonth(plan.as_at.slice(0, 7), -1)
+  const first = plan.months_from ?? shiftMonth(plan.as_at.slice(0, 7), -1)
   const last = [plan.as_at.slice(0, 7), ...ends.map((d) => d.slice(0, 7))].sort().pop()!
   const months: string[] = []
   for (let m = first; m <= last; m = shiftMonth(m, 1)) months.push(m)
@@ -230,7 +236,7 @@ export function buildMachines(plan: MachinePlanT, tracker: Tracker | null): Mach
 }
 
 /** A run is backed when the sheets name a PO for it, or it works alongside a machine that is. */
-export const hasPo = (run: Run) => run.orders.some((o) => o.kind === 'po') || run.alongside.length > 0
+export const hasPo = (run: Run) => run.orders.some((o) => o.kind === 'po' || o.kind === 'received') || run.alongside.length > 0
 
 export function shiftMonth(month: string, by: number): string {
   const [y, m] = month.split('-').map(Number)
@@ -390,4 +396,21 @@ export function withoutPo(machines: Machine[], today: string): NoPoRow[] {
       return { ...row, text, where }
     })
     .sort((a, b) => order[a.kind] - order[b.kind])
+}
+
+/** A month, `YYYY-MM`, as its first and last day. */
+export function monthSpan(month: string): { from: string; to: string } {
+  return { from: `${month}-01`, to: `${month}-${String(daysIn(month)).padStart(2, '0')}` }
+}
+
+/**
+ * A machine within one month: whether it runs at all, the last day it runs in
+ * the month, and whether that run carries on into the next month.
+ */
+export function inMonth(machine: Machine, month: string): { running: boolean; to: string | null; runsOn: boolean } {
+  const span = monthSpan(month)
+  const last = timeline(machine, span).at(-1)
+  if (!last) return { running: false, to: null, runsOn: false }
+  const goesOn = timeline(machine, { from: addDays(span.to, 1), to: addDays(span.to, 1) }).length > 0
+  return { running: true, to: last.to, runsOn: last.to === span.to && goesOn }
 }

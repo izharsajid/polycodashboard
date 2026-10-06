@@ -112,3 +112,14 @@ export function range(startIso: string, endIso: string): string {
   if (sm !== em) return `${dayMonth(startIso)} to ${day(endIso)}`
   return `${sd} to ${day(endIso)}`
 }
+
+/**
+ * A range on the machine plan, where every date falls in the year the plan is
+ * read in, so the year is left off: `5 to 19 Nov`, `10 Oct to 30 Dec`.
+ */
+export function dayRange(startIso: string, endIso: string): string {
+  if (startIso === endIso) return dayMonth(startIso)
+  const [, sm, sd] = parts(startIso)
+  const [, em] = parts(endIso)
+  return sm === em ? `${sd} to ${dayMonth(endIso)}` : `${dayMonth(startIso)} to ${dayMonth(endIso)}`
+}

@@ -1,23 +1,27 @@
-import { AlertTriangle, Factory, Layers, Scissors, ScanLine, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Factory, Layers, Scissors, ScanLine, Wrench, type LucideIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import MachineArt, { FAMILY_BG, FAMILY_LABEL } from '../../components/machines/MachineArt'
 import StatePill from '../../components/StatePill'
 import { MachinesPayload } from '../../data/schemas'
 import { useApiData } from '../../data/useApiData'
 import { useTracker } from '../../data/useTracker'
-import { buildMachines, timeline, upcoming, type Family, type MachineType } from '../../engine/machines'
+import { buildMachines, timeline, withoutPo, type Family, type MachineType } from '../../engine/machines'
+import type { TrackerPo } from '../../engine/tracker'
 import { day, dayMonth } from '../../lib/format'
-import Gantt from './Gantt'
-import MachineRow from './MachineRow'
+import Gantt, { NO_PO_STRIPES } from './Gantt'
+import MachineCard from './MachineCard'
+import NoPoPanel from './NoPoPanel'
+import TodayBoard from './TodayBoard'
 
 /**
- * Machine utilisation: one Gantt chart of when every machine runs until, then
- * each kind of machine in turn, with what it runs and the open POs it makes.
+ * The machines, from the production and finishing plans: where each stands
+ * today, a Gantt chart of when every machine runs until, the work planned
+ * without a PO, then each machine in turn with the orders it is making.
  */
 const SECTIONS: { type: MachineType; title: string; Icon: LucideIcon }[] = [
   { type: 'forming', title: 'Thermoforming', Icon: Factory },
-  { type: 'trimming', title: 'Trimming', Icon: Scissors },
   { type: 'lamination', title: 'Lamination', Icon: Layers },
+  { type: 'trimming', title: 'Trimming', Icon: Scissors },
   { type: 'xray', title: 'X-ray', Icon: ScanLine },
 ]
 
@@ -42,35 +46,26 @@ export default function MachinesTab() {
   }
 
   const today = todayIso()
-  const runningNow = (id: string) => {
-    const [first] = upcoming(model.machines.find((m) => m.id === id)!, today)
-    return Boolean(first && first.from <= today)
-  }
   const groups = SECTIONS.map((s) => ({ ...s, machines: model.machines.filter((m) => m.type === s.type) })).filter((g) => g.machines.length)
-  const running = model.machines.filter((m) => runningNow(m.id)).length
-  const nextStop = model.machines
-    .filter((m) => m.stops && m.stops >= today)
-    .sort((a, b) => a.stops!.localeCompare(b.stops!))[0]
+  const board = [
+    { title: 'Thermoforming', Icon: Factory, machines: model.machines.filter((m) => m.type === 'forming') },
+    { title: 'Finishing', Icon: Layers, machines: model.machines.filter((m) => m.type !== 'forming') },
+  ].filter((g) => g.machines.length)
   const families = [...new Set(model.machines.flatMap((m) => timeline(m, model.range).map((b) => b.family)))] as Family[]
-  const activeUnplanned = model.unplanned.filter((p) => !p.isInactive)
-  const inactiveUnplanned = model.unplanned.filter((p) => p.isInactive)
+  const noPo = withoutPo(model.machines, today)
 
   return (
     <div className="space-y-8 pt-6">
       <header>
         <h1 className="condensed text-figure font-bold">Machines</h1>
         <p className="mt-1 max-w-prose text-table text-press-2">
-          When each machine runs until, and the open POs it is making, from the production and finishing plans of{' '}
-          {day(model.asAt)}.
-          {error && ` efdashboard.com could not be read just now (${error}), so no POs are matched.`}
+          What every machine is running and until when, from the production and finishing plans of {day(model.asAt)}.
+          Each PO's status comes live from efdashboard.com.
+          {error && ` efdashboard.com could not be read just now (${error}), so the POs show without a status.`}
         </p>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Running today" value={`${running} of ${model.machines.length} machines`} />
-        <Stat label="Next to stop" value={nextStop ? `${nextStop.name}, ${dayMonth(nextStop.stops!)}` : 'None planned'} />
-        <Stat label="Open orders with no forming machine" value={String(activeUnplanned.length)} tone={activeUnplanned.length ? 'caution' : 'plain'} />
-      </div>
+      <TodayBoard groups={board} today={today} />
 
       <section aria-labelledby="gantt" className="rounded-card bg-sheet p-4 shadow-card sm:p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -80,54 +75,50 @@ export default function MachinesTab() {
         <ul className="mb-4 mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-small text-press-2" aria-label="Key">
           {families.map((f) => (
             <li key={f} className="flex items-center gap-1.5">
-              <span className={`inline-block h-3 w-3 rounded-sm ${FAMILY_BG[f]}`} aria-hidden /> {FAMILY_LABEL[f]}
+              <span className={`inline-block h-3 w-3 rounded-[3px] ${FAMILY_BG[f]}`} aria-hidden /> {FAMILY_LABEL[f]}
             </li>
           ))}
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-3 w-6 rounded-[3px] bg-press-2" style={NO_PO_STRIPES} aria-hidden /> Striped: no PO yet
+          </li>
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-3 w-6 rounded-[3px] border border-dashed border-press-2" aria-hidden /> Idle
+          </li>
           <li className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-0.5 bg-marking" aria-hidden /> Today
           </li>
           <li className="flex items-center gap-1.5">
-            <span className="inline-block h-3.5 w-[3px] rounded-sm bg-press" aria-hidden /> Machine stops
+            <span className="inline-block h-3.5 w-[3px] rounded-[2px] bg-press" aria-hidden /> Machine stops
           </li>
+          {model.machines.some((m) => m.status === 'maintenance') && (
+            <li className="flex items-center gap-1.5">
+              <Wrench size={13} strokeWidth={2.5} className="text-caution" aria-hidden /> In maintenance
+            </li>
+          )}
         </ul>
         <Gantt groups={groups} span={model.range} months={model.months} today={today} />
       </section>
 
-      <nav aria-label="Machine kinds" className="flex flex-wrap gap-1.5">
-        {groups.map(({ type, title, Icon, machines }) => (
-          <a
-            key={type}
-            href={`#sec-${type}`}
-            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-rule bg-sheet px-4 text-table font-semibold hover:border-press-2"
-          >
-            <Icon size={16} aria-hidden /> {title}
-            <span className="text-press-2">{machines.length}</span>
-          </a>
-        ))}
-      </nav>
+      {noPo.length > 0 && <NoPoPanel rows={noPo} />}
 
       {groups.map(({ type, title, machines }) => {
         const autos = machines.some((m) => /auto/i.test(m.name))
         const manuals = machines.some((m) => !/auto/i.test(m.name))
         return (
-          <section key={type} id={`sec-${type}`} aria-labelledby={`h-${type}`} className="scroll-mt-4">
+          <section key={type} aria-labelledby={`h-${type}`}>
             <div className="flex items-center gap-3">
               <span className="flex shrink-0 gap-1 rounded-card bg-sheet p-1.5 shadow-card">
                 {manuals && <MachineArt type={type} status="running" family={null} className="h-12 w-20" />}
                 {type === 'trimming' && autos && <MachineArt type={type} status="running" family={null} auto className="h-12 w-20" />}
               </span>
-              <div>
-                <h2 id={`h-${type}`} className="text-title font-bold">{title}</h2>
-                <p className="text-small text-press-2">
-                  {machines.length} {machines.length === 1 ? 'machine' : 'machines'}, {machines.filter((m) => runningNow(m.id)).length}{' '}
-                  running today
-                </p>
-              </div>
+              <h2 id={`h-${type}`} className="text-title font-bold">
+                {title} <span className="text-press-2">{machines.length}</span>
+              </h2>
             </div>
-            <ul className="mt-3 grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-3 grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {machines.map((m) => (
                 <li key={m.id}>
-                  <MachineRow machine={m} today={today} />
+                  <MachineCard machine={m} today={today} live={model.live} />
                 </li>
               ))}
             </ul>
@@ -135,35 +126,41 @@ export default function MachinesTab() {
         )
       })}
 
-      {model.unplanned.length > 0 && (
-        <section aria-labelledby="unplanned" className="rounded-card bg-sheet p-5 shadow-card">
-          <h2 id="unplanned" className="flex items-center gap-2 text-title font-bold">
-            <AlertTriangle size={20} aria-hidden className="text-caution" /> Open orders with no forming machine planned
-          </h2>
-          <p className="mt-1 text-small text-press-2">Orders on efdashboard.com not yet dispatched that no run in the plan makes.</p>
-          <ul className="mt-3 divide-y divide-rule">
-            {[...activeUnplanned, ...inactiveUnplanned].map((p) => (
-              <li key={p.po} className="flex flex-wrap items-center justify-between gap-2 py-2 text-table">
-                <span>
-                  <span className="font-semibold">PO {p.po}</span> <span className="text-press-2">{p.product}</span>
-                  {p.readyDate && <span className="block text-small text-press-2">Cargo ready {day(p.readyDate)}</span>}
-                </span>
-                <StatePill state={p.state} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
+      {model.unplanned.length > 0 && <Unplanned pos={model.unplanned} />}
     </div>
   )
 }
 
-function Stat({ label, value, tone = 'plain' }: { label: string; value: string; tone?: 'plain' | 'caution' }) {
+/** Open orders on efdashboard.com that no run on either plan names. */
+function Unplanned({ pos }: { pos: TrackerPo[] }) {
+  const active = pos.filter((p) => !p.isInactive)
+  const inactive = pos.filter((p) => p.isInactive)
+  const row = (p: TrackerPo) => (
+    <li key={p.po} className="flex flex-wrap items-center justify-between gap-2 py-2 text-table">
+      <span>
+        <span className="font-semibold">PO {p.po}</span> <span className="text-press-2">{p.product}</span>
+        {p.readyDate && <span className="block text-small text-press-2">Cargo ready {dayMonth(p.readyDate)}</span>}
+      </span>
+      <StatePill state={p.state} />
+    </li>
+  )
   return (
-    <div className={`rounded-card p-4 shadow-card ${tone === 'caution' ? 'bg-caution-wash text-caution' : 'bg-sheet'}`}>
-      <p className="text-small opacity-80">{label}</p>
-      <p className="mt-1 text-title font-bold">{value}</p>
-    </div>
+    <section aria-labelledby="unplanned" className="rounded-card bg-sheet p-4 shadow-card sm:p-5">
+      <h2 id="unplanned" className="flex items-center gap-2 text-title font-bold">
+        <AlertTriangle size={20} aria-hidden className="text-caution" /> Open orders on no machine's plan
+      </h2>
+      <p className="mt-1 max-w-prose text-table text-press-2">
+        Orders efdashboard.com shows as not yet dispatched that no run on the production or finishing plan names.
+      </p>
+      {active.length > 0 && <ul className="mt-3 divide-y divide-rule">{active.map(row)}</ul>}
+      {inactive.length > 0 && (
+        <details className="mt-3 border-t border-rule pt-2">
+          <summary className="min-h-[36px] cursor-pointer py-1.5 text-table font-semibold">
+            {inactive.length} more on hold or waiting for a PO
+          </summary>
+          <ul className="divide-y divide-rule">{inactive.map(row)}</ul>
+        </details>
+      )}
+    </section>
   )
 }

@@ -1,107 +1,144 @@
 {
-  "source": "EcoFibre production flow, machine status and finishing department sheets",
+  "source": "Production Machine Flow workbook: the Thermoforming sheet and the Finishing Department sheet, latest 1 October 2026",
   "as_at": "2026-10-01",
-  "note": "The thermoforming and finishing department plans as Izhar sent them on 1 October 2026. Lamination and manual trimming are from the finishing sheet; 'pos' ties a run to the POs the sheet names; 'stops_after' means the machine stands idle after that run's last day. A run with no 'from' was already running before the sheet; one with no 'until' has no end date. 'match' lists the product codes that tie a run to open POs on efdashboard.com.",
+  "note": "Typed from the Thermoforming and Finishing Department sheets as sent on 6 October 2026. 'from' and 'until' are the change-over days the sheets give: a run with no 'from' was already running, one with no 'until' has no end date, and 'stops_after' means the machine stands idle after that run's last day. 'orders' is what the sheets list against each run: a PO, how many POs are still required, or work made with no PO, in the sheets' words. 'codes' only pick a run's line from a PO that orders several products. It was confirmed on 6 October 2026 that Machine 4 continues with the Oasis tray after its maintenance, and that Machine 7 stood idle through September. The Platinum C3 run on Machine 1 and the Platinum C1 run on Machine 2 carry the POs the Finishing Department sheet gives for the same Platinum trays (2679969 and 2679971); the Thermoforming sheet names a cancelled PO for the first and none for the second.",
   "machines": [
     {
       "id": "forming-1", "name": "Machine 1", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Large Medical Tray", "from": null, "until": "2026-09-29", "match": ["PHTRASCL"] },
-        { "product": "Platinum C3", "from": "2026-09-29", "until": "2026-10-10", "match": ["TFPP/TRAY3", "TRAY 3"] },
-        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-30", "match": [] }
+        { "product": "Potato Tray", "from": null, "until": "2026-08-06", "orders": [] },
+        { "product": "Large Medical Tray", "from": "2026-08-06", "until": "2026-09-29", "codes": ["PHTRASCL"], "orders": [{ "po": "2679868-1" }] },
+        { "product": "Platinum C3", "from": "2026-09-29", "until": "2026-10-10", "codes": ["TRAY3"], "orders": [{ "po": "2679969" }] },
+        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-30", "orders": [{ "po_required": 3 }] }
       ],
       "stops": "2026-12-30", "stop_note": "POs will be completed", "note": null
     },
     {
       "id": "forming-2", "name": "Machine 2", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Platinum C2", "from": null, "until": "2026-11-20", "match": ["TFPP/TRAY2", "2-Comp", "2 Comp"] },
-        { "product": "Platinum C1", "from": "2026-11-20", "until": "2026-12-25", "match": ["TFPP/TRAY1", "1-Comp", "1 Comp"] }
+        { "product": "Platinum C1", "from": null, "until": "2026-08-12", "orders": [] },
+        { "product": "Platinum C2", "from": "2026-08-12", "until": "2026-11-20", "codes": ["TRAY2"], "orders": [{ "po": "2679969" }] },
+        { "product": "Platinum C1", "from": "2026-11-20", "until": "2026-12-25", "codes": ["TRAY1"], "orders": [{ "po": "2679971" }] }
       ],
       "stops": "2026-12-25", "stop_note": "POs completed", "note": null
     },
     {
       "id": "forming-3", "name": "Machine 3", "type": "forming", "status": "running",
-      "runs": [{ "product": "Oasis Tray #1", "from": null, "until": null, "match": ["OT1230"] }],
+      "runs": [
+        { "product": "Oasis Tray #1", "from": null, "until": null, "codes": ["OT1230"], "orders": [{ "po": "2680266-1" }, { "po_required": 3 }] }
+      ],
       "stops": null, "stop_note": null, "note": null
     },
     {
-      "id": "forming-4", "name": "Machine 4", "type": "forming", "status": "running",
-      "runs": [{ "product": "Oasis Tray #2", "from": null, "until": null, "match": ["OT1230"] }],
-      "stops": null, "stop_note": null, "note": "Regular: runs even after the POs, as one is required each month"
+      "id": "forming-4", "name": "Machine 4", "type": "forming", "status": "maintenance",
+      "runs": [
+        { "product": "Oasis Tray #2", "from": null, "until": null, "codes": ["OT1230"], "orders": [{ "po": "2680266-1" }, { "po_required": 3 }] }
+      ],
+      "stops": null, "stop_note": null,
+      "note": "Stopped for mould washing because of yellow shades in the product. It continues with Oasis Tray #2."
     },
     {
       "id": "forming-5", "name": "Machine 5", "type": "forming", "status": "running",
-      "runs": [{ "product": "Point Five ET Tray", "from": null, "until": "2026-10-30", "match": ["Point Five", "PointFive"] }],
+      "runs": [
+        { "product": "Point Five Tray", "from": null, "until": "2026-10-30", "codes": ["Fiber Tray 2"], "orders": [{ "po": "2679683" }, { "no_po": "Extra one producing" }] }
+      ],
       "stops": "2026-10-30", "stop_note": "POs completed", "note": null
     },
     {
       "id": "forming-6", "name": "Machine 6", "type": "forming", "status": "running",
-      "runs": [{ "product": "Medium Medical Tray", "from": null, "until": "2026-10-25", "match": ["PHTRASCM"] }],
+      "runs": [
+        { "product": "Dumpling Tray", "from": null, "until": "2026-07-09", "orders": [] },
+        { "product": "Oasis Plus Tray", "from": "2026-07-09", "until": "2026-08-06", "orders": [] },
+        { "product": "Medium Medical Tray", "from": "2026-08-06", "until": "2026-10-25", "codes": ["PHTRASCM"], "orders": [{ "po": "2680265-1" }] }
+      ],
       "stops": "2026-10-25", "stop_note": "POs completed", "note": null
     },
     {
-      "id": "forming-7", "name": "Machine 7", "type": "forming", "status": "changing",
+      "id": "forming-7", "name": "Machine 7", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Small Medical", "from": null, "until": "2026-10-10", "match": ["PHTRASCS"] },
-        { "product": "1/2M Bowl", "from": "2026-10-10", "until": "2026-12-30", "match": [] }
+        { "product": "Potato Tray", "from": null, "until": "2026-09-01", "codes": ["7x7"], "orders": [{ "po": "2466123-3", "note": "Ready" }, { "no_po": "One PO extra produced, PO not yet received" }] },
+        { "product": "Small Medical Tray", "from": "2026-10-01", "until": "2026-10-10", "codes": ["PHTRASCS"], "orders": [{ "po": "2680265-1" }] },
+        { "product": "1/2M Bowl", "from": "2026-10-10", "until": "2026-12-30", "orders": [{ "po_required": 3 }] },
+        { "product": "Potato Tray", "from": "2026-12-30", "until": null, "orders": [] }
       ],
-      "stops": "2026-12-30", "stop_note": "POs will be completed", "note": "Mould changing"
+      "stops": null, "stop_note": null, "note": null
     },
     {
       "id": "forming-8", "name": "Machine 8", "type": "forming", "status": "running",
-      "runs": [{ "product": "Point Five ET Lid", "from": null, "until": "2026-10-20", "match": ["Point Five", "PointFive"] }],
+      "runs": [
+        { "product": "Point Five ET Lid", "from": null, "until": "2026-10-20", "codes": ["Lid"], "orders": [{ "po": "2679683" }, { "no_po": "Extra one container (100 boxes) producing" }] }
+      ],
       "stops": "2026-10-20", "stop_note": null, "note": null
     },
     {
       "id": "lamination-1", "name": "Lamination Machine 1", "type": "lamination", "status": "running",
       "runs": [
-        { "product": "Platinum 2", "from": null, "until": "2026-10-10", "match": ["TFPP/TRAY2", "2 Comp", "2-Comp"], "pos": ["2679969"] },
-        { "product": "Platinum 3", "from": "2026-10-10", "until": "2026-10-17", "match": ["TFPP/TRAY3", "TRAY 3"], "pos": ["2679969"] },
-        { "product": "Platinum 2", "from": "2026-10-17", "until": "2026-10-25", "match": ["TFPP/TRAY2", "2 Comp", "2-Comp"], "pos": ["2679969"], "stops_after": true, "note": "Machine stopped after 25 October until 20 November" },
-        { "product": "Platinum 1", "from": "2026-11-20", "until": "2026-12-08", "match": ["TFPP/TRAY1", "1 Comp", "1-Comp"], "pos": ["2679971"] },
-        { "product": "Platinum 2", "from": "2026-12-08", "until": "2026-12-20", "match": ["TFPP/TRAY2", "2 Comp", "2-Comp"], "pos": ["2679971"] }
+        { "product": "Platinum 2", "from": null, "until": "2026-10-10", "codes": ["TRAY2"], "orders": [{ "po": "2679969" }] },
+        { "product": "Platinum 3", "from": "2026-10-10", "until": "2026-10-17", "codes": ["TRAY3"], "orders": [{ "po": "2679969" }] },
+        { "product": "Platinum 2", "from": "2026-10-17", "until": "2026-10-25", "codes": ["TRAY2"], "orders": [{ "po": "2679969" }], "stops_after": true },
+        { "product": "Platinum 1", "from": "2026-11-20", "until": "2026-12-08", "codes": ["TRAY1"], "orders": [{ "po": "2679971" }] },
+        { "product": "Platinum 2", "from": "2026-12-08", "until": "2026-12-20", "codes": ["TRAY2"], "orders": [{ "po": "2679971" }] }
       ],
       "stops": "2026-12-20", "stop_note": "Machine stopped", "note": null
     },
     {
       "id": "lamination-2", "name": "Lamination Machine 2", "type": "lamination", "status": "running",
       "runs": [
-        { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "match": ["7x7", "Destiny"], "pos": ["2466123-3"], "note": "Then the monthly Potato tray, no PO, before Every Table starts" },
-        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "match": [] },
-        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "match": [], "note": "1/2M PO required" },
-        { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "match": [], "note": "Monthly one, no PO" },
-        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "match": [], "note": "1/2M PO required" },
-        { "product": "Potato Tray", "from": "2026-12-01", "until": "2026-12-15", "match": [], "note": "Monthly one, no PO" },
-        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "match": [], "note": "1/2M PO required" }
+        { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
+        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
+        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_required": 1 }] },
+        { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_required": 1 }] },
+        { "product": "Potato Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_required": 1 }] }
       ],
       "stops": "2026-12-30", "stop_note": "Machine stopped after December end", "note": null
     },
     {
       "id": "trimmer-manual-1", "name": "Manual Trimmer 1", "type": "trimming", "status": "running",
-      "runs": [{ "product": "Oasis Tray", "from": null, "until": null, "match": ["OT1230"], "note": "Running parallel with forming" }],
+      "runs": [
+        { "product": "Oasis Tray", "from": null, "until": null, "orders": [] }
+      ],
       "stops": null, "stop_note": null, "note": null
     },
     {
       "id": "trimmer-manual-2", "name": "Manual Trimmer 2", "type": "trimming", "status": "running",
       "runs": [
-        { "product": "Medium Medical Tray", "from": null, "until": "2026-10-25", "match": ["PHTRASCM"] },
-        { "product": "Oasis Tray", "from": "2026-10-25", "until": null, "match": ["OT1230"], "note": "Will run parallel with production" }
+        { "product": "Medium Medical Tray", "from": null, "until": "2026-10-25", "orders": [] },
+        { "product": "Oasis Tray", "from": "2026-10-25", "until": null, "orders": [] }
       ],
       "stops": null, "stop_note": null, "note": null
     },
     {
       "id": "trimmer-manual-3", "name": "Manual Trimmer 3", "type": "trimming", "status": "running",
-      "runs": [{ "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-31", "match": [], "note": "Starts 10 October, parallel with forming, until the end of December" }],
+      "runs": [
+        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-31", "orders": [] }
+      ],
       "stops": "2026-12-31", "stop_note": "End of December", "note": null
     },
     {
-      "id": "trimmer-auto-1", "name": "Auto Trimmer 1", "type": "trimming", "status": "unscheduled",
-      "runs": [], "stops": null, "stop_note": null, "note": null
+      "id": "trimmer-auto-1", "name": "Auto Trimmer 1", "type": "trimming", "status": "running",
+      "runs": [
+        { "product": "Platinum 2", "from": null, "until": "2026-10-10", "codes": ["TRAY2"], "orders": [{ "po": "2679969" }] },
+        { "product": "Platinum 3", "from": "2026-10-10", "until": "2026-10-17", "codes": ["TRAY3"], "orders": [{ "po": "2679969" }] },
+        { "product": "Platinum 2", "from": "2026-10-17", "until": "2026-10-25", "codes": ["TRAY2"], "orders": [{ "po": "2679969" }], "stops_after": true },
+        { "product": "Platinum 1", "from": "2026-11-20", "until": "2026-12-08", "codes": ["TRAY1"], "orders": [{ "po": "2679971" }] },
+        { "product": "Platinum 2", "from": "2026-12-08", "until": "2026-12-20", "codes": ["TRAY2"], "orders": [{ "po": "2679971" }] }
+      ],
+      "stops": "2026-12-20", "stop_note": "Machine stopped", "note": null
     },
     {
-      "id": "trimmer-auto-2", "name": "Auto Trimmer 2", "type": "trimming", "status": "unscheduled",
-      "runs": [], "stops": null, "stop_note": null, "note": null
+      "id": "trimmer-auto-2", "name": "Auto Trimmer 2", "type": "trimming", "status": "running",
+      "runs": [
+        { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
+        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
+        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_required": 1 }] },
+        { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_required": 1 }] },
+        { "product": "Potato Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_required": 1 }] }
+      ],
+      "stops": "2026-12-30", "stop_note": "Machine stopped after December end", "note": null
     }
   ]
 }

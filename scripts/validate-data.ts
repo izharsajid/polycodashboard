@@ -38,15 +38,24 @@ try {
       `before efdashboard.com is read, ${statement.unresolved.length} movements without a confirmed date`,
   )
 
-  // The forming plan: shape, and every run's dates in order.
+  // The machine plan: shape, every run's dates in order, and each run starting
+  // no earlier than the one before it changes over.
   const plan = MachinePlan.parse(read('../data/machine-plan.json'))
   for (const m of plan.machines) {
-    for (const r of m.runs) {
+    m.runs.forEach((r, i) => {
       if (r.from && r.until && r.from > r.until) throw new Error(`${m.name}: ${r.product} ends before it starts`)
-    }
+      const before = m.runs[i - 1]
+      if (before && (!before.until || !r.from || r.from < before.until)) {
+        throw new Error(`${m.name}: ${r.product} starts before ${before.product} changes over`)
+      }
+    })
   }
   const machines = buildMachines(plan, null)
-  console.log(`Machine plan: ${machines.machines.length} machines, ${machines.months[0]} to ${machines.months.at(-1)}`)
+  const required = machines.machines.flatMap((m) => m.runs.flatMap((r) => r.orders)).filter((o) => o.kind === 'required').length
+  console.log(
+    `Machine plan: ${machines.machines.length} machines, ${machines.months[0]} to ${machines.months.at(-1)}, ` +
+      `${required} runs marked PO required`,
+  )
 } catch (error) {
   console.error('\nData validation failed:')
   console.error(`  - ${error instanceof Error ? error.message : String(error)}`)

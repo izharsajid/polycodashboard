@@ -125,7 +125,37 @@ unable to tell a new error from an old one.
       for login, invite and account. They now sit in a card with the wordmark above it,
       via a shared `AuthShell`.
 
+## Machines, from the Production Machine Flow workbook (6 October 2026)
+
+Answered on 6 October 2026: Machine 4 continues with the Oasis tray after
+its maintenance; Machine 7 stood idle through September; the Thermoforming sheet is
+the one to follow, not "Copy of Thermoforming".
+
+- [ ] **PO 2679683 on Machines 5 and 8.** The Thermoforming sheet has both still
+      making it, plus an extra; efdashboard.com shows it (as 2679683-3) dispatched on
+      30 September. The page shows both readings. Is another shipment still to go?
+- [ ] **The Platinum POs on Machines 1 and 2.** The Thermoforming sheet names a
+      cancelled PO for Machine 1's Platinum C3 run and none for Machine 2's Platinum
+      C1 run. The plan carries the POs the Finishing Department sheet gives for the
+      same trays, 2679969 and 2679971. Confirm.
+- [ ] **Every Table on Lamination Machine 2 and Auto Trimmer 2, 10 to 17 October.**
+      The finishing sheet still schedules it against a PO Polyco cancelled, so it
+      shows with no PO. Is the run still happening?
+- [ ] **Machine 4 has no restart date.** It shows in maintenance, then Oasis Tray #2.
+- [ ] **Green PO cells on the Thermoforming sheet** (2680266-1, 2679683, 2466123-3):
+      what does green mean? Not shown until it is known.
+- [ ] **Machine 5's product.** The sheet has the Point Five Every Table tray in
+      August, then the Point Five Tray, with no change-over date. Shown as the Point
+      Five Tray.
+- [ ] The manual trimmers carry no PO on the finishing sheet, only "running
+      parallel". Each is shown alongside the forming machine making the same product
+      at the same time, worked out from the product names.
+
 ## Machine schedule, this run
+
+Superseded: `data/machine-schedule.json` was removed in the 1 October 2026 rebuild,
+so the items in this section and in "Machines tab, build notes" no longer apply.
+
 
 - [ ] **Which purchase orders sit on which machine campaign.** `CAPACITY-SPEC.md` section 4
       names seven: the Platinum orders `2678303`, `2678304` and `2676085` on M1 and M2,

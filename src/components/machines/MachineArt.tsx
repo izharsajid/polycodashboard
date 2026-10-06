@@ -62,7 +62,7 @@ export default function MachineArt({ type, status, family, auto = false, classNa
 /** The three-lamp tower: red, amber, green. Only the lamp for the status is lit. */
 function StackLight({ status, x }: { status: MachineStatus; x: number }) {
   const lit = (lamp: 'red' | 'amber' | 'green') =>
-    (lamp === 'green' && status === 'running') || (lamp === 'amber' && status === 'changing')
+    (lamp === 'green' && status === 'running') || (lamp === 'amber' && (status === 'changing' || status === 'maintenance'))
   return (
     <g>
       <rect x={x + 3} y="30" width="2" height="12" className="fill-press-2" />

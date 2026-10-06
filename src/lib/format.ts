@@ -123,3 +123,8 @@ export function dayRange(startIso: string, endIso: string): string {
   const [, em] = parts(endIso)
   return sm === em ? `${sd} to ${dayMonth(endIso)}` : `${dayMonth(startIso)} to ${dayMonth(endIso)}`
 }
+
+/** A stock quantity, `48.2` or `1,224`: up to `digits` decimals, none when whole. */
+export function quantity(n: number, digits = 1): string {
+  return new Intl.NumberFormat('en-GB', { maximumFractionDigits: digits }).format(n)
+}

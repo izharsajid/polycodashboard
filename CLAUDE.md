@@ -112,6 +112,11 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   clicking a machine opens what it runs now and next. Where each machine stands is
   the plan's `floor` list; which formers stand in which line is assumed (1 to 4, 5 to
   8) until Izhar confirms. Colours are read from `tailwind.config.js`.
+- **Inventory**: efdashboard.com's stock of materials (fiber, lamination film,
+  others), read live at `/api/inventory` with its own rules ported to
+  `src/engine/inventory.ts`: days left is stock over average daily use; below minimum
+  is stock under `min_stock`. Free-text notes are not carried, because supplier names
+  never appear on this dashboard.
 - **Removed POs.** POs Polyco cancelled are listed in `data/removed-pos.json` and
   removed from the dashboard entirely: dropped from efdashboard.com's feed
   server-side, kept out of the statement data and its importer, and never named in
@@ -120,7 +125,7 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
 Engines are in `src/engine/`, pages in `src/tabs/`, shared components in
 `src/components/`, tests in `tests/`. Add a tab through `src/tabs/index.ts`.
 
-An Inventory tab follows. The old `orders`, `order-documents`, `documents` and
+The old `orders`, `order-documents`, `documents` and
 `exports` endpoints and `data/po-tracker.json` predate the live tracker and still
 need a session nobody can create; they can go once nothing depends on them.
 

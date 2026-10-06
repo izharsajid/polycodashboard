@@ -84,6 +84,10 @@ width. Every figure uses tabular numerals.
 - **PO files** (`PoDocuments`): each file efdashboard.com holds for a PO, viewable and
   downloadable through this site.
 - **Month bars** (`MonthBars`): the shared one-colour monthly chart.
+- **Machines** (`src/tabs/machines/`): a tile per machine for today (white running,
+  amber in maintenance, grey idle or stopped, always with the word), the Gantt, and a
+  card per machine. A run with no PO behind it is drawn in its product colour with
+  white stripes, so it still reads in greyscale; an idle stretch is a dashed outline.
 
 ## Print
 

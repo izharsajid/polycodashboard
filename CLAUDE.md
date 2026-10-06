@@ -89,15 +89,19 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   own rules ported to `src/engine/tracker.ts`, and every PO file viewable and
   downloadable through `/api/po-document`. The Supabase URL and public key are
   `SUPABASE_URL` and `SUPABASE_ANON_KEY` on Netlify, functions scope only.
-- **Machines**: a Gantt chart of when every machine runs until, September to
-  December 2026, then thermoforming, trimming and lamination in turn, each machine
-  with what it runs from today and which open POs it is making. Every machine follows
-  `data/machine-plan.json`, typed from Izhar's production and finishing department
-  plans of 1 October 2026, and nothing else: efdashboard.com's Line Usage is out of
-  date and is not read or mentioned, by Izhar's direction. Change a date through a
-  PR. On the finishing sheet the Potato tray is the Destiny 7x7 tray and Every Table
-  is Point Five ET. Each run is matched to open POs by the codes in its `match` list
-  or the PO numbers in `pos`. The auto trimmers have no runs until Izhar gives them.
+- **Machines**: a board of where every machine stands today, a Gantt chart of when
+  each runs until (September to December 2026, striped where no PO is behind the
+  work), the work planned without a PO, then thermoforming, lamination and trimming
+  in turn, each machine with what it runs from today and the POs it is making. Every
+  machine follows `data/machine-plan.json`, typed from the Production Machine Flow
+  workbook's Thermoforming and Finishing Department sheets (latest 1 October 2026,
+  sent 6 October), and nothing else: efdashboard.com's Line Usage is out of date and
+  is not read or mentioned, by Izhar's direction. The workbook's "Copy of
+  Thermoforming" sheet is an old version and is not used. Change a date through a
+  PR. Each run's `orders` are the POs, "PO Required" slots and no-PO work the sheets
+  list against it; efdashboard.com only supplies each PO's status and quantities. On
+  the finishing sheet the Potato tray is the Destiny 7x7 tray and Every Table is
+  Point Five ET.
 - **Removed POs.** POs Polyco cancelled are listed in `data/removed-pos.json` and
   removed from the dashboard entirely: dropped from efdashboard.com's feed
   server-side, kept out of the statement data and its importer, and never named in

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { amount, range, thousands, usd, usdWhole } from '../src/lib/format'
+import { amount, dayRange, range, thousands, usd, usdWhole } from '../src/lib/format'
 
 describe('money', () => {
   it('puts a credit in parentheses, never a minus sign', () => {
@@ -32,5 +32,11 @@ describe('date ranges', () => {
     expect(range('2026-02-05', '2026-03-05')).toBe('5 Feb to 5 Mar 2026')
     expect(range('2025-12-01', '2026-01-04')).toBe('1 Dec 2025 to 4 Jan 2026')
     expect(range('2026-10-01', '2026-10-01')).toBe('1 Oct 2026')
+  })
+
+  it('writes a range within the year without the year, for the machine plan', () => {
+    expect(dayRange('2026-11-05', '2026-11-19')).toBe('5 to 19 Nov')
+    expect(dayRange('2026-10-10', '2026-12-30')).toBe('10 Oct to 30 Dec')
+    expect(dayRange('2026-10-20', '2026-10-20')).toBe('20 Oct')
   })
 })

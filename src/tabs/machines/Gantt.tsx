@@ -1,20 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import { Wrench, type LucideIcon } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { FAMILY_BG } from '../../components/machines/MachineArt'
-import { addDays, dayNumber, timeline, type Bar, type Machine } from '../../engine/machines'
+import { addDays, dayNumber, gaps, hasPo, timeline, type Bar, type Machine, type Order } from '../../engine/machines'
 import { dayMonth, monthOnly } from '../../lib/format'
+import { shortName } from './parts'
 
 /**
  * Every machine on one time axis: a row per machine, grouped by kind, a bar per
- * run in its product's colour, a tick where the machine stops, and today.
- * Hover or focus a bar for the product, its dates and its POs.
+ * run in its product's colour, striped where the plan has no PO behind the run.
+ * Idle stretches and the time after a machine stops are written in. Hover or
+ * focus a bar for the product, its dates and its orders.
  */
 export type GanttGroup = { title: string; Icon: LucideIcon; machines: Machine[] }
 
 type Tip = { key: string; bar: Bar; left: number }
 
-/** A name short enough for the chart's label column; the group heading says the kind. */
-export const shortName = (name: string) => name.replace(/ Machine\b/, '').replace(/^(Manual|Auto) Trimmer\b/, '$1')
+/** Light stripes over the product colour: work with no PO behind it. Survives greyscale. */
+export const NO_PO_STRIPES: CSSProperties = {
+  backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.62) 0 3px, transparent 3px 7px)',
+}
+const PRINT_EXACT: CSSProperties = { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }
 
 export default function Gantt({
   groups,
@@ -30,6 +35,7 @@ export default function Gantt({
   const [tip, setTip] = useState<Tip | null>(null)
   const total = dayNumber(span.to) - dayNumber(span.from) + 1
   const at = (iso: string) => ((dayNumber(iso) - dayNumber(span.from)) / total) * 100
+  const width = (from: string, to: string) => at(addDays(to, 1)) - at(from)
   const showToday = today >= span.from && today <= span.to
 
   // On a narrow screen the chart scrolls sideways: open it at today.
@@ -47,15 +53,15 @@ export default function Gantt({
       {months.slice(1).map((m) => (
         <span key={m} className="absolute inset-y-0 w-px bg-rule" style={{ left: `${at(`${m}-01`)}%` }} aria-hidden />
       ))}
-      {showToday && <span className="absolute inset-y-0 z-[1] w-0.5 bg-marking" style={{ left: `${at(today)}%` }} aria-hidden />}
+      {showToday && <span className="absolute -inset-y-1 z-[4] w-0.5 bg-marking" style={{ left: `${at(today)}%`, ...PRINT_EXACT }} aria-hidden />}
     </>
   )
 
   return (
     <div ref={scroller} className="-mx-1 overflow-x-auto px-1 pb-1">
-      <div className="min-w-[640px]">
+      <div className="min-w-[680px]">
         {/* Month axis */}
-        <div className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8.5rem_1fr] items-end gap-3 pb-1.5">
+        <div className="grid grid-cols-[8.5rem_1fr] items-end gap-3 pb-1.5">
           <span />
           <div ref={track} className="relative h-5 text-small font-semibold text-press-2">
             {months.map((m, i) => (
@@ -77,37 +83,50 @@ export default function Gantt({
             <ul>
               {machines.map((m) => {
                 const bars = timeline(m, span)
+                const idle = gaps(m, span)
+                // After its last day the machine stands stopped to the chart's edge.
+                const stopped = m.stops && m.stops < span.to ? { from: m.stops < span.from ? span.from : addDays(m.stops, 1), to: span.to } : null
                 return (
-                  <li key={m.id} className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8.5rem_1fr] items-center gap-3 py-1">
-                    <span className="sticky left-0 z-[3] -my-1 self-stretch truncate bg-sheet py-1 pr-1 text-table font-semibold leading-7">
-                      {shortName(m.name)}
-                    </span>
-                    <div className="relative h-7 rounded bg-mist">
-                      {grid}
-                      {bars.length === 0 && (
-                        <span className="absolute inset-0 flex items-center pl-2 text-small text-press-2">
-                          {m.status === 'offline' ? 'Offline' : 'No plan yet'}
+                  <li key={m.id} className="grid grid-cols-[8.5rem_1fr] items-center gap-3 py-1">
+                    <span className="sticky left-0 z-[5] -my-1 flex items-center gap-1.5 self-stretch bg-sheet py-1 pr-1 text-table font-semibold leading-7">
+                      <a href={`#m-${m.id}`} className="truncate hover:underline">
+                        {shortName(m.name)}
+                      </a>
+                      {m.status === 'maintenance' && (
+                        <span className="inline-flex shrink-0 items-center text-caution" title="In maintenance">
+                          <Wrench size={14} strokeWidth={2.5} aria-hidden />
+                          <span className="sr-only">, in maintenance</span>
                         </span>
                       )}
+                    </span>
+                    <div className="relative h-8 rounded bg-mist">
+                      {grid}
+                      {bars.length === 0 && !stopped && (
+                        <span className="absolute inset-0 flex items-center pl-2 text-small text-press-2">No plan yet</span>
+                      )}
+                      {idle.map((g) => (
+                        <Stretch key={g.from} left={at(g.from)} width={width(g.from, g.to)} label="Idle" dashed />
+                      ))}
+                      {stopped && <Stretch left={at(stopped.from)} width={width(stopped.from, stopped.to)} label="Stopped" />}
                       {bars.map((b, i) => {
                         const key = `${m.id}-${i}`
                         const left = at(b.from)
-                        const width = at(addDays(b.to, 1)) - left
+                        const w = width(b.from, b.to)
                         return (
                           <button
                             key={key}
                             type="button"
-                            aria-label={`${m.name}: ${b.product}, ${label(b)}`}
+                            aria-label={`${m.name}: ${b.product}, ${dates(b)}, ${ordersText(b.run.orders, hasPo(b.run))}`}
                             onMouseEnter={() => setTip({ key, bar: b, left })}
                             onMouseLeave={() => setTip(null)}
                             onFocus={() => setTip({ key, bar: b, left })}
                             onBlur={() => setTip(null)}
                             className={`absolute inset-y-1 border-x border-sheet ${FAMILY_BG[b.family]} ${b.startsBefore ? 'rounded-l-none' : 'rounded-l'} ${b.runsOn ? 'rounded-r-none' : 'rounded-r'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-press`}
-                            style={{ left: `${left}%`, width: `${width}%`, printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}
+                            style={{ left: `${left}%`, width: `${w}%`, ...(hasPo(b.run) ? {} : NO_PO_STRIPES), ...PRINT_EXACT }}
                           >
                             {/* The product named on a white chip, readable on every product colour. */}
-                            {width > 6 && (
-                              <span className="absolute inset-y-0.5 left-1 z-[2] flex max-w-[calc(100%-0.5rem)] items-center overflow-hidden rounded-[4px] bg-sheet/90 px-1.5 text-[11px] font-semibold leading-none text-press">
+                            {w > 6 && (
+                              <span className="absolute inset-y-1 left-1 z-[2] flex max-w-[calc(100%-0.5rem)] items-center overflow-hidden rounded-[4px] bg-sheet/90 px-1.5 text-[11px] font-semibold leading-none text-press">
                                 <span className="truncate">{b.product}</span>
                               </span>
                             )}
@@ -116,8 +135,8 @@ export default function Gantt({
                       })}
                       {m.stops && m.stops >= span.from && m.stops <= span.to && (
                         <span
-                          className="absolute -inset-y-0.5 z-[1] w-[3px] rounded-sm bg-press"
-                          style={{ left: `${at(addDays(m.stops, 1))}%` }}
+                          className="absolute -inset-y-0.5 z-[3] w-[3px] rounded-[2px] bg-press"
+                          style={{ left: `${at(addDays(m.stops, 1))}%`, ...PRINT_EXACT }}
                           aria-hidden
                         />
                       )}
@@ -134,19 +153,48 @@ export default function Gantt({
   )
 }
 
-const label = (b: Bar) =>
-  `${b.startsBefore && b.run.from === null ? 'already running' : dayMonth(b.from)} to ${b.runsOn && b.run.until === null ? 'no end date' : dayMonth(b.to)}`
+/** An idle or stopped stretch, named where there is room for the word. */
+function Stretch({ left, width, label, dashed = false }: { left: number; width: number; label: string; dashed?: boolean }) {
+  return (
+    <span
+      className={`absolute inset-y-1 z-[1] flex items-center justify-center overflow-hidden text-[11px] font-semibold text-press-2 ${dashed ? 'rounded border border-dashed border-press-2/50' : ''}`}
+      style={{ left: `${left}%`, width: `${width}%` }}
+      aria-hidden
+    >
+      {width > 6 && label}
+    </span>
+  )
+}
+
+const dates = (b: Bar) =>
+  `${b.startsBefore ? (b.run.from ? `since ${dayMonth(b.run.from)}` : 'already running') : dayMonth(b.from)} to ${b.runsOn ? 'no end date' : dayMonth(b.to)}`
+
+function ordersText(orders: Order[], backed: boolean): string {
+  const parts = orders.map((o) =>
+    o.kind === 'po' ? `PO ${o.po?.po ?? o.ref}${o.po ? `, ${o.po.state.label.toLowerCase()}` : ''}` : o.kind === 'required' ? (o.count === 1 ? 'PO required' : `${o.count} POs required`) : o.text,
+  )
+  return parts.length ? parts.join('; ') : backed ? 'alongside a forming machine' : 'no PO on the plan'
+}
 
 function Tooltip({ tip }: { tip: Tip }) {
   const { bar, left } = tip
   const pos = left > 55 ? { right: `${100 - left}%` } : { left: `${left}%` }
-  const pos2 = bar.run.serves.map((s) => s.po.po)
+  const { orders, alongside, note } = bar.run
   return (
-    <div role="tooltip" className="pointer-events-none absolute bottom-full z-10 mb-1.5 w-max max-w-[260px] rounded-[8px] bg-press px-2.5 py-1.5 text-small text-sheet shadow-lift" style={pos}>
+    <div role="tooltip" className="pointer-events-none absolute bottom-full z-10 mb-1.5 w-max max-w-[280px] rounded-[8px] bg-press px-2.5 py-1.5 text-small text-sheet shadow-lift" style={pos}>
       <p className="font-semibold">{bar.product}</p>
-      <p>{label(bar)}</p>
-      {pos2.length > 0 && <p>PO {pos2.join(', ')}</p>}
-      {bar.run.note && <p>{bar.run.note}</p>}
+      <p>{dates(bar)}</p>
+      {orders.map((o, i) => (
+        <p key={i}>
+          {o.kind === 'po'
+            ? `PO ${o.po?.po ?? o.ref}${o.po ? `: ${o.po.state.label}` : ''}`
+            : o.kind === 'required'
+              ? o.count === 1 ? 'PO required' : `${o.count} POs required`
+              : o.text}
+        </p>
+      ))}
+      {!orders.length && <p>{alongside.length ? `Alongside ${alongside.map((m) => m.name).join(' and ')}` : 'No PO on the plan'}</p>}
+      {note && <p>{note}</p>}
     </div>
   )
 }

@@ -21,36 +21,52 @@ const PlanOrder = z.union([
   z.object({ no_po: z.string().min(1) }).strict(),
 ])
 
-export const MachinePlan = z.object({
-  source: z.string(),
-  as_at: IsoDate,
-  note: z.string(),
-  machines: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      type: z.enum(['forming', 'lamination', 'trimming', 'xray']),
-      /** `unscheduled`: the machine exists but the plan gives it no runs yet. */
-      status: z.enum(['running', 'maintenance', 'changing', 'stopped', 'offline', 'unscheduled']),
-      runs: z.array(
-        z.object({
-          product: z.string(),
-          from: IsoDate.nullable(),
-          until: IsoDate.nullable(),
-          orders: z.array(PlanOrder),
-          /** Product codes the run makes, to pick its line from a PO that orders several products. */
-          codes: z.array(z.string()).optional(),
-          /** The machine stands idle after this run's last day, `until`. */
-          stops_after: z.boolean().optional(),
-          note: z.string().optional(),
-        }),
-      ),
-      stops: IsoDate.nullable(),
-      stop_note: z.string().nullable(),
-      note: z.string().nullable(),
+export const MachinePlan = z
+  .object({
+    /** Where the machines stand, for the plant view: machine ids in floor order. */
+    floor: z.object({
+      note: z.string(),
+      /** Two lines of formers, standing back to back. */
+      forming_rows: z.tuple([z.array(z.string()), z.array(z.string())]),
+      lamination: z.array(z.string()),
+      trimming: z.array(z.string()),
     }),
-  ),
-})
+    source: z.string(),
+    as_at: IsoDate,
+    note: z.string(),
+    machines: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.enum(['forming', 'lamination', 'trimming', 'xray']),
+        /** `unscheduled`: the machine exists but the plan gives it no runs yet. */
+        status: z.enum(['running', 'maintenance', 'changing', 'stopped', 'offline', 'unscheduled']),
+        runs: z.array(
+          z.object({
+            product: z.string(),
+            from: IsoDate.nullable(),
+            until: IsoDate.nullable(),
+            orders: z.array(PlanOrder),
+            /** Product codes the run makes, to pick its line from a PO that orders several products. */
+            codes: z.array(z.string()).optional(),
+            /** The machine stands idle after this run's last day, `until`. */
+            stops_after: z.boolean().optional(),
+            note: z.string().optional(),
+          }),
+        ),
+        stops: IsoDate.nullable(),
+        stop_note: z.string().nullable(),
+        note: z.string().nullable(),
+      }),
+    ),
+  })
+  .superRefine((plan, ctx) => {
+    const ids = new Set(plan.machines.map((m) => m.id))
+    const { forming_rows, lamination, trimming } = plan.floor
+    for (const id of [...forming_rows.flat(), ...lamination, ...trimming]) {
+      if (!ids.has(id)) ctx.addIssue({ code: 'custom', path: ['floor'], message: `The floor names ${id}, which the plan does not have.` })
+    }
+  })
 export type MachinePlanT = z.infer<typeof MachinePlan>
 
 export type MachineType = MachinePlanT['machines'][number]['type']

@@ -2,6 +2,12 @@
   "source": "Production Machine Flow workbook: the Thermoforming sheet and the Finishing Department sheet, latest 1 October 2026",
   "as_at": "2026-10-01",
   "note": "Typed from the Thermoforming and Finishing Department sheets as sent on 6 October 2026. 'from' and 'until' are the change-over days the sheets give: a run with no 'from' was already running, one with no 'until' has no end date, and 'stops_after' means the machine stands idle after that run's last day. 'orders' is what the sheets list against each run: a PO, how many POs are still required, or work made with no PO, in the sheets' words. 'codes' only pick a run's line from a PO that orders several products. It was confirmed on 6 October 2026 that Machine 4 continues with the Oasis tray after its maintenance, and that Machine 7 stood idle through September. The Platinum C3 run on Machine 1 and the Platinum C1 run on Machine 2 carry the POs the Finishing Department sheet gives for the same Platinum trays (2679969 and 2679971); the Thermoforming sheet names a cancelled PO for the first and none for the second.",
+  "floor": {
+    "note": "How the machines stand on the floor, for the plant view. Thermoforming is two lines of four that stand back to back, then lamination, then trimming. Which formers stand in which line is assumed (1 to 4, and 5 to 8) until Izhar confirms.",
+    "forming_rows": [["forming-1", "forming-2", "forming-3", "forming-4"], ["forming-5", "forming-6", "forming-7", "forming-8"]],
+    "lamination": ["lamination-1", "lamination-2"],
+    "trimming": ["trimmer-manual-1", "trimmer-manual-2", "trimmer-manual-3", "trimmer-auto-1", "trimmer-auto-2"]
+  },
   "machines": [
     {
       "id": "forming-1", "name": "Machine 1", "type": "forming", "status": "running",

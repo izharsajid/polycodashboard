@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import type { PublicUser } from '../netlify/lib/http'
 import { SessionProvider, useSession } from './auth/session'
 import Header from './components/Header'
@@ -108,7 +108,9 @@ function Dashboard({ user }: { user: PublicUser | null }) {
       )}
 
       <main className="mx-auto max-w-page px-4 pb-12 sm:px-6">
-        <tab.Component />
+        <Suspense fallback={<p className="mt-8 text-body text-press-2" aria-busy="true">Loading.</p>}>
+          <tab.Component />
+        </Suspense>
       </main>
     </div>
   )

@@ -1,6 +1,5 @@
 import { FileQuestion } from 'lucide-react'
 import type { NoPoRow } from '../../engine/machines'
-import { NO_PO_STRIPES } from './Gantt'
 import { MachineLinks, NoPoChip, spanText, Swatch } from './parts'
 
 /**
@@ -23,10 +22,7 @@ export default function NoPoPanel({ rows }: { rows: NoPoRow[] }) {
         <FileQuestion size={20} aria-hidden className="text-caution" /> Planned without a PO
       </h2>
       <p className="mt-1 flex max-w-prose flex-wrap items-center gap-x-1.5 text-table text-press-2">
-        {pos > 0 && `${pos} POs are still required across ${required.length} products. `}
-        These runs show striped
-        <span className="inline-block h-3 w-6 rounded-[3px] bg-press-2" style={{ ...NO_PO_STRIPES, printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }} aria-hidden />
-        on the chart.
+        {pos > 0 && `${pos} POs are still required across ${required.length} products.`}
       </p>
 
       {GROUPS.map(({ kind, title, lede }) => {

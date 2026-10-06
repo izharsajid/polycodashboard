@@ -131,9 +131,11 @@ Answered on 6 October 2026: Machine 4 continues with the Oasis tray after
 its maintenance; Machine 7 stood idle through September; the Thermoforming sheet is
 the one to follow, not "Copy of Thermoforming".
 
-- [ ] **PO 2679683 on Machines 5 and 8.** The Thermoforming sheet has both still
-      making it, plus an extra; efdashboard.com shows it (as 2679683-3) dispatched on
-      30 September. The page shows both readings. Is another shipment still to go?
+- [ ] **PO 2679683 on Machine 8.** efdashboard.com shows it (as 2679683-3)
+      dispatched on 30 September; the sheet still has Machine 8 making the Point Five
+      lid for it to 20 October. Answered for Machine 5 on 6 October 2026: it ran the
+      Point Five Tray to 29 September and has stood stopped since, and no extra Point
+      Five is being made. Is another lid shipment still to go?
 - [ ] **The Platinum POs on Machines 1 and 2.** The Thermoforming sheet names a
       cancelled PO for Machine 1's Platinum C3 run and none for Machine 2's Platinum
       C1 run. The plan carries the POs the Finishing Department sheet gives for the

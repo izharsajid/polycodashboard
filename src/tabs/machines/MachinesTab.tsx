@@ -8,7 +8,7 @@ import { useTracker } from '../../data/useTracker'
 import { buildMachines, inMonth, monthSpan, timeline, withoutPo, type Family, type MachineType } from '../../engine/machines'
 import type { TrackerPo } from '../../engine/tracker'
 import { day, dayMonth, monthLong, monthOnly } from '../../lib/format'
-import Gantt, { NO_PO_STRIPES } from './Gantt'
+import Gantt from './Gantt'
 import MachineCard from './MachineCard'
 import NoPoPanel from './NoPoPanel'
 import TodayBoard from './TodayBoard'
@@ -85,9 +85,6 @@ export default function MachinesTab() {
               <span className={`inline-block h-3 w-3 rounded-[3px] ${FAMILY_BG[f]}`} aria-hidden /> {FAMILY_LABEL[f]}
             </li>
           ))}
-          <li className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-6 rounded-[3px] bg-press-2" style={NO_PO_STRIPES} aria-hidden /> Striped: no PO yet
-          </li>
           <li className="flex items-center gap-1.5">
             <span className="inline-block h-3 w-6 rounded-[3px] border border-dashed border-press-2" aria-hidden /> Idle
           </li>

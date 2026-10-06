@@ -99,9 +99,12 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   is not read or mentioned, by Izhar's direction. The workbook's "Copy of
   Thermoforming" sheet is an old version and is not used. Change a date through a
   PR. Each run's `orders` are the POs, "PO Required" slots and no-PO work the sheets
-  list against it; efdashboard.com only supplies each PO's status and quantities. On
-  the finishing sheet the Potato tray is the Destiny 7x7 tray and Every Table is
-  Point Five ET.
+  list against it, and `po_received` records a PO in hand that efdashboard.com does
+  not list yet (drawn solid, not striped). efdashboard.com supplies each PO's status
+  and quantities. Products are always written by the names in
+  `data/product-names.json` (Destiny 7x7 Tray, Point Five Tray), which the server also
+  applies to efdashboard.com's feed and the statement import (Izhar, 6 October 2026). The charts start at
+  the plan's `months_from`.
 - **Plant 3D**: the same plan drawn as the process line in three.js, loaded only when
   the tab is opened: thermoforming as two lines of four standing back to back, then
   lamination, then trimming. A day slider and play show every machine's state on any

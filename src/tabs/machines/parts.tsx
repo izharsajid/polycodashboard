@@ -1,4 +1,4 @@
-import { CalendarClock, CircleDashed, CircleStop, FileQuestion, Info, PackageOpen, PauseCircle, Play, Wrench, type LucideIcon } from 'lucide-react'
+import { CalendarClock, CircleDashed, CircleStop, FileCheck, FileQuestion, Info, PackageOpen, PauseCircle, Play, Wrench, type LucideIcon } from 'lucide-react'
 import { Fragment } from 'react'
 import { FAMILY_BG } from '../../components/machines/MachineArt'
 import StatePill from '../../components/StatePill'
@@ -118,6 +118,16 @@ export function NoPoChip({ text, kind }: { text: string; kind: 'required' | 'no-
   )
 }
 
+/** A PO in hand that efdashboard.com does not list yet: backed, so drawn solid, not as a gap. */
+export function ReceivedChip({ text }: { text: string }) {
+  return (
+    <span className="inline-flex w-max max-w-full items-center gap-1 rounded-full bg-income-wash px-2.5 py-1 text-small font-semibold text-income">
+      <FileCheck size={13} strokeWidth={2.5} aria-hidden className="shrink-0" />
+      {text}
+    </span>
+  )
+}
+
 const requiredText = (count: number) => (count === 1 ? 'PO required' : `${count} POs required`)
 
 /** A run's orders: each PO with its status on efdashboard.com, then anything without a PO. */
@@ -132,7 +142,15 @@ export function Orders({ run, live }: { run: Run; live: boolean }) {
   return (
     <ul className="space-y-1">
       {run.orders.map((o, i) => (
-        <li key={i}>{o.kind === 'po' ? <PoLine order={o} live={live} /> : <NoPoChip kind={o.kind} text={o.kind === 'required' ? requiredText(o.count) : o.text} />}</li>
+        <li key={i}>
+          {o.kind === 'po' ? (
+            <PoLine order={o} live={live} />
+          ) : o.kind === 'received' ? (
+            <ReceivedChip text={o.text} />
+          ) : (
+            <NoPoChip kind={o.kind} text={o.kind === 'required' ? requiredText(o.count) : o.text} />
+          )}
+        </li>
       ))}
       {run.alongside.length > 0 && (
         <li className="text-small text-press-2">

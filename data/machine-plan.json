@@ -1,6 +1,7 @@
 {
   "source": "Production Machine Flow workbook: the Thermoforming sheet and the Finishing Department sheet, latest 1 October 2026",
   "as_at": "2026-10-01",
+  "months_from": "2026-08",
   "note": "Typed from the Thermoforming and Finishing Department sheets as sent on 6 October 2026. 'from' and 'until' are the change-over days the sheets give: a run with no 'from' was already running, one with no 'until' has no end date, and 'stops_after' means the machine stands idle after that run's last day. 'orders' is what the sheets list against each run: a PO, how many POs are still required, or work made with no PO, in the sheets' words. 'codes' only pick a run's line from a PO that orders several products. It was confirmed on 6 October 2026 that Machine 4 continues with the Oasis tray after its maintenance, and that Machine 7 stood idle through September. The Platinum C3 run on Machine 1 and the Platinum C1 run on Machine 2 carry the POs the Finishing Department sheet gives for the same Platinum trays (2679969 and 2679971); the Thermoforming sheet names a cancelled PO for the first and none for the second.",
   "floor": {
     "note": "How the machines stand on the floor, for the plant view. Thermoforming is two lines of four that stand back to back, then lamination, then trimming. Which formers stand in which line is assumed (1 to 4, and 5 to 8) until Izhar confirms.",
@@ -12,10 +13,10 @@
     {
       "id": "forming-1", "name": "Machine 1", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Potato Tray", "from": null, "until": "2026-08-06", "orders": [] },
+        { "product": "Destiny 7x7 Tray", "from": null, "until": "2026-08-06", "orders": [] },
         { "product": "Large Medical Tray", "from": "2026-08-06", "until": "2026-09-29", "codes": ["PHTRASCL"], "orders": [{ "po": "2679868-1" }] },
-        { "product": "Platinum C3", "from": "2026-09-29", "until": "2026-10-10", "codes": ["TRAY3"], "orders": [{ "po": "2679969" }] },
-        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-30", "orders": [{ "po_required": 3 }] }
+        { "product": "Platinum C3", "from": "2026-09-29", "until": "2026-10-15", "codes": ["TRAY3"], "orders": [{ "po": "2679969" }] },
+        { "product": "1/2M Lid", "from": "2026-10-15", "until": "2026-12-30", "orders": [{ "po_received": "PO received, delivery October 2026" }, { "po_received": "PO received, delivery November 2026" }, { "po_received": "PO received, delivery December 2026" }] }
       ],
       "stops": "2026-12-30", "stop_note": "POs will be completed", "note": null
     },
@@ -62,10 +63,10 @@
     {
       "id": "forming-7", "name": "Machine 7", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Potato Tray", "from": null, "until": "2026-09-01", "codes": ["7x7"], "orders": [{ "po": "2466123-3", "note": "Ready" }, { "no_po": "One PO extra produced, PO not yet received" }] },
-        { "product": "Small Medical Tray", "from": "2026-10-01", "until": "2026-10-10", "codes": ["PHTRASCS"], "orders": [{ "po": "2680265-1" }] },
-        { "product": "1/2M Bowl", "from": "2026-10-10", "until": "2026-12-30", "orders": [{ "po_required": 3 }] },
-        { "product": "Potato Tray", "from": "2026-12-30", "until": null, "orders": [] }
+        { "product": "Destiny 7x7 Tray", "from": null, "until": "2026-09-01", "codes": ["7x7"], "orders": [{ "po": "2466123-3", "note": "Ready" }, { "no_po": "One PO extra produced, PO not yet received" }] },
+        { "product": "Small Medical Tray", "from": "2026-10-01", "until": "2026-10-15", "codes": ["PHTRASCS"], "orders": [{ "po": "2680265-1" }] },
+        { "product": "1/2M Bowl", "from": "2026-10-15", "until": "2026-12-30", "orders": [{ "po_received": "PO received, delivery October 2026" }, { "po_received": "PO received, delivery November 2026" }, { "po_received": "PO received, delivery December 2026" }] },
+        { "product": "Destiny 7x7 Tray", "from": "2026-12-30", "until": null, "orders": [] }
       ],
       "stops": null, "stop_note": null, "note": null
     },
@@ -90,13 +91,13 @@
     {
       "id": "lamination-2", "name": "Lamination Machine 2", "type": "lamination", "status": "running",
       "runs": [
-        { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
-        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
-        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_required": 1 }] },
-        { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
-        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_required": 1 }] },
-        { "product": "Potato Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
-        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_required": 1 }] }
+        { "product": "Destiny 7x7 Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
+        { "product": "Point Five Tray", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
+        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_received": "PO received, delivery October 2026" }] },
+        { "product": "Destiny 7x7 Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_received": "PO received, delivery November 2026" }] },
+        { "product": "Destiny 7x7 Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_received": "PO received, delivery December 2026" }] }
       ],
       "stops": "2026-12-30", "stop_note": "Machine stopped after December end", "note": null
     },
@@ -118,7 +119,7 @@
     {
       "id": "trimmer-manual-3", "name": "Manual Trimmer 3", "type": "trimming", "status": "running",
       "runs": [
-        { "product": "1/2M Lid", "from": "2026-10-10", "until": "2026-12-31", "orders": [] }
+        { "product": "1/2M Lid", "from": "2026-10-15", "until": "2026-12-31", "orders": [] }
       ],
       "stops": "2026-12-31", "stop_note": "End of December", "note": null
     },
@@ -136,13 +137,13 @@
     {
       "id": "trimmer-auto-2", "name": "Auto Trimmer 2", "type": "trimming", "status": "running",
       "runs": [
-        { "product": "Potato Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
-        { "product": "Every Table", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
-        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_required": 1 }] },
-        { "product": "Potato Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
-        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_required": 1 }] },
-        { "product": "Potato Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
-        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_required": 1 }] }
+        { "product": "Destiny 7x7 Tray", "from": "2026-09-27", "until": "2026-10-10", "codes": ["7x7"], "orders": [{ "po": "2466123-3" }, { "no_po": "Monthly one, no PO" }] },
+        { "product": "Point Five Tray", "from": "2026-10-10", "until": "2026-10-17", "orders": [] },
+        { "product": "1/2M Bowl", "from": "2026-10-17", "until": "2026-11-05", "orders": [{ "po_received": "PO received, delivery October 2026" }] },
+        { "product": "Destiny 7x7 Tray", "from": "2026-11-05", "until": "2026-11-20", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-11-20", "until": "2026-12-01", "orders": [{ "po_received": "PO received, delivery November 2026" }] },
+        { "product": "Destiny 7x7 Tray", "from": "2026-12-01", "until": "2026-12-15", "orders": [{ "no_po": "Monthly one, no PO" }] },
+        { "product": "1/2M Bowl", "from": "2026-12-15", "until": "2026-12-30", "orders": [{ "po_received": "PO received, delivery December 2026" }] }
       ],
       "stops": "2026-12-30", "stop_note": "Machine stopped after December end", "note": null
     }

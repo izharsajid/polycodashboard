@@ -11,6 +11,8 @@ import {
   familyOf,
   gaps,
   hasPo,
+  inMonth,
+  monthSpan,
   MachinePlan,
   nowOf,
   timeline,
@@ -32,9 +34,9 @@ const poOf = (o: Order) => (o.kind === 'po' ? o.po?.po ?? null : null)
 const named = (name: string) => [...new Set(machine(name).runs.flatMap((r) => r.orders.map(poOf)).filter(Boolean))].sort()
 
 describe('the plan', () => {
-  it('runs from September, the month before the plan, to the end of December', () => {
-    expect(model.months).toEqual(['2026-09', '2026-10', '2026-11', '2026-12'])
-    expect(model.range).toEqual({ from: '2026-09-01', to: '2026-12-31' })
+  it('runs from August, the first month on the plan, to the end of December', () => {
+    expect(model.months).toEqual(['2026-08', '2026-09', '2026-10', '2026-11', '2026-12'])
+    expect(model.range).toEqual({ from: '2026-08-01', to: '2026-12-31' })
   })
 
   it('takes all fifteen machines from the two sheets, and nothing else', () => {
@@ -51,11 +53,12 @@ describe('the plan', () => {
 })
 
 describe('thermoforming', () => {
-  it('changes Machine 1 from the large medical tray to Platinum C3 to the 1/2M lid, and stops it on 30 December', () => {
+  it('changes Machine 1 from the large medical tray to Platinum C3 to the 1/2M lid on 15 October, and stops it on 30 December', () => {
     expect(bars('Machine 1')).toEqual([
-      ['Large Medical Tray', '2026-09-01', '2026-09-28'],
-      ['Platinum C3', '2026-09-29', '2026-10-09'],
-      ['1/2M Lid', '2026-10-10', '2026-12-30'],
+      ['Destiny 7x7 Tray', '2026-08-01', '2026-08-05'],
+      ['Large Medical Tray', '2026-08-06', '2026-09-28'],
+      ['Platinum C3', '2026-09-29', '2026-10-14'],
+      ['1/2M Lid', '2026-10-15', '2026-12-30'],
     ])
     expect(machine('Machine 1').stops).toBe('2026-12-30')
   })
@@ -67,12 +70,13 @@ describe('thermoforming', () => {
     expect(machine('Machine 4').stops).toBeNull()
   })
 
-  it('leaves Machine 7 idle through September, then runs it on to the Potato tray with no end date', () => {
+  it('leaves Machine 7 idle through September, then runs it on to the Destiny 7x7 Tray with no end date', () => {
     expect(gaps(machine('Machine 7'), model.range)).toEqual([{ from: '2026-09-01', to: '2026-09-30' }])
     expect(bars('Machine 7')).toEqual([
-      ['Small Medical Tray', '2026-10-01', '2026-10-09'],
-      ['1/2M Bowl', '2026-10-10', '2026-12-29'],
-      ['Potato Tray', '2026-12-30', '2026-12-31'],
+      ['Destiny 7x7 Tray', '2026-08-01', '2026-08-31'],
+      ['Small Medical Tray', '2026-10-01', '2026-10-14'],
+      ['1/2M Bowl', '2026-10-15', '2026-12-29'],
+      ['Destiny 7x7 Tray', '2026-12-30', '2026-12-31'],
     ])
     expect(machine('Machine 7').stops).toBeNull()
     expect(timeline(machine('Machine 7'), model.range).at(-1)!.runsOn).toBe(true)
@@ -102,8 +106,8 @@ describe('finishing', () => {
     expect(nowOf(machine('Lamination Machine 1'), '2026-11-01')).toMatchObject({ state: 'idle', bar: { product: 'Platinum 1', from: '2026-11-20' } })
   })
 
-  it('starts Manual Trimmer 3 on 10 October', () => {
-    expect(nowOf(machine('Manual Trimmer 3'), '2026-10-06')).toMatchObject({ state: 'starts', bar: { from: '2026-10-10' } })
+  it('starts Manual Trimmer 3 on 15 October', () => {
+    expect(nowOf(machine('Manual Trimmer 3'), '2026-10-06')).toMatchObject({ state: 'starts', bar: { from: '2026-10-15' } })
   })
 
   it('puts each manual trimmer alongside the forming machine making the same product', () => {
@@ -139,8 +143,8 @@ describe('the POs the sheets name', () => {
     expect(missing).toEqual([])
   })
 
-  it('marks a run with nothing but POs still required as having no PO', () => {
-    expect(hasPo(run('Machine 1', '1/2M Lid'))).toBe(false)
+  it('counts a PO received, though not yet on efdashboard.com, as a PO behind the run', () => {
+    expect(hasPo(run('Machine 1', '1/2M Lid'))).toBe(true)
     expect(hasPo(run('Machine 3', 'Oasis Tray #1'))).toBe(true)
     expect(hasPo(run('Manual Trimmer 1', 'Oasis Tray'))).toBe(true)
   })
@@ -148,23 +152,15 @@ describe('the POs the sheets name', () => {
 
 describe('work planned without a PO', () => {
   const rows = withoutPo(model.machines, '2026-10-06')
-  const row = (product: string, kind: string) => rows.find((r) => r.product === product && r.kind === kind)!
 
   it('lists the POs still required, one row per product', () => {
-    expect(rows.filter((r) => r.kind === 'required').map((r) => [r.product, r.count])).toEqual([
-      ['1/2M Lid', 3],
-      ['Oasis Tray', 3],
-      ['1/2M Bowl', 3],
-    ])
+    expect(rows.filter((r) => r.kind === 'required').map((r) => [r.product, r.count])).toEqual([['Oasis Tray', 3]])
   })
 
   it('groups machines that run the same dates', () => {
-    const bowl = row('1/2M Bowl', 'required')
-    expect(bowl.where.map((w) => w.machines.map((m) => m.name))).toEqual([
-      ['Machine 7'],
-      ['Lamination Machine 2', 'Auto Trimmer 2'],
-    ])
-    expect(bowl.where[1].spans).toHaveLength(3)
+    const monthly = rows.find((r) => r.kind === 'no-po' && r.text === 'Monthly one, no PO')!
+    expect(monthly.where.map((w) => w.machines.map((m) => m.name))).toEqual([['Lamination Machine 2', 'Auto Trimmer 2']])
+    expect(monthly.where[0].spans).toHaveLength(3)
   })
 
   it('carries the sheets’ own words for work made with no PO', () => {
@@ -174,7 +170,7 @@ describe('work planned without a PO', () => {
   })
 
   it('lists runs with no PO at all, leaving out trimmers working alongside a forming machine', () => {
-    expect(rows.filter((r) => r.kind === 'none').map((r) => r.product).sort()).toEqual(['Every Table', 'Potato Tray'])
+    expect(rows.filter((r) => r.kind === 'none').map((r) => r.product).sort()).toEqual(['Destiny 7x7 Tray'])
   })
 })
 
@@ -188,7 +184,7 @@ describe('open orders on no plan', () => {
 
 describe('what is still to run', () => {
   it('lists runs and idle stretches from a given day', () => {
-    expect(upcoming(machine('Machine 1'), '2026-10-12').map((b) => b.product)).toEqual(['1/2M Lid'])
+    expect(upcoming(machine('Machine 1'), '2026-10-12').map((b) => b.product)).toEqual(['Platinum C3', '1/2M Lid'])
     expect(upcoming(machine('Machine 8'), '2026-10-21')).toEqual([])
     expect(agenda(machine('Lamination Machine 1'), '2026-10-20').map((a) => (a.kind === 'run' ? a.bar.product : 'idle'))).toEqual([
       'Platinum 2',
@@ -201,8 +197,8 @@ describe('what is still to run', () => {
   it('groups products into families for colour', () => {
     expect(familyOf('Large Medical Tray')).toBe('medical')
     expect(familyOf('Platinum C2')).toBe('platinum')
-    expect(familyOf('Potato Tray')).toBe('destiny')
-    expect(familyOf('Every Table')).toBe('pointfive')
+    expect(familyOf('Destiny 7x7 Tray')).toBe('destiny')
+    expect(familyOf('Point Five Tray')).toBe('pointfive')
     expect(familyOf('1/2M Bowl')).toBe('halfm')
   })
 })
@@ -219,5 +215,54 @@ describe('the plant floor', () => {
     const plan = read('../data/machine-plan.json')
     plan.floor.lamination = ['lamination-9']
     expect(() => MachinePlan.parse(plan)).toThrow(/lamination-9/)
+  })
+})
+
+describe('the plan of 6 October', () => {
+  it('writes every product by its name, never by the old ones', () => {
+    const names = model.machines.flatMap((m) => m.runs.map((r) => r.product))
+    expect(names.some((n) => /potato|every ?table/i.test(n))).toBe(false)
+    expect(names).toContain('Destiny 7x7 Tray')
+    expect(names).toContain('Point Five Tray')
+  })
+
+  it('starts the 1/2M lid and bowl on 15 October', () => {
+    expect(run('Machine 1', '1/2M Lid').from).toBe('2026-10-15')
+    expect(run('Machine 7', '1/2M Bowl').from).toBe('2026-10-15')
+    expect(run('Manual Trimmer 3', '1/2M Lid').from).toBe('2026-10-15')
+  })
+
+  it('carries the three 1/2M POs received, for October, November and December, as backed by a PO', () => {
+    const lid = run('Machine 1', '1/2M Lid')
+    expect(lid.orders.map((o) => o.kind)).toEqual(['received', 'received', 'received'])
+    expect(hasPo(lid)).toBe(true)
+    const bowls = machine('Lamination Machine 2').runs.filter((r) => r.product === '1/2M Bowl')
+    expect(bowls.map((r) => r.orders.map((o) => (o.kind === 'received' ? o.text : o.kind)))).toEqual([
+      ['PO received, delivery October 2026'],
+      ['PO received, delivery November 2026'],
+      ['PO received, delivery December 2026'],
+    ])
+  })
+
+  it('shows the months from August, as Izhar asked', () => {
+    expect(model.months[0]).toBe('2026-08')
+  })
+})
+
+describe('one month at a time', () => {
+  it('gives the month as a span', () => {
+    expect(monthSpan('2026-11')).toEqual({ from: '2026-11-01', to: '2026-11-30' })
+  })
+
+  it('says whether a machine runs in the month, and the last day it runs there', () => {
+    expect(inMonth(machine('Machine 8'), '2026-10')).toEqual({ running: true, to: '2026-10-20', runsOn: false })
+    expect(inMonth(machine('Machine 6'), '2026-11')).toEqual({ running: false, to: null, runsOn: false })
+    expect(inMonth(machine('Machine 3'), '2026-10')).toMatchObject({ running: true, runsOn: true })
+    expect(inMonth(machine('Machine 1'), '2026-10')).toMatchObject({ running: true, runsOn: true })
+  })
+
+  it('counts the machines running in each month', () => {
+    const running = (month: string) => model.machines.filter((m) => inMonth(m, month).running).length
+    expect(running('2026-10')).toBeGreaterThan(running('2026-12'))
   })
 })

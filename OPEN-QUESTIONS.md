@@ -138,15 +138,17 @@ the one to follow, not "Copy of Thermoforming".
       cancelled PO for Machine 1's Platinum C3 run and none for Machine 2's Platinum
       C1 run. The plan carries the POs the Finishing Department sheet gives for the
       same trays, 2679969 and 2679971. Confirm.
-- [ ] **Every Table on Lamination Machine 2 and Auto Trimmer 2, 10 to 17 October.**
+- [ ] **Point Five Tray on Lamination Machine 2 and Auto Trimmer 2, 10 to 17 October.**
       The finishing sheet still schedules it against a PO Polyco cancelled, so it
       shows with no PO. Is the run still happening?
 - [ ] **Machine 4 has no restart date.** It shows in maintenance, then Oasis Tray #2.
 - [ ] **Green PO cells on the Thermoforming sheet** (2680266-1, 2679683, 2466123-3):
       what does green mean? Not shown until it is known.
-- [ ] **Machine 5's product.** The sheet has the Point Five Every Table tray in
-      August, then the Point Five Tray, with no change-over date. Shown as the Point
-      Five Tray.
+- [ ] **Machine 5's product.** The sheet names the Point Five tray two ways, one in
+      August and one after, with no change-over date. Shown as the Point Five Tray.
+- [ ] **The three 1/2M POs.** Izhar has three POs for the 1/2M lid and bowl, for
+      delivery in October, November and December 2026. None is on efdashboard.com yet,
+      so the plan records them as "PO received" with no number. What are the PO numbers?
 - [ ] The manual trimmers carry no PO on the finishing sheet, only "running
       parallel". Each is shown alongside the forming machine making the same product
       at the same time, worked out from the product names.

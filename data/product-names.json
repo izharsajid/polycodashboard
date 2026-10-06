@@ -1,0 +1,11 @@
+{
+  "note": "Old names for products, and the names the dashboard uses instead, everywhere: in efdashboard.com's feed (applied server-side), the statement import and the plans. Izhar, 6 October 2026.",
+  "renames": [
+    { "from": "Potato Tray", "to": "Destiny 7x7 Tray" },
+    { "from": "Every Table Tray", "to": "Point Five Tray" },
+    { "from": "Everytable Tray", "to": "Point Five Tray" },
+    { "from": "Every Table Lid", "to": "Point Five Lid" },
+    { "from": "Every Table", "to": "Point Five Tray" },
+    { "from": "Everytable", "to": "Point Five" }
+  ]
+}

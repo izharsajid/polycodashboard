@@ -1,6 +1,7 @@
 import {
   ArrowDownLeft,
   CalendarX2,
+  ChevronDown,
   CircleCheck,
   History,
   LogIn,
@@ -70,6 +71,7 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
   const [views, setViews] = useState<View[]>([])
   const [severity, setSeverity] = useState<'all' | Discrepancy['severity']>('all')
   const [showFixed, setShowFixed] = useState(false)
+  const [discOpen, setDiscOpen] = useState(false)
 
   const go = (v: View) => setViews((s) => [...s, v])
   const back = () => setViews((s) => s.slice(0, -1))
@@ -264,86 +266,103 @@ function Page({ data, tracker, trackerError, reload }: { data: StatementPayloadT
         </section>
       </div>
 
-      {/* Discrepancies, one by one */}
+      {/* Discrepancies: folded away until opened */}
       <section aria-labelledby="disc-title" className="rounded-card bg-sheet p-5 shadow-card">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 id="disc-title" className="flex items-center gap-2 text-title font-bold">
-            <TriangleAlert size={20} aria-hidden className="text-caution" /> {model.openDiscrepancies} discrepancies to fix
-            {fixedCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-income-wash px-2.5 py-1 text-small font-semibold text-income">
-                <CircleCheck size={13} aria-hidden /> {fixedCount} fixed
-              </span>
-            )}
-          </h2>
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show by importance">
-            {([
-              ['all', `All ${model.openDiscrepancies}`],
-              ['high', `High ${counts.high}`],
-              ['medium', `Medium ${counts.medium}`],
-              ['low', `Low ${counts.low}`],
-            ] as const).map(([v, label]) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={severity === v}
-                onClick={() => setSeverity(v)}
-                className={`rounded-full border px-3 py-1 text-small font-semibold ${severity === v ? 'border-press bg-press text-sheet' : 'border-rule'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="mt-1 max-w-prose text-small text-press-2">
-          Where the workbook ({data.workbook.file}) and efdashboard.com disagree, this statement follows efdashboard.com.
-          Open any item to see what each side reads and fix it. Every fix is signed, and can be undone.
-        </p>
-        {fixedCount > 0 && (
-          <label className="mt-2 inline-flex items-center gap-2 text-small">
-            <input type="checkbox" checked={showFixed} onChange={(e) => setShowFixed(e.target.checked)} className="h-4 w-4" />
-            Show the {fixedCount} fixed
-          </label>
-        )}
-        <ol className="mt-4 divide-y divide-rule">
-          {shown.map((d) => (
-            <li key={d.id}>
-              <button
-                type="button"
-                onClick={() => nav.fix(d.key)}
-                aria-haspopup="dialog"
-                className="flex w-full items-start gap-3 py-2.5 text-left hover:bg-mist"
-              >
-                <span
-                  className={`mt-0.5 inline-flex h-6 min-w-[2.25rem] shrink-0 items-center justify-center rounded-full px-1.5 text-small font-bold ${
-                    d.resolved
-                      ? 'bg-income-wash text-income'
-                      : d.severity === 'high'
-                        ? 'bg-caution text-sheet'
-                        : d.severity === 'medium'
-                          ? 'bg-caution-wash text-caution'
-                          : 'bg-mist text-press-2'
-                  }`}
-                  aria-label={`${d.resolved ? 'fixed' : `${d.severity} importance`}, number ${d.id}`}
-                >
-                  {d.id}
-                </span>
-                <span className="min-w-0 flex-1 text-table">
-                  <span className={`block font-semibold ${d.resolved ? 'text-press-2 line-through' : ''}`}>{d.title}</span>
-                  <span className="block text-press-2">
-                    {d.resolved ? `Fixed by ${d.resolved.by}, ${day(d.resolved.at.slice(0, 10))}: ${d.resolved.note}` : d.detail}
+        <h2 id="disc-title" className="text-title font-bold">
+          <button
+            type="button"
+            aria-expanded={discOpen}
+            aria-controls="disc-body"
+            onClick={() => setDiscOpen((o) => !o)}
+            className="flex w-full min-h-[44px] items-center gap-2 text-left"
+          >
+            <TriangleAlert size={20} aria-hidden className="text-caution" />
+            Discrepancies
+            <ChevronDown size={20} aria-hidden className={`ml-auto text-press-2 transition-transform ${discOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </h2>
+        {discOpen && (
+          <div id="disc-body" className="mt-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="flex flex-wrap items-center gap-2 text-table font-semibold">
+                <span className="rounded-full bg-caution-wash px-2.5 py-1 text-small text-caution">{model.openDiscrepancies} open</span>
+                {fixedCount > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-income-wash px-2.5 py-1 text-small font-semibold text-income">
+                    <CircleCheck size={13} aria-hidden /> {fixedCount} fixed
                   </span>
-                </span>
-                <span
-                  className={`shrink-0 self-center rounded-full px-3 py-1 text-small font-semibold ${
-                    d.resolved ? 'bg-income-wash text-income' : 'bg-press text-sheet'
-                  }`}
-                >
-                  {d.resolved ? 'Fixed' : 'Fix'}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
+                )}
+              </p>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show by importance">
+                {([
+                  ['all', `All ${model.openDiscrepancies}`],
+                  ['high', `High ${counts.high}`],
+                  ['medium', `Medium ${counts.medium}`],
+                  ['low', `Low ${counts.low}`],
+                ] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={severity === v}
+                    onClick={() => setSeverity(v)}
+                    className={`rounded-full border px-3 py-1 text-small font-semibold ${severity === v ? 'border-press bg-press text-sheet' : 'border-rule'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="mt-1 max-w-prose text-small text-press-2">
+              Where the workbook ({data.workbook.file}) and efdashboard.com disagree, this statement follows efdashboard.com.
+              Open any item to see what each side reads and fix it. Every fix is signed, and can be undone.
+            </p>
+            {fixedCount > 0 && (
+              <label className="mt-2 inline-flex items-center gap-2 text-small">
+                <input type="checkbox" checked={showFixed} onChange={(e) => setShowFixed(e.target.checked)} className="h-4 w-4" />
+                Show the {fixedCount} fixed
+              </label>
+            )}
+            <ol className="mt-4 divide-y divide-rule">
+              {shown.map((d) => (
+                <li key={d.id}>
+                  <button
+                    type="button"
+                    onClick={() => nav.fix(d.key)}
+                    aria-haspopup="dialog"
+                    className="flex w-full items-start gap-3 py-2.5 text-left hover:bg-mist"
+                  >
+                    <span
+                      className={`mt-0.5 inline-flex h-6 min-w-[2.25rem] shrink-0 items-center justify-center rounded-full px-1.5 text-small font-bold ${
+                        d.resolved
+                          ? 'bg-income-wash text-income'
+                          : d.severity === 'high'
+                            ? 'bg-caution text-sheet'
+                            : d.severity === 'medium'
+                              ? 'bg-caution-wash text-caution'
+                              : 'bg-mist text-press-2'
+                      }`}
+                      aria-label={`${d.resolved ? 'fixed' : `${d.severity} importance`}, number ${d.id}`}
+                    >
+                      {d.id}
+                    </span>
+                    <span className="min-w-0 flex-1 text-table">
+                      <span className={`block font-semibold ${d.resolved ? 'text-press-2 line-through' : ''}`}>{d.title}</span>
+                      <span className="block text-press-2">
+                        {d.resolved ? `Fixed by ${d.resolved.by}, ${day(d.resolved.at.slice(0, 10))}: ${d.resolved.note}` : d.detail}
+                      </span>
+                    </span>
+                    <span
+                      className={`shrink-0 self-center rounded-full px-3 py-1 text-small font-semibold ${
+                        d.resolved ? 'bg-income-wash text-income' : 'bg-press text-sheet'
+                      }`}
+                    >
+                      {d.resolved ? 'Fixed' : 'Fix'}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </section>
 
       {/* Months */}

@@ -1,8 +1,11 @@
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 import FundsRequestedTab from './funds-requested/FundsRequestedTab'
 import StatementTab from './statement/StatementTab'
 import TrackerTab from './tracker/TrackerTab'
 import MachinesTab from './machines/MachinesTab'
+
+/** The 3D plant pulls in three.js, so it loads only when someone opens it. */
+const PlantTab = lazy(() => import('./plant/PlantTab'))
 
 /**
  * The dashboard's tabs, in order. Each tab loads its own data and owns its own
@@ -16,4 +19,5 @@ export const TABS: readonly Tab[] = [
   { id: 'statement', label: 'PHL/EcoFibre statement', Component: StatementTab },
   { id: 'po-tracker', label: 'PO tracker', Component: TrackerTab },
   { id: 'machines', label: 'Machines', Component: MachinesTab },
+  { id: 'plant', label: 'Plant 3D', Component: PlantTab },
 ]

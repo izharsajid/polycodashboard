@@ -102,6 +102,13 @@ tabs; the first two are built as month cards that open into a panel (see `DESIGN
   list against it; efdashboard.com only supplies each PO's status and quantities. On
   the finishing sheet the Potato tray is the Destiny 7x7 tray and Every Table is
   Point Five ET.
+- **Plant 3D**: the same plan drawn as the process line in three.js, loaded only when
+  the tab is opened: thermoforming as two lines of four standing back to back, then
+  lamination, then trimming. A day slider and play show every machine's state on any
+  day (`nowOf`), with stack lights green running, amber maintenance, red not running;
+  clicking a machine opens what it runs now and next. Where each machine stands is
+  the plan's `floor` list; which formers stand in which line is assumed (1 to 4, 5 to
+  8) until Izhar confirms. Colours are read from `tailwind.config.js`.
 - **Removed POs.** POs Polyco cancelled are listed in `data/removed-pos.json` and
   removed from the dashboard entirely: dropped from efdashboard.com's feed
   server-side, kept out of the statement data and its importer, and never named in

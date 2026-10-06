@@ -206,3 +206,18 @@ describe('what is still to run', () => {
     expect(familyOf('1/2M Bowl')).toBe('halfm')
   })
 })
+
+describe('the plant floor', () => {
+  it('reads the floor layout: two back-to-back lines of four formers, then lamination, then trimming', () => {
+    const plan = MachinePlan.parse(read('../data/machine-plan.json'))
+    expect(plan.floor.forming_rows.map((r) => r.length)).toEqual([4, 4])
+    expect(plan.floor.lamination).toHaveLength(2)
+    expect(plan.floor.trimming).toHaveLength(5)
+  })
+
+  it('refuses a floor that names a machine the plan does not have', () => {
+    const plan = read('../data/machine-plan.json')
+    plan.floor.lamination = ['lamination-9']
+    expect(() => MachinePlan.parse(plan)).toThrow(/lamination-9/)
+  })
+})

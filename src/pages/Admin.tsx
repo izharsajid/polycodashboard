@@ -53,7 +53,9 @@ export default function Admin({ user }: { user: PublicUser }) {
 
   return (
     <div className="min-h-screen">
-      <Header user={user} />
+      <div className="bg-press">
+        <Header user={user} />
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <div className="card">

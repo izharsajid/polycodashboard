@@ -120,6 +120,8 @@ export default {
     },
 
     extend: {
+      /** The live dot in the header: the page's one ambient motion, off under reduced motion. */
+      animation: { 'ping-slow': 'ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite' },
       maxWidth: {
         page: '1200px',
         prose: '68ch',

@@ -47,9 +47,9 @@
     {
       "id": "forming-5", "name": "Machine 5", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Point Five Tray", "from": null, "until": "2026-10-30", "codes": ["Fiber Tray 2"], "orders": [{ "po": "2679683" }, { "no_po": "Extra one producing" }] }
+        { "product": "Point Five Tray", "from": null, "until": "2026-09-29", "codes": ["Fiber Tray 2"], "orders": [{ "po": "2679683" }] }
       ],
-      "stops": "2026-10-30", "stop_note": "POs completed", "note": null
+      "stops": "2026-09-29", "stop_note": "Stopped", "note": null
     },
     {
       "id": "forming-6", "name": "Machine 6", "type": "forming", "status": "running",
@@ -73,7 +73,7 @@
     {
       "id": "forming-8", "name": "Machine 8", "type": "forming", "status": "running",
       "runs": [
-        { "product": "Point Five ET Lid", "from": null, "until": "2026-10-20", "codes": ["Lid"], "orders": [{ "po": "2679683" }, { "no_po": "Extra one container (100 boxes) producing" }] }
+        { "product": "Point Five ET Lid", "from": null, "until": "2026-10-20", "codes": ["Lid"], "orders": [{ "po": "2679683" }] }
       ],
       "stops": "2026-10-20", "stop_note": null, "note": null
     },

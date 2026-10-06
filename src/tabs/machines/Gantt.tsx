@@ -7,7 +7,7 @@ import { shortName } from './parts'
 
 /**
  * Every machine on one time axis: a row per machine, grouped by kind, a bar per
- * run in its product's colour, striped where the plan has no PO behind the run.
+ * run in its product's colour.
  * Idle stretches and the time after a machine stops are written in. Hover or
  * focus a bar for the product, its dates and its orders.
  */
@@ -15,10 +15,6 @@ export type GanttGroup = { title: string; Icon: LucideIcon; machines: Machine[] 
 
 type Tip = { key: string; bar: Bar; left: number }
 
-/** Light stripes over the product colour: work with no PO behind it. Survives greyscale. */
-export const NO_PO_STRIPES: CSSProperties = {
-  backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.62) 0 3px, transparent 3px 7px)',
-}
 const PRINT_EXACT: CSSProperties = { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }
 
 export default function Gantt({
@@ -135,7 +131,7 @@ export default function Gantt({
                             onFocus={() => setTip({ key, bar: b, left })}
                             onBlur={() => setTip(null)}
                             className={`absolute inset-y-1 border-x border-sheet ${FAMILY_BG[b.family]} ${b.startsBefore ? 'rounded-l-none' : 'rounded-l'} ${b.runsOn ? 'rounded-r-none' : 'rounded-r'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-press`}
-                            style={{ left: `${left}%`, width: `${w}%`, ...(hasPo(b.run) ? {} : NO_PO_STRIPES), ...PRINT_EXACT }}
+                            style={{ left: `${left}%`, width: `${w}%`, ...PRINT_EXACT }}
                           >
                             {/* The product named on a white chip, readable on every product colour. */}
                             {w > 6 && (

@@ -88,8 +88,10 @@ describe('thermoforming', () => {
     expect(run('Machine 6', 'Oasis Plus Tray').from).toBe('2026-07-09')
   })
 
-  it('stops Machines 5, 6 and 8 when their POs are completed', () => {
-    expect(['Machine 5', 'Machine 6', 'Machine 8'].map((n) => machine(n).stops)).toEqual(['2026-10-30', '2026-10-25', '2026-10-20'])
+  it('stops Machine 5 after 29 September, and Machines 6 and 8 when their POs are completed', () => {
+    expect(['Machine 5', 'Machine 6', 'Machine 8'].map((n) => machine(n).stops)).toEqual(['2026-09-29', '2026-10-25', '2026-10-20'])
+    expect(bars('Machine 5')).toEqual([['Point Five Tray', '2026-08-01', '2026-09-29']])
+    expect(nowOf(machine('Machine 5'), '2026-10-06')).toEqual({ state: 'stopped', on: '2026-09-29' })
     expect(nowOf(machine('Machine 8'), '2026-10-21')).toEqual({ state: 'stopped', on: '2026-10-20' })
   })
 })
@@ -165,12 +167,14 @@ describe('work planned without a PO', () => {
 
   it('carries the sheets’ own words for work made with no PO', () => {
     expect(rows.filter((r) => r.kind === 'no-po').map((r) => r.text)).toEqual(
-      expect.arrayContaining(['Extra one producing', 'One PO extra produced, PO not yet received', 'Monthly one, no PO']),
+      expect.arrayContaining(['One PO extra produced, PO not yet received', 'Monthly one, no PO']),
     )
+    // No extra Point Five is being made now.
+    expect(rows.filter((r) => r.kind === 'no-po' && /point five/i.test(r.product))).toEqual([])
   })
 
   it('lists runs with no PO at all, leaving out trimmers working alongside a forming machine', () => {
-    expect(rows.filter((r) => r.kind === 'none').map((r) => r.product).sort()).toEqual(['Destiny 7x7 Tray'])
+    expect(rows.filter((r) => r.kind === 'none').map((r) => r.product).sort()).toEqual(['Destiny 7x7 Tray', 'Point Five Tray'])
   })
 })
 

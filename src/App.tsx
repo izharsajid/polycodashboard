@@ -77,7 +77,7 @@ function Dashboard({ user }: { user: PublicUser | null }) {
   // Every tab's data starts loading as soon as the dashboard opens, so moving
   // between tabs shows it straight away.
   useEffect(() => {
-    prefetch(['/api/tracker', '/api/machines', '/api/statement', '/api/data'])
+    prefetch(['/api/tracker', '/api/machines', '/api/statement', '/api/data', '/api/inventory'])
   }, [])
   const choose = (id: string) => {
     setActive(id)

@@ -26,6 +26,33 @@ async function getJson(url: string, headers: Record<string, string> = {}): Promi
 let cached: { at: number; payload: unknown } | null = null
 const FRESH_MS = 30_000
 
+let inventoryCache: { at: number; payload: unknown } | null = null
+
+/**
+ * efdashboard.com's stock of materials: fiber, lamination film and others, with
+ * each item's stock, minimum, average daily use, what is on order and when it is
+ * due. At most thirty seconds old. Product names are written the dashboard's way.
+ */
+export async function readInventory(): Promise<unknown> {
+  if (inventoryCache && Date.now() - inventoryCache.at < FRESH_MS) return inventoryCache.payload
+  const base = process.env.SUPABASE_URL?.replace(/\/+$/, '')
+  const key = process.env.SUPABASE_ANON_KEY
+  if (!base || !key) throw new MasterUnavailable('SUPABASE_URL and SUPABASE_ANON_KEY are not set in the Netlify environment.')
+  const auth = { apikey: key, Authorization: `Bearer ${key}` }
+  const [rows, settings] = await Promise.all([
+    getJson(`${base}/rest/v1/inventory?select=*&order=sort_order.asc`, auth),
+    getJson(`${base}/rest/v1/settings?select=key,value&key=eq.last_updated`, auth),
+  ])
+  const asOf = (settings as { value?: string }[])[0]?.value ?? null
+  const payload = {
+    rows: renamed({ rows: rows as Record<string, unknown>[], documents: [] }, names.renames).rows,
+    as_of: asOf,
+    fetched_at: new Date().toISOString(),
+  }
+  inventoryCache = { at: Date.now(), payload }
+  return payload
+}
+
 /** The tracker payload, at most thirty seconds old. */
 export async function readTracker(): Promise<unknown> {
   if (cached && Date.now() - cached.at < FRESH_MS) return cached.payload

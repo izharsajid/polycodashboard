@@ -21,6 +21,20 @@ const JSON_HEADERS: Record<string, string> = {
   'x-content-type-options': 'nosniff',
 }
 
+/**
+ * For answers that are the same for everyone and carry no session (the
+ * efdashboard.com feed, the machine plan): Netlify's CDN keeps a copy for
+ * `seconds`, and hands out the last copy while it fetches a new one, so a reader
+ * seldom waits on efdashboard.com. Browsers still check every time. A deploy
+ * clears the CDN's copies.
+ */
+export function shared(seconds: number): Record<string, string> {
+  return {
+    'cache-control': 'public, max-age=0, must-revalidate',
+    'netlify-cdn-cache-control': `public, durable, s-maxage=${seconds}, stale-while-revalidate=600`,
+  }
+}
+
 export function json(body: unknown, status = 200, extra: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...extra } })
 }

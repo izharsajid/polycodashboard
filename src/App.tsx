@@ -10,6 +10,7 @@ import Forgot from './pages/Forgot'
 import Invite from './pages/Invite'
 import Login from './pages/Login'
 import Reset from './pages/Reset'
+import { prefetch } from './data/cache'
 import { TABS } from './tabs'
 
 /**
@@ -73,6 +74,11 @@ function Dashboard({ user }: { user: PublicUser | null }) {
     }
   })
   const tab = TABS.find((t) => t.id === active) ?? TABS[0]
+  // Every tab's data starts loading as soon as the dashboard opens, so moving
+  // between tabs shows it straight away.
+  useEffect(() => {
+    prefetch(['/api/tracker', '/api/machines', '/api/statement', '/api/data'])
+  }, [])
   const choose = (id: string) => {
     setActive(id)
     try {
@@ -96,6 +102,8 @@ function Dashboard({ user }: { user: PublicUser | null }) {
                 role="tab"
                 aria-selected={t.id === tab.id}
                 onClick={() => choose(t.id)}
+                onPointerEnter={t.preload}
+                onFocus={t.preload}
                 className={`min-h-[44px] whitespace-nowrap border-b-3 px-3 text-table font-semibold ${
                   t.id === tab.id ? 'border-marking text-press' : 'border-transparent text-press-2 hover:text-press'
                 }`}

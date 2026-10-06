@@ -57,7 +57,9 @@ export default function Account({ user }: { user: PublicUser }) {
 
   return (
     <div className="min-h-screen">
-      <Header user={user} />
+      <div className="bg-press">
+        <Header user={user} />
+      </div>
 
       <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
         <div className="card">

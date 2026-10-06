@@ -25,6 +25,42 @@
   ::placeholder {
     @apply text-press-2;
   }
+
+  /* The parts the browser draws carry the palette too. */
+  ::selection {
+    background: theme('colors.marking');
+    color: theme('colors.press.DEFAULT');
+  }
+  html {
+    caret-color: theme('colors.press.DEFAULT');
+    scrollbar-color: theme('colors.rule') transparent;
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.rule');
+    border: 3px solid theme('colors.zinc');
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+}
+
+@layer utilities {
+  /* A strip that scrolls sideways without showing a bar (the tab row on a phone). */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {

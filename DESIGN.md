@@ -72,8 +72,7 @@ width. Every figure uses tabular numerals.
   that needs attention. Grouped by year, newest first, in a 1–4 column grid.
 - **Panel** (`src/components/Panel.tsx`): a native modal `<dialog>`. It traps focus,
   starts focus on its title, closes on Escape or a backdrop click, and returns focus
-  to the card. It is the page's one moment of motion: 180ms, transform and opacity
-  only, and none under reduced motion.
+  to the card. 180ms, transform and opacity only, and none under reduced motion.
 - **Tile** (`Tile`): a summary figure inside a panel. Income is green; the figure the
   panel is about is the single dark tile.
 - **Category bar** (`CategoryBar`): a rounded strip of a month's costs by category, with
@@ -92,3 +91,22 @@ width. Every figure uses tabular numerals.
 ## Print
 
 A4 portrait, 12mm margins. The panel does not print; cards print as a grid.
+
+
+## The header band and motion (6 October 2026)
+
+- **Header band:** one sticky `press` band holds the wordmark, the live status and the
+  tabs, in `sheet` at full and 70% strength. The live status is a green dot and the
+  time efdashboard.com was read, from the same shared copy every tab uses; it is the
+  page's one ambient motion, a slow ping, off under reduced motion.
+- **Tabs:** the active tab carries a `marking` bar that glides to the next tab
+  (Motion `layoutId`, spring). Switching tabs fades the page up 10px with a 2px blur
+  clearing, 280ms, exponential ease-out; leaving takes 120ms. Under reduced motion
+  both are instant (`MotionConfig reducedMotion="user"`).
+- **Motion library:** `motion`, loaded lazily (`LazyMotion` with `domMax` in its own
+  file), so the first paint does not wait for it.
+- **Loading:** a tab waiting for data shows the page's shape in quiet blocks
+  (`Loading`), pulsing only when motion is allowed, not a sentence.
+- **Browser surfaces:** text selection in `marking` with `press` ink, thin `rule`
+  scrollbars, `press` caret.
+- **Links to a tab:** `?tab=<id>` opens that tab.

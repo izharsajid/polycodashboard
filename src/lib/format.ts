@@ -128,3 +128,8 @@ export function dayRange(startIso: string, endIso: string): string {
 export function quantity(n: number, digits = 1): string {
   return new Intl.NumberFormat('en-GB', { maximumFractionDigits: digits }).format(n)
 }
+
+/** `14:05`, the reader's own clock, for how fresh live data is. */
+export function clock(iso: string): string {
+  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso))
+}
